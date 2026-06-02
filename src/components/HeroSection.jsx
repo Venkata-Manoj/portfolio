@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Volume2, VolumeX } from 'lucide-react'
+import { Volume2, VolumeX, Play } from 'lucide-react'
 import FadeIn from './FadeIn'
 
 const NAV_LINKS = [
@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { label: 'Contact', href: '#contact' },
 ]
 
-export default function HeroSection() {
+export default function HeroSection({ onStartTour }) {
   const sectionRef = useRef(null)
   const videoRef = useRef(null)
   const [muted, setMuted] = useState(true)
@@ -82,7 +82,7 @@ export default function HeroSection() {
   }
 
   return (
-    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden bg-black">
+    <section ref={sectionRef} id="hero" className="relative h-screen w-full overflow-hidden bg-black">
       {/* Video background */}
       <video
         ref={videoRef}
@@ -167,9 +167,16 @@ export default function HeroSection() {
             </a>
           </FadeIn>
 
-          {/* Mute toggle + Sound hint */}
+          {/* Start Tour + Mute toggle + Sound hint */}
           <FadeIn delay={1.1} y={20}>
             <div className="flex items-center gap-3">
+              <button
+                onClick={onStartTour}
+                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-md transition hover:bg-white/20 hover:scale-[1.03] active:scale-[0.97]"
+              >
+                <Play size={12} fill="white" />
+                Start Tour
+              </button>
               {showSoundHint && (
                 <span
                   className="hidden sm:inline text-[10px] font-medium uppercase tracking-[0.25em] text-white/80"
