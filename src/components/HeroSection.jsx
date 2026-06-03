@@ -1,64 +1,102 @@
-import { useState, useEffect, useRef } from 'react'
-import { Volume2, VolumeX, Play } from 'lucide-react'
-import FadeIn from './FadeIn'
+import { useEffect, useRef, useState } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { Volume2, VolumeX, ChevronDown } from 'lucide-react'
 
-const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Contact', href: '#contact' },
-]
-
-export default function HeroSection({ onStartTour }) {
-  const sectionRef = useRef(null)
-  const videoRef = useRef(null)
-  const [muted, setMuted] = useState(true)
-  const [showSoundHint, setShowSoundHint] = useState(true)
+const WordReveal = ({ text, className = '', delay = 0 }) => {
+  const [isVisible, setIsVisible] = useState(false)
+  const ref = useRef(null)
 
   useEffect(() => {
-    const t = setTimeout(() => setShowSoundHint(false), 5000)
-    return () => clearTimeout(t)
-  }, [])
-
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-
+    const el = ref.current
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) {
-          const v = videoRef.current
-          if (v && !v.muted) {
-            v.muted = true
-            setMuted(true)
-          }
-        }
+        if (entry.isIntersecting) setIsVisible(true)
       },
-      { threshold: 0, rootMargin: '-50% 0px 0px 0px' }
+      { threshold: 0.1 }
     )
-    observer.observe(section)
-    return () => observer.disconnect()
+    if (el) observer.observe(el)
+    return () => {
+      if (el) observer.unobserve(el)
+    }
   }, [])
 
+  const words = text.split(' ')
+
+  return (
+    <div ref={ref} className={`inline-flex flex-wrap ${className}`}>
+      {words.map((word, i) => (
+        <motion.span
+          key={i}
+          initial={{ y: 50, opacity: 0, filter: 'blur(10px)' }}
+          animate={isVisible ? { y: 0, opacity: 1, filter: 'blur(0px)' } : {}}
+          transition={{
+            duration: 0.8,
+            delay: delay + i * 0.1,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          className="inline-block"
+          style={{ marginRight: i < words.length - 1 ? '0.25em' : 0 }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </div>
+  )
+}
+
+export default function HeroSection() {
+  const videoRef = useRef(null)
+  const containerRef = useRef(null)
+  const [isMuted, setIsMuted] = useState(true)
+  const snapFired = useRef(false)
+
+  const { scrollY } = useScroll()
+  const opacity = useTransform(scrollY, [0, 300], [1, 0])
+  const scale = useTransform(scrollY, [0, 300], [1, 0.95])
+
   useEffect(() => {
-    let fired = false
+    if (videoRef.current) {
+      videoRef.current.muted = true
+      videoRef.current.play().catch(() => { })
+    }
+  }, [])
+
+  // Auto-mute on scroll away
+  useEffect(() => {
+    const handleScroll = () => {
+      const hero = containerRef.current
+      if (!hero) return
+      const rect = hero.getBoundingClientRect()
+      const isVisible = rect.bottom > 0 && rect.top < window.innerHeight
+      if (!isVisible && !videoRef.current.muted) {
+        setIsMuted(true)
+        if (videoRef.current) videoRef.current.muted = true
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // First-scroll snap to About
+  useEffect(() => {
     const goToAbout = () => {
-      if (fired) return
-      fired = true
+      if (snapFired.current) return
+      snapFired.current = true
       const about = document.getElementById('about')
-      if (about) about.scrollIntoView({ behavior: 'auto', block: 'start' })
+      if (about) about.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
     const onWheel = (e) => {
-      if (fired) return
+      if (snapFired.current) return
       if (e.deltaY <= 0) return
-      if (window.scrollY > 50) return
+      if (window.scrollY > 60) return
       e.preventDefault()
       goToAbout()
     }
 
     const onKey = (e) => {
-      if (fired) return
-      if (window.scrollY > 50) return
+      if (snapFired.current) return
+      if (window.scrollY > 60) return
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
         goToAbout()
@@ -74,139 +112,135 @@ export default function HeroSection({ onStartTour }) {
   }, [])
 
   const toggleMute = () => {
-    const v = videoRef.current
-    if (!v) return
-    v.muted = !v.muted
-    setMuted(v.muted)
-    setShowSoundHint(false)
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted
+      setIsMuted(!isMuted)
+    }
+  }
+
+  const scrollToAbout = () => {
+    snapFired.current = true
+    const about = document.getElementById('about')
+    if (about) about.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
-    <section ref={sectionRef} id="hero" className="relative h-screen w-full overflow-hidden bg-black">
-      {/* Video background */}
+    <div ref={containerRef} className="relative h-screen w-full overflow-hidden bg-background">
+      {/* Video Background */}
       <video
         ref={videoRef}
         autoPlay
-        muted
         loop
+        muted
         playsInline
-        preload="auto"
         className="absolute inset-0 h-full w-full object-cover"
+        style={{ filter: 'brightness(0.6)' }}
       >
         <source src="/video/intro.mp4" type="video/mp4" />
       </video>
 
-      {/* Cinematic gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/35 to-black/40" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+      {/* Gradient overlays */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.7) 100%)',
+        }}
+      />
 
-      {/* Content layer */}
-      <div className="relative z-10 flex h-full flex-col">
-        {/* Top bar */}
-        <FadeIn delay={0} y={-20} className="relative">
-          <div className="flex items-center justify-between px-6 md:px-10 pt-6 md:pt-8">
-            <ul className="flex items-center gap-5 sm:gap-8 md:gap-12">
-              {NAV_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-xs sm:text-sm font-medium uppercase tracking-[0.2em] text-white/80 transition hover:text-white"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <a
-              href="#contact"
-              className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 sm:px-5 sm:py-2.5 text-[10px] sm:text-xs font-medium uppercase tracking-[0.2em] text-white backdrop-blur-md transition hover:bg-white/20 hover:scale-[1.03]"
+      {/* Noise texture overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Ambient glow */}
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-violet-600/15 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-cyan-600/10 blur-[120px] pointer-events-none" />
+
+      {/* Main content */}
+      <motion.div
+        style={{ opacity, scale }}
+        className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center pt-56 sm:pt-60"
+      >
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Name */}
+          <div className="space-y-1">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white/80 drop-shadow-lg"
+              style={{ fontFamily: "'Kanit', sans-serif" }}
             >
-              Email me
-            </a>
+              <WordReveal text="B V MANOJ" delay={0.5} />
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="text-xs sm:text-sm md:text-base font-light text-white/60 tracking-wide drop-shadow-md"
+            >
+              <WordReveal text="AI Engineer · Data Scientist · Full-Stack Developer" delay={1.5} />
+            </motion.p>
           </div>
-        </FadeIn>
 
-        {/* Middle-left: Name + Subtitle */}
-        <div className="flex flex-1 items-center">
-          <div className="w-full max-w-7xl px-6 md:px-10">
-            <FadeIn delay={0.3} y={20}>
-              <p className="mb-4 text-[10px] sm:text-xs font-medium uppercase tracking-[0.35em] text-white/60">
-                Portfolio · 2026
-              </p>
-            </FadeIn>
-            <FadeIn delay={0.5} y={40}>
-              <h1
-                className="font-black uppercase leading-[0.88] tracking-tight text-white"
-                style={{ fontSize: 'clamp(3rem, 12vw, 10.5rem)' }}
-              >
-                Venkata<br />Manoj
-              </h1>
-            </FadeIn>
-            <FadeIn delay={0.85} y={20}>
-              <p className="mt-5 md:mt-7 text-[10px] sm:text-xs md:text-sm font-medium uppercase tracking-[0.3em] text-white/75">
-                AI Engineer · Data Scientist · Full Stack Developer
-              </p>
-            </FadeIn>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="flex items-end justify-between px-6 md:px-10 pb-7 sm:pb-10 md:pb-12">
-          {/* Scroll indicator */}
-          <FadeIn delay={1.1} y={20}>
-            <a href="#about" aria-label="Scroll to next section" className="group flex flex-col items-center gap-3">
-              <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.35em] text-white/70 transition group-hover:text-white">
-                Scroll
-              </span>
-              <div className="relative h-12 w-px overflow-hidden bg-white/20">
-                <span
-                  className="absolute inset-x-0 top-0 h-1/2 w-full bg-white"
-                  style={{ animation: 'scrollLine 1.8s ease-in-out infinite' }}
-                />
-              </div>
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 2.2 }}
+            className="flex items-center justify-center gap-4"
+          >
+            <a
+              href="mailto:bsumanoj@gmail.com"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-semibold rounded-full text-sm hover:shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:scale-105 transition-all duration-300"
+            >
+              Get in touch
+              <span className="text-base">→</span>
             </a>
-          </FadeIn>
-
-          {/* Start Tour + Mute toggle + Sound hint */}
-          <FadeIn delay={1.1} y={20}>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onStartTour}
-                className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.25em] text-white backdrop-blur-md transition hover:bg-white/20 hover:scale-[1.03] active:scale-[0.97]"
-              >
-                <Play size={12} fill="white" />
-                Start Tour
-              </button>
-              {showSoundHint && (
-                <span
-                  className="hidden sm:inline text-[10px] font-medium uppercase tracking-[0.25em] text-white/80"
-                  style={{ animation: 'pulseFade 2s ease-in-out infinite' }}
-                >
-                  Tap for sound
-                </span>
-              )}
-              <button
-                onClick={toggleMute}
-                aria-label={muted ? 'Unmute video' : 'Mute video'}
-                className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 hover:scale-110"
-              >
-                {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-              </button>
-            </div>
-          </FadeIn>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      <style>{`
-        @keyframes scrollLine {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(200%); }
-        }
-        @keyframes pulseFade {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 1; }
-        }
-      `}</style>
-    </section>
+      {/* Mute toggle */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 2.5 }}
+        onClick={toggleMute}
+        className="absolute top-8 right-8 z-50 p-3 bg-black/30 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-black/50 transition-all duration-300 cursor-pointer"
+        aria-label={isMuted ? 'Unmute' : 'Mute'}
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+      </motion.button>
+
+      {/* Mute hint */}
+      {isMuted && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 3, duration: 0.5 }}
+          className="absolute top-20 right-8 text-[9px] uppercase tracking-[0.3em] text-white/30 font-light animate-pulse"
+        >
+          Tap for sound
+        </motion.p>
+      )}
+
+      {/* Scroll cue */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 3 }}
+        onClick={scrollToAbout}
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 p-3 text-white/60 hover:text-white transition-all duration-300 animate-bounce cursor-pointer"
+        aria-label="Scroll to about section"
+      >
+        <ChevronDown className="w-8 h-8" />
+      </motion.button>
+    </div>
   )
 }
