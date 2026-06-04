@@ -155,17 +155,6 @@ export default function PamWidget({ tourTrigger }) {
 
   return (
     <>
-      <style>{`
-        @keyframes pam-wave {
-          0%, 100% { transform: scaleY(0.3); opacity: 0.4; }
-          50% { transform: scaleY(1.2); opacity: 1; }
-        }
-        @keyframes pam-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.5); }
-          50% { box-shadow: 0 0 0 12px rgba(168, 85, 247, 0); }
-        }
-      `}</style>
-
       <AnimatePresence mode="wait">
         {pamState === 'idle' ? (
           <motion.button

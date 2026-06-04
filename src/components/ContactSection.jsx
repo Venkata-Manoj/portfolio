@@ -1,121 +1,204 @@
-import { Mail, MessageCircle, Linkedin, Github, ArrowUpRight } from 'lucide-react'
-import FadeIn from './FadeIn'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
+import { Mail, MessageCircle, Linkedin, Github, Send, MapPin, User, ArrowUpRight } from 'lucide-react'
 
-const CONTACT_METHODS = [
+const CONTACT_CHANNELS = [
   {
     icon: Mail,
     label: 'Email',
     value: 'bsumanoj@gmail.com',
     href: 'mailto:bsumanoj@gmail.com',
+    gradient: 'from-violet-500 to-purple-600',
+    hoverGradient: 'group-hover:shadow-violet-500/20',
+  },
+  {
+    icon: MessageCircle,
+    label: 'WhatsApp',
+    value: '+91 00000 00000', /* Placeholder — replace with actual number */
+    href: 'https://wa.me/910000000000',
+    gradient: 'from-emerald-500 to-teal-600',
+    hoverGradient: 'group-hover:shadow-emerald-500/20',
   },
   {
     icon: Linkedin,
     label: 'LinkedIn',
-    value: 'in/venkata-manoj',
-    href: 'https://www.linkedin.com/in/venkata-manoj/',
+    value: 'linkedin.com/in/venkata-manoj',
+    href: 'https://linkedin.com/in/venkata-manoj',
+    gradient: 'from-blue-500 to-blue-700',
+    hoverGradient: 'group-hover:shadow-blue-500/20',
   },
   {
     icon: Github,
     label: 'GitHub',
-    value: '@Venkata-Manoj',
+    value: 'github.com/Venkata-Manoj',
     href: 'https://github.com/Venkata-Manoj',
-  },
-  {
-    icon: MessageCircle,
-    label: 'Location',
-    value: 'Chennai, India',
-    href: '#',
+    gradient: 'from-gray-500 to-gray-700',
+    hoverGradient: 'group-hover:shadow-gray-500/20',
   },
 ]
 
+function ContactCard({ channel, index }) {
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: '-30px' })
+
+  return (
+    <motion.a
+      ref={ref}
+      href={channel.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="group relative flex flex-col p-6 sm:p-8 rounded-2xl border border-white/[0.08] bg-[#141418]/60 backdrop-blur-sm transition-all duration-300 hover:border-white/[0.15] hover:bg-[#1a1a24]/80 hover:shadow-lg overflow-hidden"
+    >
+      {/* Hover gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${channel.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
+
+      <div className="relative z-10 flex items-start justify-between mb-4">
+        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${channel.gradient} bg-opacity-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}
+          style={{ backgroundOpacity: 0.1 }}
+        >
+          <channel.icon className="w-5 h-5 text-white" />
+        </div>
+        <ArrowUpRight className="w-4 h-4 text-white/20 group-hover:text-white/60 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      </div>
+
+      <div className="relative z-10">
+        <h3 className="text-sm font-['Kanit'] font-semibold text-white/80 mb-1 group-hover:text-white transition-colors">
+          {channel.label}
+        </h3>
+        <p className="text-xs text-white/40 font-light truncate">
+          {channel.value}
+        </p>
+      </div>
+
+      {/* Bottom accent line */}
+      <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r ${channel.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-x-0 group-hover:scale-x-100 origin-left`} />
+    </motion.a>
+  )
+}
+
 export default function ContactSection() {
+  const headerRef = useRef(null)
+  const headerInView = useInView(headerRef, { once: true })
+
   return (
     <section
       id="contact"
-      className="relative w-full bg-[#0C0C0C] px-5 sm:px-8 md:px-10 pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20"
+      className="relative z-10 w-full bg-[#0C0C0C] px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36"
     >
-      <FadeIn y={40}>
-        <h2
-          className="hero-heading text-center font-black uppercase tracking-tight leading-none mb-4"
-          style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
-        >
-          Get in touch
-        </h2>
-      </FadeIn>
+      {/* Background glow */}
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-violet-600/5 blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-80 h-80 rounded-full bg-cyan-600/5 blur-[120px] pointer-events-none" />
 
-      <FadeIn delay={0.15} y={20}>
-        <p
-          className="text-center font-light uppercase tracking-widest text-[#D7E2EA]/60 mb-12 sm:mb-16 md:mb-20"
-          style={{ fontSize: 'clamp(0.85rem, 1.4vw, 1.1rem)' }}
-        >
-          Let's connect and innovate together
-        </p>
-      </FadeIn>
-
-      <div className="mx-auto grid max-w-5xl grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-        {CONTACT_METHODS.map((method, i) => {
-          const Icon = method.icon
-          const isExternal = method.href.startsWith('http')
-
-          const Wrapper = isExternal ? 'a' : 'div'
-
-          return (
-            <FadeIn key={method.label} delay={i * 0.1} y={30}>
-              <Wrapper
-                href={isExternal ? method.href : undefined}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noopener noreferrer' : undefined}
-                className="group relative flex h-full flex-col justify-between gap-8 sm:gap-10 rounded-[28px] sm:rounded-[32px] border-2 border-[#D7E2EA]/20 bg-[#141418] p-6 sm:p-7 md:p-8 transition-all duration-300 hover:border-[#D7E2EA]/60 hover:bg-[#1a1a20] hover:-translate-y-1"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="rounded-full border border-[#D7E2EA]/20 p-3 sm:p-3.5 transition-colors duration-300 group-hover:border-[#D7E2EA]/50">
-                    <Icon className="text-[#D7E2EA]" size={22} strokeWidth={1.5} />
-                  </div>
-                  {isExternal && (
-                    <ArrowUpRight
-                      className="text-[#D7E2EA]/40 transition-all duration-300 group-hover:text-[#D7E2EA] group-hover:rotate-12"
-                      size={22}
-                      strokeWidth={1.5}
-                    />
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2 sm:gap-3">
-                  <span
-                    className="font-light uppercase tracking-widest text-[#D7E2EA]/50"
-                    style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.9rem)' }}
-                  >
-                    {method.label}
-                  </span>
-                  <span
-                    className="font-medium text-[#D7E2EA] break-all"
-                    style={{ fontSize: 'clamp(1rem, 1.8vw, 1.4rem)' }}
-                  >
-                    {method.value}
-                  </span>
-                </div>
-              </Wrapper>
-            </FadeIn>
-          )
-        })}
-      </div>
-
-      <FadeIn delay={0.4} y={20}>
-        <div className="mx-auto mt-20 sm:mt-24 md:mt-28 flex max-w-5xl flex-col items-center gap-3 border-t border-[#D7E2EA]/10 pt-8 text-center sm:flex-row sm:justify-between">
-          <span
-            className="font-light uppercase tracking-widest text-[#D7E2EA]/50"
-            style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.9rem)' }}
+      <div className="mx-auto max-w-6xl relative z-10">
+        {/* Section Heading */}
+        <div ref={headerRef} className="text-center mb-16 sm:mb-20">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="gradient-heading font-black uppercase leading-none tracking-tight"
+            style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
           >
-            © 2026 Venkata Manoj
-          </span>
-          <span
-            className="font-light uppercase tracking-widest text-[#D7E2EA]/50"
-            style={{ fontSize: 'clamp(0.7rem, 1.1vw, 0.9rem)' }}
+            Get in Touch
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-sm sm:text-base text-white/50 font-light mt-4"
           >
-            Built with React · AI & Data Science
-          </span>
+            Let's build something together
+          </motion.p>
         </div>
-      </FadeIn>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          {/* Left: Info card */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="lg:col-span-5 flex flex-col justify-between border border-white/[0.08] bg-[#141418]/60 backdrop-blur-2xl p-8 sm:p-10 rounded-3xl relative overflow-hidden shadow-2xl shadow-black/50"
+          >
+            <div className="absolute -left-10 -top-10 w-40 h-40 bg-violet-500/5 rounded-full blur-xl pointer-events-none" />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-cyan-500/20 flex items-center justify-center">
+                  <Send className="w-6 h-6 text-violet-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-['Kanit'] font-bold text-white">Available for work</h3>
+                  <p className="text-xs text-white/40 font-light">Actively seeking internships</p>
+                </div>
+              </div>
+
+              <div className="space-y-5 text-sm">
+                <div className="flex items-center gap-3">
+                  <User size={16} className="text-white/20" />
+                  <span className="text-white/30 w-20 text-xs">Name:</span>
+                  <span className="text-white font-medium text-sm">Ballani Venkata Manoj</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail size={16} className="text-white/20" />
+                  <span className="text-white/30 w-20 text-xs">Email:</span>
+                  <a href="mailto:bsumanoj@gmail.com" className="text-violet-400 hover:text-violet-300 transition-colors text-sm">
+                    bsumanoj@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin size={16} className="text-white/20" />
+                  <span className="text-white/30 w-20 text-xs">Location:</span>
+                  <span className="text-white/70 text-sm">Chennai, India</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Status badge */}
+            <div className="relative z-10 mt-8 pt-6 border-t border-white/[0.06]">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-emerald-400/70 font-semibold">
+                  Open to opportunities
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right: Contact channels grid */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="lg:col-span-7"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {CONTACT_CHANNELS.map((channel, i) => (
+                <ContactCard key={channel.label} channel={channel} index={i} />
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mx-auto mt-20 sm:mt-24 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/[0.06] pt-8 text-xs text-white/30 tracking-widest font-light uppercase"
+        >
+          <span>© 2026 B V Manoj</span>
+          <span>Built with React · AI & Data Science</span>
+        </motion.div>
+      </div>
     </section>
   )
 }

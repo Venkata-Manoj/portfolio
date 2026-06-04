@@ -1,24 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { Volume2, VolumeX, ChevronDown } from 'lucide-react'
 
 const WordReveal = ({ text, className = '', delay = 0 }) => {
-  const [isVisible, setIsVisible] = useState(false)
   const ref = useRef(null)
-
-  useEffect(() => {
-    const el = ref.current
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true)
-      },
-      { threshold: 0.1 }
-    )
-    if (el) observer.observe(el)
-    return () => {
-      if (el) observer.unobserve(el)
-    }
-  }, [])
+  const isVisible = useInView(ref, { once: true, amount: 0.1 })
 
   const words = text.split(' ')
 
@@ -126,13 +112,14 @@ export default function HeroSection() {
 
   return (
     <div ref={containerRef} className="relative h-screen w-full overflow-hidden bg-background">
-      {/* Video Background */}
+      {/* Video Background — preload=metadata avoids downloading entire video on page load */}
       <video
         ref={videoRef}
         autoPlay
         loop
         muted
         playsInline
+        preload="metadata"
         className="absolute inset-0 h-full w-full object-cover"
         style={{ filter: 'brightness(0.6)' }}
       >
@@ -148,17 +135,11 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Noise texture overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+      {/* Noise texture removed — SVG @ 3% opacity had negligible visual impact but costly GPU compositing */}
 
-      {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-violet-600/15 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-cyan-600/10 blur-[120px] pointer-events-none" />
+      {/* Ambient glow — reduced blur for GPU efficiency */}
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-violet-600/15 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-cyan-600/10 blur-[80px] pointer-events-none" />
 
       {/* Main content */}
       <motion.div

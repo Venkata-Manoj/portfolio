@@ -35,8 +35,6 @@ const SERVICES = [
   },
 ]
 
-const GAP = 24
-
 function ServiceCard({ service, index, isActive, onDotClick }) {
   const cardRef = useRef(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
@@ -46,6 +44,7 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
   return (
     <motion.div
       ref={cardRef}
+      data-service-card
       initial={{ opacity: 0, scale: 0.85, y: 30 }}
       animate={inView ? {
         opacity: isActive ? 1 : 0.45,
@@ -140,6 +139,21 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
   )
 }
 
+/* ── Reusable carousel arrow (replaces duplicated inline mouse handlers) ── */
+function CarouselArrow({ direction, onClick }) {
+  const isLeft = direction === 'left'
+  const Icon = isLeft ? ChevronLeft : ChevronRight
+  return (
+    <button
+      onClick={onClick}
+      aria-label={isLeft ? 'Previous service' : 'Next service'}
+      className="w-11 h-11 max-sm:w-9 max-sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer border border-[rgba(212,165,116,0.12)] bg-[rgba(30,28,26,0.5)] backdrop-blur-md text-[rgba(237,231,217,0.65)] hover:bg-[rgba(212,165,116,0.15)] hover:border-[rgba(212,165,116,0.35)] hover:text-[#EDE7D9] hover:scale-110 hover:shadow-[0_0_25px_rgba(212,165,116,0.15)] active:scale-90"
+    >
+      <Icon size={18} className="max-sm:w-4 max-sm:h-4" />
+    </button>
+  )
+}
+
 export default function ServicesSection() {
   const sectionRef = useRef(null)
   const trackRef = useRef(null)
@@ -154,18 +168,20 @@ export default function ServicesSection() {
     if (!track) return 0
     const trackRect = track.getBoundingClientRect()
     const trackCenter = trackRect.left + trackRect.width / 2
-    const cards = track.querySelectorAll('[data-service-card]')
+    // Use live HTMLCollection (track.children) instead of querySelectorAll
+    // Avoids DOM query on every scroll event — children is a live reference
+    const children = track.children
     let closestIdx = 0
     let closestDist = Infinity
-    cards.forEach((card, i) => {
-      const rect = card.getBoundingClientRect()
+    for (let i = 0; i < children.length; i++) {
+      const rect = children[i].getBoundingClientRect()
       const cardCenter = rect.left + rect.width / 2
       const dist = Math.abs(cardCenter - trackCenter)
       if (dist < closestDist) {
         closestDist = dist
         closestIdx = i
       }
-    })
+    }
     return closestIdx
   }, [])
 
@@ -173,8 +189,7 @@ export default function ServicesSection() {
   const scrollToCard = useCallback((index) => {
     const track = trackRef.current
     if (!track) return
-    const cards = track.querySelectorAll('[data-service-card]')
-    const card = cards[index]
+    const card = track.children[index]
     if (card) {
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
       setActiveIndex(index)
@@ -385,57 +400,20 @@ export default function ServicesSection() {
             msOverflowStyle: 'none',
           }}
         >
-          <style>{`
-            #services .flex::-webkit-scrollbar { display: none; }
-          `}</style>
           {SERVICES.map((service, i) => (
-            <div key={service.number} data-service-card>
-              <ServiceCard
-                service={service}
-                index={i}
-                isActive={activeIndex === i}
-                onDotClick={scrollToCard}
-              />
-            </div>
+            <ServiceCard
+              key={service.number}
+              service={service}
+              index={i}
+              isActive={activeIndex === i}
+              onDotClick={scrollToCard}
+            />
           ))}
         </div>
 
         {/* Controls */}
         <div className="flex items-center justify-center gap-8 mt-4">
-          {/* Left arrow */}
-          <button
-            onClick={goPrev}
-            aria-label="Previous service"
-            className="w-11 h-11 max-sm:w-9 max-sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer"
-            style={{
-              border: '1px solid rgba(212,165,116,0.12)',
-              background: 'rgba(30,28,26,0.5)',
-              backdropFilter: 'blur(8px)',
-              color: 'rgba(237,231,217,0.65)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(212,165,116,0.15)'
-              e.currentTarget.style.borderColor = 'rgba(212,165,116,0.35)'
-              e.currentTarget.style.color = '#EDE7D9'
-              e.currentTarget.style.transform = 'scale(1.1)'
-              e.currentTarget.style.boxShadow = '0 0 25px rgba(212,165,116,0.15)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(30,28,26,0.5)'
-              e.currentTarget.style.borderColor = 'rgba(212,165,116,0.12)'
-              e.currentTarget.style.color = 'rgba(237,231,217,0.65)'
-              e.currentTarget.style.transform = 'scale(1)'
-              e.currentTarget.style.boxShadow = 'none'
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'scale(0.92)'
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)'
-            }}
-          >
-            <ChevronLeft size={18} className="max-sm:w-4 max-sm:h-4" />
-          </button>
+          <CarouselArrow direction="left" onClick={goPrev} />
 
           {/* Dots */}
           <div className="flex items-center gap-2" role="tablist" aria-label="Service indicators">
@@ -459,57 +437,11 @@ export default function ServicesSection() {
             ))}
           </div>
 
-          {/* Right arrow */}
-          <button
-            onClick={goNext}
-            aria-label="Next service"
-            className="w-11 h-11 max-sm:w-9 max-sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer"
-            style={{
-              border: '1px solid rgba(212,165,116,0.12)',
-              background: 'rgba(30,28,26,0.5)',
-              backdropFilter: 'blur(8px)',
-              color: 'rgba(237,231,217,0.65)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(212,165,116,0.15)'
-              e.currentTarget.style.borderColor = 'rgba(212,165,116,0.35)'
-              e.currentTarget.style.color = '#EDE7D9'
-              e.currentTarget.style.transform = 'scale(1.1)'
-              e.currentTarget.style.boxShadow = '0 0 25px rgba(212,165,116,0.15)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(30,28,26,0.5)'
-              e.currentTarget.style.borderColor = 'rgba(212,165,116,0.12)'
-              e.currentTarget.style.color = 'rgba(237,231,217,0.65)'
-              e.currentTarget.style.transform = 'scale(1)'
-              e.currentTarget.style.boxShadow = 'none'
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'scale(0.92)'
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)'
-            }}
-          >
-            <ChevronRight size={18} className="max-sm:w-4 max-sm:h-4" />
-          </button>
+          <CarouselArrow direction="right" onClick={goNext} />
         </div>
       </div>
 
-      <style>{`
-        @keyframes orbFloatSlow {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(30px, -20px); }
-        }
-        @keyframes orbFloatMedium {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(-25px, 15px); }
-        }
-        @keyframes orbFloatFast {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(15px, 25px); }
-        }
-      `}</style>
+      {/* @keyframes moved to index.css — eliminates inline style node recreation */}
     </section>
   )
 }

@@ -59,9 +59,10 @@ export default function AboutSection() {
       />
 
       {/* Floating gold orbs */}
-      <div className="absolute top-[5%] -left-[5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.08),transparent)] blur-[120px] pointer-events-none animate-float-a" />
-      <div className="absolute bottom-[5%] -right-[5%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(166,124,82,0.06),transparent)] blur-[160px] pointer-events-none animate-float-b" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.04),transparent)] blur-[100px] pointer-events-none animate-float-a-reverse" />
+      {/* Reduced blur radii — blur >80px has diminishing visual returns but high GPU cost */}
+      <div className="absolute top-[5%] -left-[5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.08),transparent)] blur-[80px] pointer-events-none animate-about-float-a" />
+      <div className="absolute bottom-[5%] -right-[5%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(166,124,82,0.06),transparent)] blur-[100px] pointer-events-none animate-about-float-b" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.04),transparent)] blur-[60px] pointer-events-none animate-about-float-a-reverse" />
 
       <div className="relative z-10 mx-auto max-w-6xl">
         {/* === Heading === */}
@@ -114,13 +115,14 @@ export default function AboutSection() {
             >
               {/* Shimmering gold ring */}
               <div
-                className="w-full h-full rounded-full p-[4px] relative animate-shimmer-border cursor-pointer group"
+                  className="w-full h-full rounded-full p-[4px] relative animate-about-shimmer-border cursor-pointer group"
                 style={{
-                  background: 'linear-gradient(135deg, #D4A574, #A67C52, #C4956A, #D4A574)',
-                  backgroundSize: '300% 300%',
-                }}
-              >
-                <div className="absolute -inset-[10px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.12),transparent)] blur-[14px] -z-10 opacity-40 transition-opacity duration-400 group-hover:opacity-60" />
+                background: 'linear-gradient(135deg, #D4A574, #A67C52, #C4956A, #D4A574)',
+                backgroundSize: '300% 300%',
+              }}
+            >
+              {/* will-change optimized — already GPU-composited by shimmer animation */}
+              <div className="absolute -inset-[10px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.12),transparent)] blur-[14px] -z-10 opacity-40 transition-opacity duration-400 group-hover:opacity-60" />
                 <div className="w-full h-full rounded-full bg-[#0C0C0C] overflow-hidden transition-colors duration-300 hover:bg-[#11100E]">
                   <img
                     src="/me.jpeg"
@@ -210,7 +212,7 @@ export default function AboutSection() {
           />
           <div className="rounded-[28px] sm:rounded-[32px] bg-[rgba(30,28,26,0.5)] backdrop-blur-[24px] p-8 sm:p-10 md:p-12 relative overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/skills:-translate-y-0.5">
             {/* Top streak */}
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(212,165,116,0.2)] to-transparent animate-shimmer-streak" />
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[rgba(212,165,116,0.2)] to-transparent animate-about-shimmer-streak" />
 
             <div className="flex items-center justify-between mb-8 sm:mb-9 flex-wrap gap-3">
               <h3 className="text-xs sm:text-sm font-medium text-[rgba(237,231,217,0.6)] uppercase tracking-[0.05em] transition-colors duration-300 group-hover/skills:text-[rgba(237,231,217,0.8)]">
@@ -254,43 +256,9 @@ export default function AboutSection() {
             </div>
           </div>
         </motion.div>
-
-
-
-
       </div>
 
-      <style>{`
-        @keyframes float-a {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(50px, -60px) scale(1.1); }
-          66% { transform: translate(-40px, 40px) scale(0.9); }
-        }
-        @keyframes float-b {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-60px, 50px) scale(1.15); }
-          66% { transform: translate(40px, -60px) scale(0.85); }
-        }
-        @keyframes float-a-reverse {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); }
-          33% { transform: translate(-50%, -50%) translate(40px, -40px) scale(1.1); }
-          66% { transform: translate(-50%, -50%) translate(-30px, 30px) scale(0.9); }
-        }
-        @keyframes shimmer-border {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        @keyframes shimmer-streak {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .animate-float-a { animation: float-a 25s ease-in-out infinite; }
-        .animate-float-b { animation: float-b 30s ease-in-out infinite; }
-        .animate-float-a-reverse { animation: float-a-reverse 20s ease-in-out infinite reverse; }
-        .animate-shimmer-border { animation: shimmer-border 4s ease-in-out infinite; }
-        .animate-shimmer-streak { animation: shimmer-streak 4s ease-in-out infinite; }
-
-      `}</style>
+      {/* Animations moved to index.css — eliminates DOM style node recreation on every render */}
     </section>
   )
 }
