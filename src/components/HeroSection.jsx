@@ -20,8 +20,7 @@ const WordReveal = ({ text, className = '', delay = 0 }) => {
             delay: delay + i * 0.1,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="inline-block"
-          style={{ marginRight: i < words.length - 1 ? '0.25em' : 0 }}
+          className="inline-block mr-1"
         >
           {word}
         </motion.span>
@@ -111,7 +110,7 @@ export default function HeroSection() {
   }
 
   return (
-    <div ref={containerRef} className="relative h-screen w-full overflow-hidden bg-background">
+    <div ref={containerRef} id="hero" className="relative h-screen w-full overflow-hidden bg-background">
       {/* Video Background — preload=metadata avoids downloading entire video on page load */}
       <video
         ref={videoRef}

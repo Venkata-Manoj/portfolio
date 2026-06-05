@@ -161,6 +161,7 @@ export default function ServicesSection() {
   const headerInView = useInView(headerRef, { once: true })
   const [activeIndex, setActiveIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
+  const sectionInView = useInView(sectionRef, { margin: '-100px' })
 
   // Get which card is most centered in the viewport
   const getCenterIndex = useCallback(() => {
@@ -191,7 +192,11 @@ export default function ServicesSection() {
     if (!track) return
     const card = track.children[index]
     if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      const cardLeft = card.offsetLeft
+      const trackWidth = track.clientWidth
+      const cardWidth = card.offsetWidth
+      const scrollLeft = cardLeft - (trackWidth / 2 - cardWidth / 2)
+      track.scrollTo({ left: scrollLeft, behavior: 'smooth' })
       setActiveIndex(index)
     }
   }, [])
@@ -217,16 +222,18 @@ export default function ServicesSection() {
   // Auto-play
   useEffect(() => {
     if (isHovering) return
+    if (!sectionInView) return
     const timer = setInterval(() => {
       const next = (activeIndex + 1) % SERVICES.length
       scrollToCard(next)
     }, 4000)
     return () => clearInterval(timer)
-  }, [activeIndex, isHovering, scrollToCard])
+  }, [activeIndex, isHovering, scrollToCard, sectionInView])
 
   // Keyboard navigation (left/right arrow keys)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (!sectionInView) return
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
         const prev = Math.max(0, getCenterIndex() - 1)
@@ -239,7 +246,7 @@ export default function ServicesSection() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [getCenterIndex, scrollToCard])
+  }, [getCenterIndex, scrollToCard, sectionInView])
 
   // Re-check on resize
   useEffect(() => {
@@ -271,7 +278,7 @@ export default function ServicesSection() {
     <section
       id="services"
       ref={sectionRef}
-      className="relative w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
+      className="relative w-full overflow-hidden min-h-screen px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onTouchStart={() => setIsHovering(true)}
@@ -342,20 +349,16 @@ export default function ServicesSection() {
               }}
             />
             <h2
-              className="font-['Kanit'] font-black uppercase leading-none tracking-[0.12em] whitespace-nowrap text-[#EDE7D9]"
-              style={{ fontSize: 'clamp(2.25rem, 6vw, 4.5rem)' }}
+              className="font-['Kanit'] font-black uppercase leading-none tracking-[0.12em] whitespace-nowrap"
+              style={{
+                fontSize: 'clamp(2.25rem, 6vw, 4.5rem)',
+                background: 'linear-gradient(135deg, #D4A574, #A67C52)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
             >
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #D4A574, #A67C52)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                S
-              </span>
-              ERVICES
+              SERVICES
             </h2>
             <span
               className="flex-0 h-[2px] rounded-full"
@@ -422,7 +425,7 @@ export default function ServicesSection() {
                 key={i}
                 role="tab"
                 aria-selected={i === activeIndex}
-                aria-label={`Service ${i + 1}`}
+                aria-label={SERVICES[i].title}
                 onClick={() => scrollToCard(i)}
                 className="rounded-full border-none p-0 cursor-pointer transition-all duration-500"
                 style={{

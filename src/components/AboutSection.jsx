@@ -166,6 +166,7 @@ export default function AboutSection() {
             <div className="flex flex-wrap gap-4">
               <a
                 href="#contact"
+                onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }) }}
                 className="group/cta inline-flex items-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] text-[11px] sm:text-xs font-bold uppercase tracking-[0.1em] no-underline transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 hover:-translate-y-0.5 hover:shadow-[0_8px_40px_rgba(212,165,116,0.3),0_0_60px_rgba(212,165,116,0.1)] active:scale-[0.98] active:translate-y-0 relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.15),transparent)] opacity-0 transition-opacity duration-400 group-hover/cta:opacity-100" />
@@ -174,6 +175,7 @@ export default function AboutSection() {
               </a>
               <a
                 href="#projects"
+                onClick={(e) => { e.preventDefault(); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }) }}
                 className="group/cta2 relative inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full border border-[rgba(237,231,217,0.12)] text-[rgba(237,231,217,0.6)] text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.08em] no-underline transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-[rgba(212,165,116,0.3)] hover:text-[#EDE7D9] hover:-translate-y-0.5 overflow-hidden"
               >
                 <span className="absolute inset-[-1px] rounded-full opacity-0 transition-opacity duration-400 group-hover/cta2:opacity-100"

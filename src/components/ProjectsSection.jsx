@@ -238,11 +238,12 @@ function ProjectCard({ project, index, scrollYProgress, total, isMobile }) {
     }
   }, [handleFlip])
 
+  // z-index: later cards (higher index) get higher z-index so they stack on top
   return (
     <div
       ref={cardRef}
       className="card sticky top-0 h-screen w-full overflow-hidden"
-      style={{ zIndex: total - index }}
+      style={{ zIndex: index + 1 }}
       onClick={handleFlip}
       onKeyDown={handleKeyDown}
       role="button"
@@ -309,7 +310,7 @@ function ProjectCard({ project, index, scrollYProgress, total, isMobile }) {
         {/* Card inner — 3D flip + tilt target */}
         <div
           ref={innerRef}
-          className="card-inner relative w-[88%] max-w-[1200px] h-[82%] max-h-[700px] rounded-[24px] cursor-pointer"
+          className="card-inner group relative w-[88%] max-w-[1200px] h-[82%] max-h-[700px] rounded-[24px] cursor-pointer"
           style={{
             transformStyle: 'preserve-3d',
             boxShadow: '0 8px 40px rgba(0,0,0,0.4), 0 2px 12px rgba(0,0,0,0.3)',
@@ -366,7 +367,7 @@ function ProjectCard({ project, index, scrollYProgress, total, isMobile }) {
               </div>
 
               {/* Emoji in gold-tinted glass circle */}
-              <div className="card-emoji-circle w-[80px] h-[80px] rounded-full flex items-center justify-center text-[2.2rem] flex-shrink-0 mb-4 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/inner:scale-[1.08] group-hover/inner:border-[rgba(212,165,116,0.45)] group-hover/inner:shadow-[0_0_40px_-4px_rgba(212,165,116,0.25)] hover:animate-projects-gold-ring"
+              <div className="card-emoji-circle w-[80px] h-[80px] rounded-full flex items-center justify-center text-[2.2rem] flex-shrink-0 mb-4 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/inner:scale-[1.08] group-hover/inner:border-[rgba(212,165,116,0.45)] group-hover/inner:shadow-[0_0_40px_-4px_rgba(212,165,116,0.25)] hover:animate-projects-gold-ring select-none"
                 style={{
                   background:
                     'radial-gradient(circle at 30% 30%, rgba(212,165,116,0.20), rgba(166,124,82,0.08) 60%, transparent 80%)',
@@ -395,10 +396,8 @@ function ProjectCard({ project, index, scrollYProgress, total, isMobile }) {
                 ))}
               </div>
 
-              {/* "Click to flip" hint */}
-              <div className="card-front-hint text-[0.72rem] font-light tracking-[0.08em] text-[rgba(212,165,116,0.35)] transition-colors duration-300">
-                Click to flip ↻
-              </div>
+              {/* "Click to flip" hint — sr-only accessible text */}
+              <span className="sr-only">Click to flip</span>
             </div>
 
             {/* ── Right panel (42%) — Gold/bronze gradient blobs ── */}
@@ -447,14 +446,6 @@ function ProjectCard({ project, index, scrollYProgress, total, isMobile }) {
               border: '1px solid rgba(212,165,116,0.08)',
             }}
           >
-            {/* Back title */}
-            <div
-              className="card-back-title text-[clamp(1.2rem,2.5vw,2rem)] font-bold mb-3"
-              style={{ color: project.accent }}
-            >
-              {project.name}
-            </div>
-
             {/* Back description */}
             <p className="card-back-desc text-[clamp(0.88rem,1.2vw,1.05rem)] font-light leading-[1.7] text-[rgba(237,231,217,0.65)] max-w-[640px] mb-6">
               {project.description}
@@ -511,10 +502,8 @@ function ProjectCard({ project, index, scrollYProgress, total, isMobile }) {
               )}
             </div>
 
-            {/* Back hint */}
-            <div className="card-back-hint absolute bottom-[24px] right-[32px] text-[0.68rem] font-light tracking-[0.08em] text-[rgba(212,165,116,0.18)]">
-              Flip back ↩
-            </div>
+            {/* Back hint — sr-only accessible text */}
+            <span className="sr-only absolute bottom-[24px] right-[32px]">Flip back</span>
           </div>
 
           {/* ── Shimmer overlay (hover gold sweep) ── */}
@@ -564,11 +553,12 @@ function GitHubCard({ project, index, scrollYProgress, total }) {
     }
   }, [project.github])
 
+  // z-index: later cards (higher index) get higher z-index so they stack on top
   return (
     <div
       ref={cardRef}
       className="card sticky top-0 h-screen w-full overflow-hidden cursor-pointer"
-      style={{ zIndex: total - index }}
+      style={{ zIndex: index + 1 }}
       onClick={() =>
         window.open(project.github, '_blank', 'noopener noreferrer')
       }
@@ -698,9 +688,9 @@ export default function ProjectsSection() {
     [1, 0.92, 0.85]
   )
   const headingOpacity = useTransform(
-    headingState,
-    [0, 0.5, 1],
-    [1, 0.35, 0]
+    scrollYProgress,
+    [0, 0.08, 0.35, 0.9],
+    [0, 1, 1, 0]
   )
 
   // ── Scroll hint fades after first scroll ──
@@ -742,6 +732,7 @@ export default function ProjectsSection() {
         className="fixed top-0 left-0 h-[3px] z-[1000] pointer-events-none"
         style={{
           width: progressWidth,
+          opacity: headingOpacity,
           background:
             'linear-gradient(90deg, #D4A574, #A67C52, #C4956A, #D4A574)',
           backgroundSize: '200% 100%',
@@ -750,8 +741,6 @@ export default function ProjectsSection() {
             : '0 0 8px rgba(212,165,116,0.25), 0 0 20px rgba(212,165,116,0.10)',
           transition: 'box-shadow 1.5s ease-in-out',
         }}
-        role="progressbar"
-        aria-label="Scroll progress"
       >
         <div
           className="absolute top-0 left-0 right-0 h-[10px] blur-[6px] pointer-events-none"
@@ -765,9 +754,10 @@ export default function ProjectsSection() {
       {/* ═══════════════════════════════════════════════════════════════
           FIXED PROJECT INDICATOR — Gold numbers with "OF" label
           ═══════════════════════════════════════════════════════════════ */}
-      <div
+      <motion.div
         className="fixed right-[32px] top-1/2 -translate-y-1/2 z-[100] flex-col items-center gap-[6px] pointer-events-none hidden md:flex"
         aria-hidden="true"
+        style={{ opacity: headingOpacity }}
       >
         <div
           className="w-[20px] h-[1px]"
@@ -812,13 +802,17 @@ export default function ProjectsSection() {
               'linear-gradient(90deg, transparent, rgba(212,165,116,0.35), transparent)',
           }}
         />
-      </div>
+      </motion.div>
 
       {/* ═══════════════════════════════════════════════════════════════
           FIXED AURORA BACKGROUND — Gold/Bronze drifting bands
           ═══════════════════════════════════════════════════════════════ */}
       {/* Reduced blur: 120→80px — blur beyond 80px has negligible visual gain vs GPU cost */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      <motion.div
+        className="fixed inset-0 z-0 pointer-events-none overflow-hidden"
+        aria-hidden="true"
+        style={{ opacity: useTransform(scrollYProgress, [0, 0.08, 0.9, 1], [0, 0.25, 0.25, 0]) }}
+      >
         <div
           className="absolute w-[800px] h-[800px] rounded-full blur-[80px] opacity-[0.08] top-[-20%] left-[-10%] animate-projects-float-a"
           style={{
@@ -854,7 +848,7 @@ export default function ProjectsSection() {
               'radial-gradient(circle, rgba(212,165,116,0.06), transparent 70%)',
           }}
         />
-      </div>
+      </motion.div>
 
       {/* ═══════════════════════════════════════════════════════════════
           FIXED HEADING — Eyebrow, gradient title, underline, scroll hint
@@ -884,22 +878,7 @@ export default function ProjectsSection() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            PR
-            <span
-              className="title-accent inline-block"
-              style={{
-                background:
-                  'linear-gradient(135deg, #E8C88A, #D4A574, #F0D8A0, #D4A574)',
-                backgroundSize: '200% 100%',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 30px rgba(212,165,116,0.40))',
-              }}
-            >
-              O
-            </span>
-            JECTS
+            PROJECTS
           </h1>
 
           {/* Title ornaments: dots + animated underline */}

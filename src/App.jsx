@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import AboutSection from './components/AboutSection'
@@ -8,6 +8,9 @@ import ContactSection from './components/ContactSection'
 import PamWidget from './components/PamWidget'
 
 const App = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
   const [tourTrigger, setTourTrigger] = useState(0)
   const handleStartTour = () => setTourTrigger(t => t + 1)
 

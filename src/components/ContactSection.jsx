@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Mail, MessageCircle, Linkedin, Github, Send, MapPin, User, ArrowUpRight } from 'lucide-react'
+import { Mail, Linkedin, Github, Send, MapPin, User, ArrowUpRight } from 'lucide-react'
 
 const CONTACT_CHANNELS = [
   {
@@ -10,14 +10,6 @@ const CONTACT_CHANNELS = [
     href: 'mailto:bsumanoj@gmail.com',
     gradient: 'from-violet-500 to-purple-600',
     hoverGradient: 'group-hover:shadow-violet-500/20',
-  },
-  {
-    icon: MessageCircle,
-    label: 'WhatsApp',
-    value: '+91 00000 00000', /* Placeholder — replace with actual number */
-    href: 'https://wa.me/910000000000',
-    gradient: 'from-emerald-500 to-teal-600',
-    hoverGradient: 'group-hover:shadow-emerald-500/20',
   },
   {
     icon: Linkedin,
@@ -132,7 +124,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h3 className="text-lg font-['Kanit'] font-bold text-white">Available for work</h3>
-                  <p className="text-xs text-white/40 font-light">Actively seeking internships</p>
+                  <p className="text-xs text-white/40 font-light">Open to opportunities</p>
                 </div>
               </div>
 
@@ -154,11 +146,14 @@ export default function ContactSection() {
                   <span className="text-white/30 w-20 text-xs">Location:</span>
                   <span className="text-white/70 text-sm">Chennai, India</span>
                 </div>
-              </div>
             </div>
+          </div>
 
-            {/* Status badge */}
-            <div className="relative z-10 mt-8 pt-6 border-t border-white/[0.06]">
+          {/* Visible spacer to prevent merged text */}
+          <div className="h-4" />
+
+          {/* Status badge */}
+          <div className="relative z-10 mt-8 pt-6 border-t border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
