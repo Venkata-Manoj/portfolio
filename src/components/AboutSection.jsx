@@ -8,22 +8,22 @@ const SKILL_GROUPS = [
   {
     label: 'Languages',
     dotColor: '#D4A574',
-    items: ['Python', 'TypeScript', 'JavaScript', 'C++', 'SQL', 'HTML/CSS'],
+    items: ['Python', 'TypeScript', 'JavaScript', 'C++', 'SQL', 'HTML', 'CSS'],
   },
   {
     label: 'Frameworks',
     dotColor: '#A67C52',
-    items: ['React', 'Next.js', 'FastAPI', 'Node.js', 'Tailwind CSS', 'Framer Motion'],
+    items: ['React', 'Next.js', 'FastAPI', 'Node.js', 'Tailwind CSS', 'Framer Motion', 'LangChain', 'shadcn/ui'],
   },
   {
     label: 'AI / ML',
     dotColor: '#C4956A',
-    items: ['LLMs', 'RAG Pipelines', 'FAISS', 'XGBoost', 'PyTorch', 'Ollama'],
+    items: ['LLMs', 'RAG Pipelines', 'FAISS', 'XGBoost', 'PyTorch', 'Ollama', 'Prompt Engineering', 'scikit-learn'],
   },
   {
     label: 'Tools & Platforms',
     dotColor: '#B8895E',
-    items: ['Vercel', 'Firebase', 'Docker', 'Git', 'Prisma', 'SQLite'],
+    items: ['Vercel', 'Firebase', 'Docker', 'Git', 'Prisma', 'SQLite', 'PostgreSQL', 'MongoDB', 'REST APIs', 'VS Code'],
   },
 ]
 
@@ -221,7 +221,7 @@ export default function AboutSection() {
                 Technical expertise
               </h3>
               <span className="text-[10px] sm:text-[11px] text-[rgba(237,231,217,0.2)] font-light transition-colors duration-300 group-hover/skills:text-[rgba(212,165,116,0.4)]">
-                24 skills
+                33 skills
               </span>
             </div>
 

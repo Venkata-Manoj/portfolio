@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion, useInView, useMotionValue, animate } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Bot, Code2, Cloud, LineChart, Shield } from 'lucide-react'
 
 const SERVICES = [
@@ -35,10 +35,11 @@ const SERVICES = [
   },
 ]
 
-function ServiceCard({ service, index, isActive, onDotClick }) {
+const CLONE_COUNT = 3
+
+function ServiceCard({ service, index }) {
   const cardRef = useRef(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
-
   const Icon = service.icon
 
   return (
@@ -46,13 +47,9 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
       ref={cardRef}
       data-service-card
       initial={{ opacity: 0, scale: 0.85, y: 30 }}
-      animate={inView ? {
-        opacity: isActive ? 1 : 0.45,
-        scale: isActive ? 1 : 0.88,
-        y: 0,
-      } : {}}
-      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="relative shrink-0 snap-center cursor-pointer rounded-3xl overflow-hidden group w-[85vw] lg:w-[380px]"
+      animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: (index % SERVICES.length) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      className="relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[380px]"
       style={{
         minHeight: 420,
         background: 'rgba(30,28,26,0.6)',
@@ -61,16 +58,14 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
         transition: 'border-color 0.5s ease, box-shadow 0.5s ease',
       }}
       whileHover={{ y: -6 }}
-      onHoverStart={() => {}}
-      onClick={() => onDotClick(index)}
     >
       {/* Gold top streak */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] rounded-full transition-all duration-500"
         style={{
-          width: isActive ? '80%' : '60%',
+          width: '80%',
           background: 'linear-gradient(90deg, transparent, rgba(212,165,116,0.30), transparent)',
-          opacity: isActive ? 1 : 0,
+          opacity: 1,
         }}
       />
 
@@ -99,7 +94,6 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
 
       {/* Content */}
       <div className="relative z-10 p-9 pb-8 flex flex-col h-full max-sm:p-6 max-sm:pb-6">
-        {/* Icon circle */}
         <div
           className="w-[68px] h-[68px] rounded-full flex items-center justify-center mb-6 transition-all duration-400 group-hover:scale-110 max-sm:w-[56px] max-sm:h-[56px] max-sm:mb-4"
           style={{
@@ -112,12 +106,10 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
           <Icon className="w-7 h-7 text-[#EDE7D9] max-sm:w-6 max-sm:h-6" />
         </div>
 
-        {/* Title */}
         <h3 className="text-[1.35rem] font-bold tracking-[0.02em] text-[#EDE7D9] mb-3 max-sm:text-[1.15rem]">
           {service.title}
         </h3>
 
-        {/* Description */}
         <p
           className="text-[0.92rem] font-light leading-[1.7] flex-1 max-sm:text-[0.85rem]"
           style={{ color: 'rgba(237,231,217,0.45)' }}
@@ -126,20 +118,16 @@ function ServiceCard({ service, index, isActive, onDotClick }) {
         </p>
       </div>
 
-      {/* Glow overlay for active state */}
-      {isActive && (
-        <div
-          className="absolute inset-0 pointer-events-none rounded-3xl"
-          style={{
-            boxShadow: 'inset 0 0 40px rgba(212,165,116,0.06), 0 0 40px rgba(212,165,116,0.12), 0 0 80px rgba(212,165,116,0.05)',
-          }}
-        />
-      )}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-3xl"
+        style={{
+          boxShadow: 'inset 0 0 40px rgba(212,165,116,0.06), 0 0 40px rgba(212,165,116,0.12), 0 0 80px rgba(212,165,116,0.05)',
+        }}
+      />
     </motion.div>
   )
 }
 
-/* ── Reusable carousel arrow (replaces duplicated inline mouse handlers) ── */
 function CarouselArrow({ direction, onClick }) {
   const isLeft = direction === 'left'
   const Icon = isLeft ? ChevronLeft : ChevronRight
@@ -159,120 +147,115 @@ export default function ServicesSection() {
   const trackRef = useRef(null)
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [isHovering, setIsHovering] = useState(false)
   const sectionInView = useInView(sectionRef, { margin: '-100px' })
 
-  // Get which card is most centered in the viewport
-  const getCenterIndex = useCallback(() => {
-    const track = trackRef.current
-    if (!track) return 0
-    const trackRect = track.getBoundingClientRect()
-    const trackCenter = trackRect.left + trackRect.width / 2
-    // Use live HTMLCollection (track.children) instead of querySelectorAll
-    // Avoids DOM query on every scroll event — children is a live reference
-    const children = track.children
-    let closestIdx = 0
-    let closestDist = Infinity
-    for (let i = 0; i < children.length; i++) {
-      const rect = children[i].getBoundingClientRect()
-      const cardCenter = rect.left + rect.width / 2
-      const dist = Math.abs(cardCenter - trackCenter)
-      if (dist < closestDist) {
-        closestDist = dist
-        closestIdx = i
-      }
-    }
-    return closestIdx
-  }, [])
+  const [focusedIndex, setFocusedIndex] = useState(0)
+  const [isHovering, setIsHovering] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [stepWidth, setStepWidth] = useState(0)
+  const [oneSetWidth, setOneSetWidth] = useState(0)
 
-  // Scroll to a specific card
-  const scrollToCard = useCallback((index) => {
-    const track = trackRef.current
-    if (!track) return
-    const card = track.children[index]
-    if (card) {
-      const cardLeft = card.offsetLeft
-      const trackWidth = track.clientWidth
-      const cardWidth = card.offsetWidth
-      const scrollLeft = cardLeft - (trackWidth / 2 - cardWidth / 2)
-      track.scrollTo({ left: scrollLeft, behavior: 'smooth' })
-      setActiveIndex(index)
-    }
-  }, [])
+  const x = useMotionValue(0)
+  const animRef = useRef(null)
+  const startAnimFn = useRef(() => {})
 
-  // Track scroll to update active index
+  // Measure card dimensions once mounted
   useEffect(() => {
     const track = trackRef.current
-    if (!track) return
-    let rafId = null
-    const handleScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(() => {
-        setActiveIndex(getCenterIndex())
+    if (!track || !track.children[0]) return
+    const cardW = track.children[0].offsetWidth
+    const gap = 24
+    const step = cardW + gap
+    setStepWidth(step)
+    setOneSetWidth(step * SERVICES.length)
+  }, [])
+
+  // Keep animation function in ref to avoid circular dependency
+  useEffect(() => {
+    startAnimFn.current = () => {
+      if (!oneSetWidth || !sectionInView) return
+
+      const currentX = x.get()
+      const targetX = currentX - oneSetWidth
+
+      if (animRef.current) animRef.current.stop()
+
+      animRef.current = animate(x, [currentX, targetX], {
+        duration: 40,
+        ease: 'linear',
+        onComplete: () => {
+          x.set(x.get() + oneSetWidth)
+          if (startAnimFn.current) startAnimFn.current()
+        },
       })
     }
-    track.addEventListener('scroll', handleScroll, { passive: true })
-    return () => {
-      track.removeEventListener('scroll', handleScroll)
-      if (rafId) cancelAnimationFrame(rafId)
-    }
-  }, [getCenterIndex])
+  }, [oneSetWidth, sectionInView, x])
 
-  // Auto-play
+  // Start/stop animation based on playing state
   useEffect(() => {
-    if (isHovering) return
-    if (!sectionInView) return
-    const timer = setInterval(() => {
-      const next = (activeIndex + 1) % SERVICES.length
-      scrollToCard(next)
-    }, 4000)
-    return () => clearInterval(timer)
-  }, [activeIndex, isHovering, scrollToCard, sectionInView])
+    if (isPlaying && sectionInView && oneSetWidth > 0) {
+      startAnimFn.current()
+    } else {
+      if (animRef.current) animRef.current.stop()
+    }
+    return () => {
+      if (animRef.current) animRef.current.stop()
+    }
+  }, [isPlaying, sectionInView, oneSetWidth])
 
-  // Keyboard navigation (left/right arrow keys)
+  // Pause on hover
+  const shouldPause = isHovering || !isPlaying
+  useEffect(() => {
+    if (shouldPause && animRef.current) animRef.current.pause()
+    if (!shouldPause && animRef.current) animRef.current.play()
+  }, [shouldPause])
+
+  const scrollToCard = useCallback(
+    (index) => {
+      if (!stepWidth) return
+      setIsPlaying(false)
+      setFocusedIndex(index)
+
+      const targetX = -(index * stepWidth)
+      if (animRef.current) animRef.current.stop()
+
+      animate(x, targetX, {
+        type: 'spring',
+        stiffness: 150,
+        damping: 25,
+        onComplete: () => {
+          setTimeout(() => setIsPlaying(true), 2000)
+        },
+      })
+    },
+    [stepWidth, x]
+  )
+
+  const goPrev = useCallback(() => {
+    const prev = (focusedIndex - 1 + SERVICES.length) % SERVICES.length
+    scrollToCard(prev)
+  }, [focusedIndex, scrollToCard])
+
+  const goNext = useCallback(() => {
+    const next = (focusedIndex + 1) % SERVICES.length
+    scrollToCard(next)
+  }, [focusedIndex, scrollToCard])
+
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!sectionInView) return
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
-        const prev = Math.max(0, getCenterIndex() - 1)
-        scrollToCard(prev)
+        goPrev()
       } else if (e.key === 'ArrowRight') {
         e.preventDefault()
-        const next = Math.min(SERVICES.length - 1, getCenterIndex() + 1)
-        scrollToCard(next)
+        goNext()
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [getCenterIndex, scrollToCard, sectionInView])
-
-  // Re-check on resize
-  useEffect(() => {
-    let rafId = null
-    const handleResize = () => {
-      if (rafId) cancelAnimationFrame(rafId)
-      rafId = requestAnimationFrame(() => {
-        setActiveIndex(getCenterIndex())
-      })
-    }
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      if (rafId) cancelAnimationFrame(rafId)
-    }
-  }, [getCenterIndex])
-
-  const goPrev = () => {
-    const prev = Math.max(0, getCenterIndex() - 1)
-    scrollToCard(prev)
-  }
-
-  const goNext = () => {
-    const next = Math.min(SERVICES.length - 1, getCenterIndex() + 1)
-    scrollToCard(next)
-  }
+  }, [goPrev, goNext, sectionInView])
 
   return (
     <section
@@ -282,7 +265,7 @@ export default function ServicesSection() {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onTouchStart={() => setIsHovering(true)}
-      onTouchEnd={() => setTimeout(() => setIsHovering(false), 500)}
+      onTouchEnd={() => setTimeout(() => setIsHovering(false), 2000)}
     >
       {/* Ambient gold orbs */}
       <div
@@ -322,7 +305,6 @@ export default function ServicesSection() {
       />
 
       <div className="relative z-10 mx-auto max-w-[1400px]">
-        {/* Eyebrow label */}
         <div ref={headerRef}>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -334,7 +316,6 @@ export default function ServicesSection() {
             Explore
           </motion.p>
 
-          {/* Heading with flanking lines */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
@@ -369,7 +350,6 @@ export default function ServicesSection() {
             />
           </motion.div>
 
-          {/* Animated gold underline */}
           <motion.div
             initial={{ width: 0 }}
             animate={headerInView ? { width: 80 } : {}}
@@ -392,49 +372,45 @@ export default function ServicesSection() {
           </motion.p>
         </div>
 
-        {/* Carousel track */}
-        <div
-          ref={trackRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth px-4 pb-8 pt-4"
-          style={{
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-          }}
-        >
-          {SERVICES.map((service, i) => (
-            <ServiceCard
-              key={service.number}
-              service={service}
-              index={i}
-              isActive={activeIndex === i}
-              onDotClick={scrollToCard}
-            />
-          ))}
+        {/* Infinite scrolling track */}
+        <div className="relative overflow-hidden">
+          <motion.div
+            ref={trackRef}
+            className="flex gap-6"
+            style={{ x }}
+          >
+            {Array.from({ length: CLONE_COUNT }, (_, copy) =>
+              SERVICES.map((service, i) => (
+                <ServiceCard
+                  key={`${service.number}-${copy}`}
+                  service={service}
+                  index={copy * SERVICES.length + i}
+                />
+              ))
+            ).flat()}
+          </motion.div>
         </div>
 
         {/* Controls */}
         <div className="flex items-center justify-center gap-8 mt-4">
           <CarouselArrow direction="left" onClick={goPrev} />
 
-          {/* Dots */}
           <div className="flex items-center gap-2" role="tablist" aria-label="Service indicators">
             {SERVICES.map((_, i) => (
               <button
                 key={i}
                 role="tab"
-                aria-selected={i === activeIndex}
+                aria-selected={i === focusedIndex}
                 aria-label={SERVICES[i].title}
                 onClick={() => scrollToCard(i)}
                 className="rounded-full border-none p-0 cursor-pointer transition-all duration-500"
                 style={{
-                  width: i === activeIndex ? 32 : 8,
+                  width: i === focusedIndex ? 32 : 8,
                   height: 8,
-                  background: i === activeIndex
+                  background: i === focusedIndex
                     ? 'linear-gradient(90deg, #D4A574, #A67C52)'
                     : 'rgba(237,231,217,0.18)',
-                  boxShadow: i === activeIndex ? '0 0 12px rgba(212,165,116,0.30)' : 'none',
+                  boxShadow: i === focusedIndex ? '0 0 12px rgba(212,165,116,0.30)' : 'none',
                 }}
               />
             ))}
@@ -443,8 +419,6 @@ export default function ServicesSection() {
           <CarouselArrow direction="right" onClick={goNext} />
         </div>
       </div>
-
-      {/* @keyframes moved to index.css — eliminates inline style node recreation */}
     </section>
   )
 }

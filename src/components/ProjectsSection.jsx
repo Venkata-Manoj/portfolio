@@ -676,21 +676,11 @@ export default function ProjectsSection() {
     (v) => String(Math.min(Math.floor(v * TOTAL), TOTAL - 1)).padStart(2, '0')
   )
 
-  // ── Heading state: visible → scrolled → scrolled-out ──
-  const headingState = useTransform(
-    scrollYProgress,
-    [0, 0.12, 0.35],
-    [0, 0.5, 1]
-  )
-  const headingScale = useTransform(
-    headingState,
-    [0, 0.5, 1],
-    [1, 0.92, 0.85]
-  )
+  // ── Heading: always visible, no fade-out ──
   const headingOpacity = useTransform(
     scrollYProgress,
-    [0, 0.08, 0.35, 0.9],
-    [0, 1, 1, 0]
+    [0, 0.08],
+    [0, 1]
   )
 
   // ── Scroll hint fades after first scroll ──
@@ -858,7 +848,7 @@ export default function ProjectsSection() {
         className="fixed top-0 left-0 right-0 z-50 text-center pointer-events-none pt-10 sm:pt-16"
       >
         <motion.div
-          style={{ scale: headingScale, opacity: headingOpacity }}
+          style={{ opacity: headingOpacity }}
           className="origin-center"
         >
           {/* Eyebrow */}
