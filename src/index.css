@@ -203,7 +203,7 @@ a:focus:not(:focus-visible) {
   animation: about-shimmer-streak 4s ease-in-out infinite;
 }
 
-/* ── ServicesSection ── */
+/* ── EducationSection ── */
 @keyframes orbFloatSlow {
   0%, 100% { transform: translate(0, 0); }
   50% { transform: translate(30px, -20px); }
