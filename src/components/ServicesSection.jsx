@@ -1,77 +1,62 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
-import { motion, useInView, useMotionValue, animate } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Bot, Code2, Cloud, LineChart, Shield } from 'lucide-react'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 
-const SERVICES = [
+const EDUCATION = [
   {
-    number: '01',
-    icon: Bot,
-    title: 'AI & ML Solutions',
-    description: 'Custom LLM integrations, RAG pipelines, and intelligent automation systems built for production-scale performance.',
+    id: 'btech',
+    title: "B.Tech CSE (AI & Data Science)",
+    institution: 'SIMATS Engineering / Saveetha University',
+    image: '/SIMATS.jpeg',
+    marks: '9.2 CGPA',
+    year: '2024 – 2028',
+    description:
+      "Pursuing a Bachelor's degree in Computer Science with a specialization in Artificial Intelligence & Data Science. Focused on machine learning, deep learning, and full-stack development.",
   },
   {
-    number: '02',
-    icon: Code2,
-    title: 'Full-Stack Development',
-    description: 'End-to-end web applications with React, Next.js, Node.js, and modern frameworks deployed on Vercel.',
-  },
-  {
-    number: '03',
-    icon: Cloud,
-    title: 'Cloud & DevOps',
-    description: 'CI/CD pipelines, Docker containerization, Firebase integration, and serverless architecture design.',
-  },
-  {
-    number: '04',
-    icon: LineChart,
-    title: 'Data Engineering',
-    description: 'Data pipelines, ETL processes, predictive modeling with XGBoost, and interactive data visualizations.',
-  },
-  {
-    number: '05',
-    icon: Shield,
-    title: 'AI Consulting',
-    description: 'Technical strategy for AI adoption, proof-of-concept development, and architecture review for AI-powered products.',
+    id: 'intermediate',
+    title: 'Class XII (MPC)',
+    institution: 'SR Junior College, Vijayawada',
+    image: '/SR.jpeg',
+    marks: '95.6%',
+    year: '2022 – 2024',
+    description:
+      'Completed intermediate education with a focus on Mathematics, Physics, and Chemistry. Achieved top percentile in the board examinations.',
   },
 ]
 
-const CLONE_COUNT = 3
-
-function ServiceCard({ service, index }) {
+function EducationCard({ item, index }) {
   const cardRef = useRef(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
-  const Icon = service.icon
 
   return (
     <motion.div
       ref={cardRef}
-      data-service-card
-      initial={{ opacity: 0, scale: 0.85, y: 30 }}
-      animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: (index % SERVICES.length) * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[380px]"
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.15,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="group relative rounded-3xl overflow-hidden"
       style={{
-        minHeight: 420,
         background: 'rgba(30,28,26,0.6)',
         backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid rgba(212,165,116,0.06)',
-        transition: 'border-color 0.5s ease, box-shadow 0.5s ease',
       }}
-      whileHover={{ y: -6 }}
     >
       {/* Gold top streak */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] rounded-full transition-all duration-500"
+        className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-4/5 rounded-full z-10 transition-all duration-500"
         style={{
-          width: '80%',
           background: 'linear-gradient(90deg, transparent, rgba(212,165,116,0.30), transparent)',
-          opacity: 1,
         }}
       />
 
-      {/* Shimmer sweep on hover */}
+      {/* Shimmer on hover */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
         style={{
           background: 'linear-gradient(90deg, transparent, rgba(212,165,116,0.04), transparent)',
           transform: 'skewX(-20deg)',
@@ -80,7 +65,7 @@ function ServiceCard({ service, index }) {
 
       {/* Watermark number */}
       <span
-        className="absolute top-[-0.05em] right-[0.05em] text-[8rem] font-black leading-none pointer-events-none select-none"
+        className="absolute top-[-0.05em] right-[0.05em] text-[7rem] font-black leading-none pointer-events-none select-none z-0"
         style={{
           background: 'linear-gradient(135deg, rgba(212,165,116,0.06), rgba(166,124,82,0.06))',
           WebkitBackgroundClip: 'text',
@@ -89,183 +74,68 @@ function ServiceCard({ service, index }) {
           letterSpacing: '-0.04em',
         }}
       >
-        {service.number}
+        {String(index + 1).padStart(2, '0')}
       </span>
 
-      {/* Content */}
-      <div className="relative z-10 p-9 pb-8 flex flex-col h-full max-sm:p-6 max-sm:pb-6">
-        <div
-          className="w-[68px] h-[68px] rounded-full flex items-center justify-center mb-6 transition-all duration-400 group-hover:scale-110 max-sm:w-[56px] max-sm:h-[56px] max-sm:mb-4"
-          style={{
-            background: 'linear-gradient(135deg, rgba(212,165,116,0.20), rgba(166,124,82,0.12))',
-            border: '1px solid rgba(212,165,116,0.10)',
-            backdropFilter: 'blur(4px)',
-            boxShadow: '0 0 20px rgba(212,165,116,0.06)',
-          }}
-        >
-          <Icon className="w-7 h-7 text-[#EDE7D9] max-sm:w-6 max-sm:h-6" />
-        </div>
-
-        <h3 className="text-[1.35rem] font-bold tracking-[0.02em] text-[#EDE7D9] mb-3 max-sm:text-[1.15rem]">
-          {service.title}
-        </h3>
-
-        <p
-          className="text-[0.92rem] font-light leading-[1.7] flex-1 max-sm:text-[0.85rem]"
-          style={{ color: 'rgba(237,231,217,0.45)' }}
-        >
-          {service.description}
-        </p>
+      {/* Image */}
+      <div className="relative h-[200px] overflow-hidden">
+        <img
+          src={item.image}
+          alt={item.institution}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+        {/* Image overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(12,12,12,0.7)] via-transparent to-transparent" />
+        {/* Year badge on image */}
+        <span className="absolute bottom-3 right-3 px-3 py-1 rounded-full text-[0.7rem] font-medium tracking-wider bg-[rgba(12,12,12,0.6)] backdrop-blur-sm border border-[rgba(212,165,116,0.1)] text-[rgba(212,165,116,0.7)]">
+          {item.year}
+        </span>
       </div>
 
+      {/* Content */}
+      <div className="relative z-10 p-6 sm:p-8">
+        <h3 className="text-lg sm:text-xl font-bold text-[#EDE7D9] mb-1 font-['Kanit'] leading-tight">
+          {item.title}
+        </h3>
+        <p className="text-sm text-[rgba(212,165,116,0.6)] mb-3 font-medium">
+          {item.institution}
+        </p>
+        <p className="text-[0.88rem] text-[rgba(237,231,217,0.45)] font-light leading-relaxed mb-4">
+          {item.description}
+        </p>
+        {/* Marks highlight */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(212,165,116,0.12)] bg-[rgba(212,165,116,0.04)]">
+          <span className="text-[0.65rem] uppercase tracking-[0.15em] text-[rgba(212,165,116,0.4)] font-medium">
+            Marks
+          </span>
+          <span className="text-sm font-bold text-[#D4A574]">{item.marks}</span>
+        </div>
+      </div>
+
+      {/* Inner shadow effect */}
       <div
         className="absolute inset-0 pointer-events-none rounded-3xl"
         style={{
-          boxShadow: 'inset 0 0 40px rgba(212,165,116,0.06), 0 0 40px rgba(212,165,116,0.12), 0 0 80px rgba(212,165,116,0.05)',
+          boxShadow:
+            'inset 0 0 40px rgba(212,165,116,0.06), 0 0 40px rgba(212,165,116,0.12), 0 0 80px rgba(212,165,116,0.05)',
         }}
       />
     </motion.div>
   )
 }
 
-function CarouselArrow({ direction, onClick }) {
-  const isLeft = direction === 'left'
-  const Icon = isLeft ? ChevronLeft : ChevronRight
-  return (
-    <button
-      onClick={onClick}
-      aria-label={isLeft ? 'Previous service' : 'Next service'}
-      className="w-11 h-11 max-sm:w-9 max-sm:h-9 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer border border-[rgba(212,165,116,0.12)] bg-[rgba(30,28,26,0.5)] backdrop-blur-md text-[rgba(237,231,217,0.65)] hover:bg-[rgba(212,165,116,0.15)] hover:border-[rgba(212,165,116,0.35)] hover:text-[#EDE7D9] hover:scale-110 hover:shadow-[0_0_25px_rgba(212,165,116,0.15)] active:scale-90"
-    >
-      <Icon size={18} className="max-sm:w-4 max-sm:h-4" />
-    </button>
-  )
-}
-
-export default function ServicesSection() {
+export default function EducationSection() {
   const sectionRef = useRef(null)
-  const trackRef = useRef(null)
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
-  const sectionInView = useInView(sectionRef, { margin: '-100px' })
 
-  const [focusedIndex, setFocusedIndex] = useState(0)
-  const [isHovering, setIsHovering] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [stepWidth, setStepWidth] = useState(0)
-  const [oneSetWidth, setOneSetWidth] = useState(0)
-
-  const x = useMotionValue(0)
-  const animRef = useRef(null)
-  const startAnimFn = useRef(() => {})
-
-  // Measure card dimensions once mounted
-  useEffect(() => {
-    const track = trackRef.current
-    if (!track || !track.children[0]) return
-    const cardW = track.children[0].offsetWidth
-    const gap = 24
-    const step = cardW + gap
-    setStepWidth(step)
-    setOneSetWidth(step * SERVICES.length)
-  }, [])
-
-  // Keep animation function in ref to avoid circular dependency
-  useEffect(() => {
-    startAnimFn.current = () => {
-      if (!oneSetWidth || !sectionInView) return
-
-      const currentX = x.get()
-      const targetX = currentX - oneSetWidth
-
-      if (animRef.current) animRef.current.stop()
-
-      animRef.current = animate(x, [currentX, targetX], {
-        duration: 40,
-        ease: 'linear',
-        onComplete: () => {
-          x.set(x.get() + oneSetWidth)
-          if (startAnimFn.current) startAnimFn.current()
-        },
-      })
-    }
-  }, [oneSetWidth, sectionInView, x])
-
-  // Start/stop animation based on playing state
-  useEffect(() => {
-    if (isPlaying && sectionInView && oneSetWidth > 0) {
-      startAnimFn.current()
-    } else {
-      if (animRef.current) animRef.current.stop()
-    }
-    return () => {
-      if (animRef.current) animRef.current.stop()
-    }
-  }, [isPlaying, sectionInView, oneSetWidth])
-
-  // Pause on hover
-  const shouldPause = isHovering || !isPlaying
-  useEffect(() => {
-    if (shouldPause && animRef.current) animRef.current.pause()
-    if (!shouldPause && animRef.current) animRef.current.play()
-  }, [shouldPause])
-
-  const scrollToCard = useCallback(
-    (index) => {
-      if (!stepWidth) return
-      setIsPlaying(false)
-      setFocusedIndex(index)
-
-      const targetX = -(index * stepWidth)
-      if (animRef.current) animRef.current.stop()
-
-      animate(x, targetX, {
-        type: 'spring',
-        stiffness: 150,
-        damping: 25,
-        onComplete: () => {
-          setTimeout(() => setIsPlaying(true), 2000)
-        },
-      })
-    },
-    [stepWidth, x]
-  )
-
-  const goPrev = useCallback(() => {
-    const prev = (focusedIndex - 1 + SERVICES.length) % SERVICES.length
-    scrollToCard(prev)
-  }, [focusedIndex, scrollToCard])
-
-  const goNext = useCallback(() => {
-    const next = (focusedIndex + 1) % SERVICES.length
-    scrollToCard(next)
-  }, [focusedIndex, scrollToCard])
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!sectionInView) return
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault()
-        goPrev()
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault()
-        goNext()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [goPrev, goNext, sectionInView])
 
   return (
     <section
-      id="services"
+      id="education"
       ref={sectionRef}
       className="relative w-full overflow-hidden min-h-screen px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onTouchStart={() => setIsHovering(true)}
-      onTouchEnd={() => setTimeout(() => setIsHovering(false), 2000)}
     >
       {/* Ambient gold orbs */}
       <div
@@ -313,7 +183,7 @@ export default function ServicesSection() {
             className="text-center text-[0.75rem] font-medium uppercase tracking-[0.3em] mb-1"
             style={{ color: 'rgba(212,165,116,0.50)' }}
           >
-            Explore
+            My Journey
           </motion.p>
 
           <motion.div
@@ -339,7 +209,7 @@ export default function ServicesSection() {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              SERVICES
+              EDUCATION
             </h2>
             <span
               className="flex-0 h-[2px] rounded-full"
@@ -368,55 +238,15 @@ export default function ServicesSection() {
             className="text-center text-[0.90rem] font-light tracking-[0.15em] mb-12 max-sm:mb-8"
             style={{ color: 'rgba(237,231,217,0.40)' }}
           >
-            What I bring to the table
+            Academic background & achievements
           </motion.p>
         </div>
 
-        {/* Infinite scrolling track */}
-        <div className="relative overflow-hidden">
-          <motion.div
-            ref={trackRef}
-            className="flex gap-6"
-            style={{ x }}
-          >
-            {Array.from({ length: CLONE_COUNT }, (_, copy) =>
-              SERVICES.map((service, i) => (
-                <ServiceCard
-                  key={`${service.number}-${copy}`}
-                  service={service}
-                  index={copy * SERVICES.length + i}
-                />
-              ))
-            ).flat()}
-          </motion.div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-8 mt-4">
-          <CarouselArrow direction="left" onClick={goPrev} />
-
-          <div className="flex items-center gap-2" role="tablist" aria-label="Service indicators">
-            {SERVICES.map((_, i) => (
-              <button
-                key={i}
-                role="tab"
-                aria-selected={i === focusedIndex}
-                aria-label={SERVICES[i].title}
-                onClick={() => scrollToCard(i)}
-                className="rounded-full border-none p-0 cursor-pointer transition-all duration-500"
-                style={{
-                  width: i === focusedIndex ? 32 : 8,
-                  height: 8,
-                  background: i === focusedIndex
-                    ? 'linear-gradient(90deg, #D4A574, #A67C52)'
-                    : 'rgba(237,231,217,0.18)',
-                  boxShadow: i === focusedIndex ? '0 0 12px rgba(212,165,116,0.30)' : 'none',
-                }}
-              />
-            ))}
-          </div>
-
-          <CarouselArrow direction="right" onClick={goNext} />
+        {/* Education cards grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {EDUCATION.map((item, index) => (
+            <EducationCard key={item.id} item={item} index={index} />
+          ))}
         </div>
       </div>
     </section>

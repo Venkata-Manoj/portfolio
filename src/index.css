@@ -5,7 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: 'Kanit', sans-serif;
+  --font-sans: 'Inter', 'Kanit', sans-serif;
+  --font-heading: 'Kanit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -84,14 +86,15 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Inter', 'Kanit', sans-serif;
   }
 }
 
 html,
 body,
 #root {
-  background: #0C0C0C;
+  background: linear-gradient(180deg, #0a0a0f 0%, #020203 100%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -134,6 +137,22 @@ body {
 img {
   -webkit-user-drag: none;
   user-select: none;
+}
+
+/* ── Global focus-visible ring ── */
+:focus-visible {
+  outline: 2px solid #D4A574;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Cursor utilities ── */
+.clickable {
+  cursor: pointer;
 }
 
 /* ============================================
@@ -197,7 +216,7 @@ img {
   0%, 100% { transform: translate(0, 0); }
   50% { transform: translate(15px, 25px); }
 }
-#services .flex::-webkit-scrollbar { display: none; }
+/* #services scrollbar hidden — removed, infinite flow uses JS transform */
 
 /* ── ProjectsSection ── */
 @keyframes projects-eyebrowFadeIn {
@@ -261,6 +280,24 @@ img {
   66%  { transform: translate(70px,-110px) scale(0.90); }
 }
 
+/* ── HeroSection ── */
+@keyframes hero-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.08); }
+  66% { transform: translate(-30px, 20px) scale(0.92); }
+}
+@keyframes hero-orb-float-delayed {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-40px, 40px) scale(1.12); }
+  66% { transform: translate(30px, -25px) scale(0.90); }
+}
+
+/* ── ContactSection ── */
+@keyframes contact-orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, -30px) scale(1.05); }
+}
+
 /* Animation classes */
 .animate-projects-eyebrow-fade-in {
   opacity: 0;
@@ -309,6 +346,22 @@ img {
 }
 .animate-projects-float-b {
   animation: projects-floatB 45s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── HeroSection animation classes ── */
+.animate-hero-orb-float {
+  animation: hero-orb-float 20s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-hero-orb-float-delayed {
+  animation: hero-orb-float-delayed 25s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── ContactSection animation classes ── */
+.animate-contact-orb-float {
+  animation: contact-orb-float 18s ease-in-out infinite;
   will-change: transform;
 }
 

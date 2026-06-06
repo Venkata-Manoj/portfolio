@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import AboutSection from './components/AboutSection'
-import ServicesSection from './components/ServicesSection'
+import EducationSection from './components/ServicesSection'
 import ProjectsSection from './components/ProjectsSection'
 import ContactSection from './components/ContactSection'
 import PamWidget from './components/PamWidget'
@@ -15,11 +15,19 @@ const App = () => {
   const handleStartTour = () => setTourTrigger(t => t + 1)
 
   return (
-    <main className="relative w-full" style={{ overflowX: 'clip', background: '#0C0C0C' }}>
+    <main className="relative w-full" style={{ overflowX: 'clip', background: 'transparent' }}>
+      {/* Skip to content — first focusable element for keyboard users */}
+      <a
+        href="#hero"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-6 focus:py-3 focus:bg-[#D4A574] focus:text-[#0C0C0C] focus:font-bold focus:text-sm focus:rounded-full focus:shadow-[0_0_30px_rgba(212,165,116,0.3)] focus:outline-none"
+        tabIndex={0}
+      >
+        Skip to content
+      </a>
       <Navbar onStartTour={handleStartTour} />
       <HeroSection />
       <AboutSection />
-      <ServicesSection />
+      <EducationSection />
       <ProjectsSection />
       <ContactSection />
       <PamWidget tourTrigger={tourTrigger} />
