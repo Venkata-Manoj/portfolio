@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import AboutSection from './components/AboutSection'
 import EducationSection from './components/EducationSection'
+import CertificatesSection from './components/CertificatesSection'
 import ProjectsSection from './components/ProjectsSection'
 import ContactSection from './components/ContactSection'
 import PamWidget from './components/PamWidget'
@@ -28,6 +29,7 @@ const App = () => {
       <HeroSection />
       <AboutSection />
       <EducationSection />
+      <CertificatesSection />
       <ProjectsSection />
       <ContactSection />
       <PamWidget tourTrigger={tourTrigger} />
