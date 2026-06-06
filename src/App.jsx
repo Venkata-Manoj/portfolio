@@ -29,8 +29,8 @@ const App = () => {
       <HeroSection />
       <AboutSection />
       <EducationSection />
-      <CertificatesSection />
       <ProjectsSection />
+      <CertificatesSection />
       <ContactSection />
       <PamWidget tourTrigger={tourTrigger} />
     </main>
