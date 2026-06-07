@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
 /* =====================================================================
    DATA — 13 certificates (gold/bronze palette accents)
    Images live in /public/certificates/ — Vite serves them at root.
+   On Vercel, image src/srcSet routes through /_vercel/image for
+   auto-WebP + responsive sizes (see optimizeImage helper below).
    ===================================================================== */
 const CERTS = [
   {
@@ -112,6 +114,20 @@ const MIN_SIDE_PADDING_PX = 24
 const TOTAL = CERTS.length
 
 /* =====================================================================
+   IMAGE OPTIMIZATION — Vercel Image Optimization
+   On Vercel deployments, routes /certificates/foo.png through
+   /_vercel/image?url=...&w=...&q=...&f=webp for auto-WebP + resize.
+   Off-Vercel (local dev, GitHub Pages, etc.) returns the original path.
+   ===================================================================== */
+const IS_VERCEL = typeof window !== 'undefined'
+  && /vercel\.app$|vercel\.com$/.test(window.location.hostname)
+
+function optimizeImage(path, width, quality = 75) {
+  if (!IS_VERCEL) return path
+  return `/_vercel/image?url=${encodeURIComponent(path)}&w=${width}&q=${quality}`
+}
+
+/* =====================================================================
    CERTIFICATE CARD
    ===================================================================== */
 function CertificateCard({ cert, index, isVisible, registerFirstRef }) {
@@ -212,7 +228,13 @@ function CertificateCard({ cert, index, isVisible, registerFirstRef }) {
         }}
       >
         <img
-          src={cert.image}
+          src={optimizeImage(cert.image, 640)}
+          srcSet={`
+            ${optimizeImage(cert.image, 320)} 320w,
+            ${optimizeImage(cert.image, 640)} 640w,
+            ${optimizeImage(cert.image, 960)} 960w
+          `}
+          sizes="(max-width: 768px) 85vw, 380px"
           alt={`${cert.title} certificate`}
           loading="lazy"
           decoding="async"
@@ -604,7 +626,7 @@ export default function CertificatesSection() {
             className="flex items-center justify-center gap-6 mb-1"
           >
             <span
-              className="flex-0 h-[2px] rounded-full"
+              className="flex-none h-[2px] rounded-full"
               style={{
                 width: 140,
                 background: 'linear-gradient(90deg, transparent, #D4A574, #A67C52)',
@@ -623,7 +645,7 @@ export default function CertificatesSection() {
               CERTIFICATES
             </h2>
             <span
-              className="flex-0 h-[2px] rounded-full"
+              className="flex-none h-[2px] rounded-full"
               style={{
                 width: 140,
                 background: 'linear-gradient(90deg, #A67C52, #D4A574, transparent)',

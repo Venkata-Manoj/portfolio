@@ -127,6 +127,11 @@ export default function AboutSection() {
                   <img
                     src="/me.jpeg"
                     alt="Ballani Venkata Manoj"
+                    width="200"
+                    height="200"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 </div>

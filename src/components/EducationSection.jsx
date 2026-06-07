@@ -82,8 +82,11 @@ function EducationCard({ item, index }) {
         <img
           src={item.image}
           alt={item.institution}
+          width="400"
+          height="200"
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
+          decoding="async"
         />
         {/* Image overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(12,12,12,0.7)] via-transparent to-transparent" />
@@ -126,7 +129,6 @@ function EducationCard({ item, index }) {
 }
 
 export default function EducationSection() {
-  const sectionRef = useRef(null)
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
 
@@ -134,7 +136,6 @@ export default function EducationSection() {
   return (
     <section
       id="education"
-      ref={sectionRef}
       className="relative w-full overflow-hidden min-h-screen px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
     >
       {/* Ambient gold orbs */}
@@ -193,7 +194,7 @@ export default function EducationSection() {
             className="flex items-center justify-center gap-6 mb-1"
           >
             <span
-              className="flex-0 h-[2px] rounded-full"
+              className="flex-none h-[2px] rounded-full"
               style={{
                 width: 140,
                 background: 'linear-gradient(90deg, transparent, #D4A574, #A67C52)',
@@ -212,7 +213,7 @@ export default function EducationSection() {
               EDUCATION
             </h2>
             <span
-              className="flex-0 h-[2px] rounded-full"
+              className="flex-none h-[2px] rounded-full"
               style={{
                 width: 140,
                 background: 'linear-gradient(90deg, #A67C52, #D4A574, transparent)',

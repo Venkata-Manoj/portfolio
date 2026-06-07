@@ -873,6 +873,7 @@ export default function ProjectsSection() {
         <div className="flex items-center justify-center gap-6 mt-8 sm:mt-10">
           {/* Left arrow */}
           <button
+            type="button"
             onClick={goPrev}
             className="flex items-center justify-center w-10 h-10 rounded-full border border-[rgba(212,165,116,0.20)] text-[rgba(212,165,116,0.60)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.40)] hover:text-[#D4A574] active:scale-90"
             aria-label="Previous project"
@@ -884,6 +885,7 @@ export default function ProjectsSection() {
           <div className="flex items-center gap-2" role="tablist" aria-label="Project navigation">
             {ALL_PROJECTS.map((_, i) => (
               <button
+                type="button"
                 key={i}
                 onClick={() => goToCard(i)}
                 role="tab"
@@ -900,6 +902,7 @@ export default function ProjectsSection() {
 
           {/* Right arrow */}
           <button
+            type="button"
             onClick={goNext}
             className="flex items-center justify-center w-10 h-10 rounded-full border border-[rgba(212,165,116,0.20)] text-[rgba(212,165,116,0.60)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.40)] hover:text-[#D4A574] active:scale-90"
             aria-label="Next project"
