@@ -7,10 +7,19 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
 *.local
+
+# Env files (Vite convention: VITE_* vars are public by design,
+# but still keep all env files out of git)
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
