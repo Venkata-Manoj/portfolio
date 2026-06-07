@@ -780,7 +780,7 @@ export default function ProjectsSection() {
 
           {/* Main title — "PROJECTS" with gold gradient */}
           <h1
-            className="gradient-title text-[clamp(4rem,12vw,10rem)] font-black leading-none tracking-[0.04em]"
+            className="gradient-title text-[clamp(3rem,9vw,7.5rem)] font-black leading-none tracking-[0.04em]"
             style={{
               background:
                 'linear-gradient(135deg, #D4A574, #C4956A, #E8C88A, #A67C52, #C4956A, #D4A574, #B8895E, #E8C88A, #D4A574)',

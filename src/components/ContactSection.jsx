@@ -62,7 +62,7 @@ export default function ContactSection() {
             transition={{ duration: 0.6 }}
             className="font-['Kanit'] font-black uppercase leading-none tracking-tight inline-block"
             style={{
-              fontSize: 'clamp(3rem, 10vw, 100px)',
+              fontSize: 'clamp(3rem, 9vw, 7.5rem)',
               background: 'linear-gradient(135deg, #D4A574, #A67C52)',
               WebkitBackgroundClip: 'text',
               backgroundClip: 'text',

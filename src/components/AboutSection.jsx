@@ -80,7 +80,7 @@ export default function AboutSection() {
             animate={headingInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
             className="font-['Kanit'] font-black uppercase leading-none tracking-tighter text-[#EDE7D9] transition-transform duration-500 group-hover/heading:scale-[1.01]"
-            style={{ fontSize: 'clamp(3rem, 14vw, 150px)' }}
+            style={{ fontSize: 'clamp(3rem, 9vw, 7.5rem)' }}
           >
             About{' '}
             <span className="bg-gradient-to-r from-[#D4A574] to-[#A67C52] bg-clip-text text-transparent transition-[filter] duration-300 hover:brightness-110">

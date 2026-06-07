@@ -421,7 +421,10 @@ export default function CertificatesSection() {
     if (autoplayTimerRef.current) return
     autoplayTimerRef.current = setInterval(() => {
       const idx = currentIndexRef.current
-      scrollToIndex(idx + 1)
+      // Autoplay runs left→right: cards enter from the left edge and exit to the right.
+      // `scrollToIndex` handles negative wrap via `((idx % TOTAL) + TOTAL) % TOTAL`,
+      // so `idx - 1` is safe. (User-facing `next`/`prev` buttons keep their +1/-1 semantics.)
+      scrollToIndex(idx - 1)
     }, AUTOPLAY_INTERVAL_MS)
   }, [prefersReducedMotion, scrollToIndex])
 
@@ -635,7 +638,7 @@ export default function CertificatesSection() {
             <h2
               className="font-['Kanit'] font-black uppercase leading-none tracking-[0.12em] whitespace-nowrap"
               style={{
-                fontSize: 'clamp(2.25rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(3rem, 9vw, 7.5rem)',
                 background: 'linear-gradient(135deg, #D4A574, #A67C52)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',

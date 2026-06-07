@@ -203,7 +203,7 @@ export default function EducationSection() {
             <h2
               className="font-['Kanit'] font-black uppercase leading-none tracking-[0.12em] whitespace-nowrap"
               style={{
-                fontSize: 'clamp(2.25rem, 6vw, 4.5rem)',
+                fontSize: 'clamp(3rem, 9vw, 7.5rem)',
                 background: 'linear-gradient(135deg, #D4A574, #A67C52)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
