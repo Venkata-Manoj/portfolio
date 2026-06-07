@@ -6,44 +6,51 @@ const TRACKS = [
   {
     id: 'hero', sectionId: 'hero', label: 'Welcome', duration: 17,
     subtitles: [
-      { start: 0, end: 3.5, text: "Hello there! I am PAM, Manoj's Personal Assistant." },
-      { start: 3.5, end: 7, text: "Since he is currently busy coding, I will be your guide today." },
-      { start: 7, end: 10, text: "Let's start with a quick overview of Manoj's profile." },
-      { start: 10, end: 13, text: "He is a B.Tech CSE student specializing in AI and Data Science." },
-      { start: 13, end: 17, text: "Scrolling down to show you his background and core skills." },
+      { start: 0, end: 4, text: "Hello! I'm PAM, Manoj's Personal Assistant." },
+      { start: 4, end: 8, text: "While he's busy coding, I'll be your guide today." },
+      { start: 8, end: 12, text: "Manoj is an AI Engineer, Data Scientist, and Full-Stack Developer building production-grade systems." },
+      { start: 12, end: 17, text: "Let's begin." },
     ],
   },
   {
     id: 'about', sectionId: 'about', label: 'About', duration: 11,
     subtitles: [
-      { start: 0, end: 4, text: "Here you can see Manoj's educational background at SIMATS Engineering, class of 2028." },
-      { start: 4, end: 7.5, text: "He has built a strong foundation in Python, JavaScript, machine learning, and generative AI." },
-      { start: 7.5, end: 11, text: "Next up, let's explore his areas of expertise." },
+      { start: 0, end: 4, text: "Manoj is a B.Tech student in AI and Data Science at SIMATS Engineering, graduating 2028." },
+      { start: 4, end: 8, text: "His core skills span Python, TypeScript, machine learning, and generative AI." },
+      { start: 8, end: 11, text: "Full-stack development across 33 technologies." },
     ],
   },
   {
-    id: 'expertise', sectionId: 'expertise', label: 'Expertise', duration: 10,
+    id: 'education', sectionId: 'education', label: 'Education', duration: 10,
     subtitles: [
-      { start: 0, end: 3.5, text: "Manoj specializes in five key areas of AI and software engineering." },
-      { start: 3.5, end: 7, text: "Generative AI, Machine Learning, Full Stack Development, RAG pipelines, and Reinforcement Learning." },
-      { start: 7, end: 10, text: "Now let's look at some of his featured projects." },
+      { start: 0, end: 4, text: "His academic background includes a B.Tech with 9.2 CGPA." },
+      { start: 4, end: 8, text: "Class XII at SR Junior College with 95.6 percent." },
+      { start: 8, end: 10, text: "Both focused on mathematics, physics, and computer science." },
     ],
   },
   {
     id: 'projects', sectionId: 'projects', label: 'Projects', duration: 14,
     subtitles: [
-      { start: 0, end: 4, text: "This is Manoj's project bento grid." },
-      { start: 4, end: 8, text: "VideoReverse, AI-News-Bot, WhatIF, Capstone-Forage, and more." },
-      { start: 8, end: 12, text: "Hover over any card for details or click to visit live deployments." },
-      { start: 12, end: 14, text: "Finally, let's head to the Contact section." },
+      { start: 0, end: 4, text: "This showcase features six projects." },
+      { start: 4, end: 8, text: "VideoReverse, AI-News-Bot, WhatIF, Capstone-Forage, Resilience-Ops-Env." },
+      { start: 8, end: 11, text: "Hover any card for details, or click to visit live demos and source code." },
+      { start: 11, end: 14, text: "And a link to all GitHub repositories." },
+    ],
+  },
+  {
+    id: 'certificates', sectionId: 'certificates', label: 'Certificates', duration: 12,
+    subtitles: [
+      { start: 0, end: 4, text: "Here are the certificates covering AI Fundamentals, LLMs, and RAG pipelines." },
+      { start: 4, end: 8, text: "Embeddings, APIs, and prompt engineering from providers like NVIDIA and KodeKloud." },
+      { start: 8, end: 12, text: "Swipe through the carousel or click any card to view the full certificate." },
     ],
   },
   {
     id: 'contact', sectionId: 'contact', label: 'Contact', duration: 12,
     subtitles: [
-      { start: 0, end: 3.5, text: "We have reached the end of the tour!" },
-      { start: 3.5, end: 7.5, text: "Connect with Manoj on LinkedIn, GitHub, or send him an email." },
-      { start: 7.5, end: 12, text: "Thank you for visiting! Feel free to explore at your own pace." },
+      { start: 0, end: 4, text: "Reach Manoj through the orbit portal." },
+      { start: 4, end: 8, text: "X, Instagram, email, LinkedIn, or GitHub." },
+      { start: 8, end: 12, text: "Or send a message directly via the form. Thank you for visiting!" },
     ],
   },
 ]
