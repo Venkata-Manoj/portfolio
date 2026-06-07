@@ -1,34 +1,28 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Mail, Linkedin, Github, Send } from 'lucide-react'
+import { useForm } from '@formspree/react'
 
 export default function ContactSection() {
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
 
-  const [formState, setFormState] = useState({ name: '', email: '', message: '' })
-  const [feedback, setFeedback] = useState({ show: false, message: '', type: '' })
+  const [state, handleSubmit] = useForm('xaqzelqw')
 
-  const handleChange = (e) => {
-    setFormState({ ...formState, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault()
-    if (!formState.name || !formState.email || !formState.message) {
-      setFeedback({ show: true, message: 'Please fill in all fields.', type: 'error' })
+    const formData = new FormData(e.target)
+    const name = formData.get('name')
+    const email = formData.get('email')
+    const message = formData.get('message')
+
+    if (!name || !email || !message) {
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
-      setFeedback({ show: true, message: 'Please enter a valid email address.', type: 'error' })
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return
     }
-    setFeedback({
-      show: true,
-      message: `Thanks, ${formState.name}! Your message has been sent. I'll respond within 24 hours.`,
-      type: 'success',
-    })
-    setFormState({ name: '', email: '', message: '' })
+    handleSubmit(formData)
   }
 
   return (
@@ -185,11 +179,11 @@ export default function ContactSection() {
               {/* Form header */}
               <h3 className="text-xl font-['Kanit'] font-bold text-white mb-2">Send a Message</h3>
               <p className="text-sm text-[rgba(212,165,116,0.5)] mb-8 font-light">
-                Fill in the details below and I'll get back to you within 24 hours.
+                Fill in the details below and I'll get back to you within 24-48 hours.
               </p>
 
               {/* Form fields */}
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6">
                 {/* Name field */}
                 <div>
                   <label className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
@@ -198,9 +192,8 @@ export default function ContactSection() {
                   <input
                     type="text"
                     name="name"
-                    value={formState.name}
-                    onChange={handleChange}
                     placeholder="Your name"
+                    required
                     className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
                   />
                 </div>
@@ -213,9 +206,8 @@ export default function ContactSection() {
                   <input
                     type="email"
                     name="email"
-                    value={formState.email}
-                    onChange={handleChange}
                     placeholder="your@email.com"
+                    required
                     className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
                   />
                 </div>
@@ -227,10 +219,9 @@ export default function ContactSection() {
                   </label>
                   <textarea
                     name="message"
-                    value={formState.message}
-                    onChange={handleChange}
                     placeholder="Your message..."
                     rows={5}
+                    required
                     className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all resize-none"
                   />
                 </div>
@@ -238,23 +229,23 @@ export default function ContactSection() {
                 {/* Submit button */}
                 <button
                   type="submit"
-                  className="group w-full py-3 rounded-xl font-semibold text-[#0C0C0C] animate-contact-gold-sweep bg-[linear-gradient(135deg,#D4A574,#C4956A,#D4A574,#A67C52,#D4A574)] flex items-center justify-center gap-2 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgba(212,165,116,0.25)]"
+                  disabled={state.submitting}
+                  className="group w-full py-3 rounded-xl font-semibold text-[#0C0C0C] animate-contact-gold-sweep bg-[linear-gradient(135deg,#D4A574,#C4956A,#D4A574,#A67C52,#D4A574)] flex items-center justify-center gap-2 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgba(212,165,116,0.25)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                  Send Message
+                  {state.submitting ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
 
               {/* Feedback message (success or error) */}
-              {feedback.show && (
-                <div
-                  className={`mt-4 px-4 py-3 rounded-xl text-sm ${
-                    feedback.type === 'error'
-                      ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                      : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                  }`}
-                >
-                  {feedback.message}
+              {state.succeeded && (
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  Thanks! Your message has been sent. I'll respond within 24-48 hours.
+                </div>
+              )}
+              {state.errors && (
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400">
+                  {state.errors.map((err, i) => <p key={i}>{err.message}</p>)}
                 </div>
               )}
             </div>

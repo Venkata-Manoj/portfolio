@@ -6,51 +6,50 @@ const TRACKS = [
   {
     id: 'hero', sectionId: 'hero', label: 'Welcome', duration: 17,
     subtitles: [
-      { start: 0, end: 4, text: "Hello! I'm PAM, Manoj's Personal Assistant." },
-      { start: 4, end: 8, text: "While he's busy coding, I'll be your guide today." },
-      { start: 8, end: 12, text: "Manoj is an AI Engineer, Data Scientist, and Full-Stack Developer building production-grade systems." },
-      { start: 12, end: 17, text: "Let's begin." },
+      { start: 0, end: 4.5, text: "Hello! I'm PAM, Manoj's Personal Assistant." },
+      { start: 4.5, end: 9, text: "While he's busy coding, I'll be your guide today." },
+      { start: 9, end: 14, text: "Manoj is an AI Engineer, Data Scientist, and Full-Stack Developer building production-grade systems." },
+      { start: 14, end: 17, text: "Let's begin." },
     ],
   },
   {
     id: 'about', sectionId: 'about', label: 'About', duration: 11,
     subtitles: [
-      { start: 0, end: 4, text: "Manoj is a B.Tech student in AI and Data Science at SIMATS Engineering, graduating 2028." },
-      { start: 4, end: 8, text: "His core skills span Python, TypeScript, machine learning, and generative AI." },
-      { start: 8, end: 11, text: "Full-stack development across 33 technologies." },
+      { start: 0, end: 5, text: "Manoj is a B.Tech student in AI and Data Science at SIMATS Engineering, graduating 2028." },
+      { start: 5, end: 11, text: "His core skills span Python, TypeScript, machine learning, generative AI, and full-stack development across 33 technologies." },
     ],
   },
   {
     id: 'education', sectionId: 'education', label: 'Education', duration: 10,
     subtitles: [
       { start: 0, end: 4, text: "His academic background includes a B.Tech with 9.2 CGPA." },
-      { start: 4, end: 8, text: "Class XII at SR Junior College with 95.6 percent." },
-      { start: 8, end: 10, text: "Both focused on mathematics, physics, and computer science." },
+      { start: 4, end: 8, text: "And Class XII at SR Junior College with 95.6 percent." },
+      { start: 8, end: 10, text: "Both focused on mathematics, physics, and computer science foundations." },
     ],
   },
   {
     id: 'projects', sectionId: 'projects', label: 'Projects', duration: 14,
     subtitles: [
       { start: 0, end: 4, text: "This showcase features six projects." },
-      { start: 4, end: 8, text: "VideoReverse, AI-News-Bot, WhatIF, Capstone-Forage, Resilience-Ops-Env." },
-      { start: 8, end: 11, text: "Hover any card for details, or click to visit live demos and source code." },
-      { start: 11, end: 14, text: "And a link to all GitHub repositories." },
+      { start: 4, end: 9, text: "VideoReverse for AI video prompting, AI-News-Bot with a six-model LLM fallback chain." },
+      { start: 9, end: 12, text: "WhatIF for UI component analysis, Capstone-Forage for RAG-powered report generation." },
+      { start: 12, end: 14, text: "Resilience-Ops-Env for reinforcement learning, plus a link to all GitHub repositories. Hover any card for details or click to visit live demos." },
     ],
   },
   {
     id: 'certificates', sectionId: 'certificates', label: 'Certificates', duration: 12,
     subtitles: [
       { start: 0, end: 4, text: "Here are the certificates covering AI Fundamentals, LLMs, and RAG pipelines." },
-      { start: 4, end: 8, text: "Embeddings, APIs, and prompt engineering from providers like NVIDIA and KodeKloud." },
-      { start: 8, end: 12, text: "Swipe through the carousel or click any card to view the full certificate." },
+      { start: 4, end: 8.5, text: "Embeddings, APIs, and prompt engineering from providers like NVIDIA, KodeKloud, and Jio Institute." },
+      { start: 8.5, end: 12, text: "Swipe through the carousel or click any card to view the full certificate." },
     ],
   },
   {
     id: 'contact', sectionId: 'contact', label: 'Contact', duration: 12,
     subtitles: [
-      { start: 0, end: 4, text: "Reach Manoj through the orbit portal." },
-      { start: 4, end: 8, text: "X, Instagram, email, LinkedIn, or GitHub." },
-      { start: 8, end: 12, text: "Or send a message directly via the form. Thank you for visiting!" },
+      { start: 0, end: 4, text: "Reach Manoj through the orbit portal — X, Instagram, email, LinkedIn, or GitHub." },
+      { start: 4, end: 8, text: "Or send a message directly via the form." },
+      { start: 8, end: 12, text: "Thank you for visiting. Feel free to explore the rest of the site at your own pace." },
     ],
   },
 ]
@@ -93,26 +92,10 @@ export default function PamWidget({ tourTrigger }) {
   const [currentTime, setCurrentTime] = useState(0)
   const [showOverride, setShowOverride] = useState(false)
   const lastAutoScrollRef = useRef(0)
+  const audioRef = useRef(null)
+  const isSeekingRef = useRef(false)
 
   const currentTrack = TRACKS[currentTrackIndex]
-
-  const activeSubtitle = currentTrack?.subtitles.find(
-    s => currentTime >= s.start && currentTime < s.end
-  )
-
-  const startTour = useCallback(() => {
-    setPamState('playing')
-    setCurrentTrackIndex(0)
-    setCurrentTime(0)
-    setShowOverride(false)
-  }, [])
-
-  const closePam = useCallback(() => {
-    setPamState('idle')
-    setCurrentTrackIndex(0)
-    setCurrentTime(0)
-    setShowOverride(false)
-  }, [])
 
   const autoScrollToSection = useCallback((sectionId) => {
     lastAutoScrollRef.current = Date.now()
@@ -130,6 +113,93 @@ export default function PamWidget({ tourTrigger }) {
       setPamState('complete')
     }
   }, [currentTrackIndex, autoScrollToSection])
+
+  const startTour = useCallback(() => {
+    setPamState('playing')
+    setCurrentTrackIndex(0)
+    setCurrentTime(0)
+    setShowOverride(false)
+  }, [])
+
+  const closePam = useCallback(() => {
+    setPamState('idle')
+    setCurrentTrackIndex(0)
+    setCurrentTime(0)
+    setShowOverride(false)
+  }, [])
+
+  const resumeTour = () => {
+    setShowOverride(false)
+    setPamState('playing')
+    autoScrollToSection(currentTrack.sectionId)
+  }
+
+  const activeSubtitle = currentTrack?.subtitles.find(
+    s => currentTime >= s.start && currentTime < s.end
+  )
+
+  const trackProgress = currentTrack
+    ? ((currentTime / currentTrack.duration) * 100).toFixed(0)
+    : 0
+
+  useEffect(() => {
+    if (!audioRef.current) return
+    const audio = audioRef.current
+    audio.src = `/audio/${currentTrack.id}.mp3`
+    audio.currentTime = 0
+    audio.preload = 'auto'
+    
+    const handleCanPlay = () => {
+      if (pamState === 'playing') {
+        audio.play().catch(() => {})
+      }
+    }
+    
+    const handleError = () => {
+      console.error(`Failed to load audio: /audio/${currentTrack.id}.mp3`)
+    }
+    
+    const handleEnded = () => {
+      handleTrackEnd()
+    }
+    
+    audio.addEventListener('canplay', handleCanPlay)
+    audio.addEventListener('error', handleError)
+    audio.addEventListener('ended', handleEnded)
+    
+    if (pamState === 'playing') {
+      audio.play().catch(() => {})
+    } else {
+      audio.pause()
+    }
+    
+    return () => {
+      audio.removeEventListener('canplay', handleCanPlay)
+      audio.removeEventListener('error', handleError)
+      audio.removeEventListener('ended', handleEnded)
+      audio.pause()
+      audio.src = ''
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrackIndex, currentTrack.id, handleTrackEnd])
+
+  useEffect(() => {
+    if (!audioRef.current || isSeekingRef.current) return
+    const audio = audioRef.current
+    if (Math.abs(audio.currentTime - currentTime) > 0.5) {
+      audio.currentTime = currentTime
+    }
+  }, [currentTime])
+
+  useEffect(() => {
+    if (!audioRef.current) return
+    const audio = audioRef.current
+    if (pamState === 'playing') {
+      audio.play().catch(() => {})
+    } else if (pamState === 'paused' || pamState === 'idle') {
+      audio.pause()
+    }
+  }, [pamState])
 
   useEffect(() => {
     if (tourTrigger > 0 && pamState === 'idle') {
@@ -153,18 +223,9 @@ export default function PamWidget({ tourTrigger }) {
     return () => window.removeEventListener('scroll', checkManualScroll)
   }, [pamState])
 
-  const resumeTour = () => {
-    setShowOverride(false)
-    setPamState('playing')
-    autoScrollToSection(currentTrack.sectionId)
-  }
-
-  const trackProgress = currentTrack
-    ? ((currentTime / currentTrack.duration) * 100).toFixed(0)
-    : 0
-
   return (
     <>
+      <audio ref={audioRef} preload="auto" />
       <AnimatePresence mode="wait">
         {pamState === 'idle' ? (
           <motion.button
