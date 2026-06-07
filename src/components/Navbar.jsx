@@ -22,34 +22,51 @@ export default function Navbar({ onStartTour }) {
     if (el) el.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  // Scroll spy effect
+  // Track scrolled state for nav background
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
-
-      const scrollPosition = window.scrollY + window.innerHeight / 3
-
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60) {
-        setActiveSection('contact')
-        return
-      }
-
-      for (const item of NAV_ITEMS) {
-        const el = document.getElementById(item.id)
-        if (el) {
-          const top = el.offsetTop
-          const height = el.offsetHeight
-          if (scrollPosition >= top && scrollPosition < top + height) {
-            setActiveSection(item.id)
-            break
-          }
-        }
-      }
     }
-
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Active section detection via IntersectionObserver (no per-scroll DOM reads)
+  useEffect(() => {
+    const observers = []
+    NAV_ITEMS.forEach((item) => {
+      const el = document.getElementById(item.id)
+      if (!el) return
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(item.id)
+            }
+          })
+        },
+        { rootMargin: '-30% 0px -50% 0px', threshold: 0 }
+      )
+      observer.observe(el)
+      observers.push(observer)
+    })
+
+    // Bottom-of-page fallback: when scrolled to end, force 'contact' active
+    const handleBottom = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 60
+      ) {
+        setActiveSection('contact')
+      }
+    }
+    window.addEventListener('scroll', handleBottom, { passive: true })
+
+    return () => {
+      observers.forEach((o) => o.disconnect())
+      window.removeEventListener('scroll', handleBottom)
+    }
   }, [])
 
   // Auto-close mobile menu on resize
@@ -111,6 +128,7 @@ export default function Navbar({ onStartTour }) {
         {/* Actions */}
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={onStartTour}
             className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-[0_4px_16px_-4px_rgba(212,165,116,0.3)] font-semibold text-[9px] uppercase tracking-widest transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(212,165,116,0.45)] hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
           >
@@ -123,6 +141,7 @@ export default function Navbar({ onStartTour }) {
 
           {/* Hamburger */}
           <button
+            type="button"
             onClick={() => setIsOpen(!isOpen)}
             className="flex md:hidden items-center justify-center w-9 h-9 rounded-full border border-[#D4A574]/20 text-white/50 hover:text-[#D4A574] transition-colors duration-300 cursor-pointer hover:bg-[#D4A574]/8"
             aria-label="Toggle menu"
@@ -166,6 +185,7 @@ export default function Navbar({ onStartTour }) {
         <div className="h-px bg-[#D4A574]/10 my-1" />
 
         <button
+          type="button"
           onClick={() => {
             setIsOpen(false)
             onStartTour()

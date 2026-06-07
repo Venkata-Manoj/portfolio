@@ -55,24 +55,27 @@ const TRACKS = [
  */
 function TrackTimer({ duration, playing, onTimeUpdate, onComplete }) {
   useEffect(() => {
-    if (!playing || duration <= 0) return
-
-    const interval = setInterval(() => {
-      onTimeUpdate(prev => {
-        const next = +(prev + 0.1).toFixed(1)
-        if (next >= duration) {
-          clearInterval(interval)
-          setTimeout(onComplete, 1500)
-          return duration
-        }
-        return next
-      })
-    }, 100)
-
-    return () => clearInterval(interval)
-    // This component remounts via key={currentTrackIndex}, so deps are stable
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing])
+    if (!playing || duration <= 0) return undefined
+    const start = performance.now()
+    let raf
+    let lastTenth = 0
+    const tick = (now) => {
+      const elapsed = (now - start) / 1000
+      if (elapsed >= duration) {
+        onTimeUpdate(duration)
+        onComplete?.()
+        return
+      }
+      const tenth = Math.floor(elapsed * 10)
+      if (tenth !== lastTenth) {
+        lastTenth = tenth
+        onTimeUpdate(+(tenth / 10).toFixed(1))
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => raf && cancelAnimationFrame(raf)
+  }, [playing, duration, onTimeUpdate, onComplete])
 
   return null
 }
@@ -186,7 +189,7 @@ export default function PamWidget({ tourTrigger }) {
                       Tour Complete
                     </span>
                   </div>
-                  <button onClick={closePam} className="text-white/30 hover:text-white transition-colors">
+                  <button type="button" onClick={closePam} className="text-white/30 hover:text-white transition-colors">
                     <X size={14} />
                   </button>
                 </div>
@@ -194,6 +197,7 @@ export default function PamWidget({ tourTrigger }) {
                   Tour completed! You can explore the rest of the site on your own.
                 </p>
                 <button
+                  type="button"
                   onClick={closePam}
                   className="w-full rounded-full border border-white/20 py-2.5 text-[10px] font-medium uppercase tracking-[0.25em] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
                 >
@@ -209,7 +213,7 @@ export default function PamWidget({ tourTrigger }) {
                       {currentTrack?.label} · {currentTrackIndex + 1}/{TRACKS.length}
                     </span>
                   </div>
-                  <button onClick={closePam} className="text-white/30 hover:text-white transition-colors">
+                  <button type="button" onClick={closePam} className="text-white/30 hover:text-white transition-colors">
                     <X size={14} />
                   </button>
                 </div>
@@ -262,6 +266,7 @@ export default function PamWidget({ tourTrigger }) {
                       Tour paused — you scrolled away
                     </p>
                     <button
+                      type="button"
                       onClick={resumeTour}
                       className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 py-2.5 text-[10px] font-medium uppercase tracking-[0.25em] text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     >

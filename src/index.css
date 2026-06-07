@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "./styles/animations.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -471,4 +470,302 @@ a:focus:not(:focus-visible) {
   .card:hover .card-shimmer { opacity: 0; }
   .card:hover .card-emoji-circle { transform: none; }
   .card:hover .card-glow { opacity: 0; }
+}
+
+/* ============================================
+   MERGED FROM src/styles/animations.css (deleted 2026-06-07)
+   Live rules used by ContactSection, PamWidget, CertificatesSection
+   ============================================ */
+
+/* ── ContactSection: shared shimmer (for animate-shimmer-border / -streak) ── */
+@keyframes shimmer-border {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes shimmer-streak {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer-border { animation: shimmer-border 4s ease-in-out infinite; }
+.animate-shimmer-streak { animation: shimmer-streak 4s ease-in-out infinite; }
+
+/* ── PamWidget: Waveform bars and pulse (used by inline style) ── */
+@keyframes pam-wave {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.4; }
+  50% { transform: scaleY(1.2); opacity: 1; }
+}
+@keyframes pam-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(168, 85, 247, 0); }
+}
+
+/* ── ContactSection: Orbit Portal ── */
+@keyframes contact-orbit-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes contact-orbit-counter-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+@keyframes contact-center-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(212,165,116,0.05), 0 0 30px rgba(212,165,116,0.02);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(212,165,116,0.12), 0 0 50px rgba(212,165,116,0.05);
+  }
+}
+@keyframes contact-gold-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-contact-orbit-spin {
+  animation: contact-orbit-spin 30s linear infinite;
+}
+.animate-contact-orbit-counter-spin {
+  animation: contact-orbit-counter-spin 30s linear infinite;
+}
+.animate-contact-center-pulse {
+  animation: contact-center-pulse 3.5s ease-in-out infinite;
+}
+.animate-contact-gold-sweep {
+  animation: contact-gold-sweep 4s ease-in-out infinite;
+  background-size: 300% 300%;
+}
+
+.orbit-container:hover .animate-contact-orbit-spin,
+.orbit-container:hover .animate-contact-orbit-counter-spin {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-contact-orbit-spin,
+  .animate-contact-orbit-counter-spin,
+  .animate-contact-center-pulse {
+    animation: none;
+  }
+}
+
+/* ============================================
+   CertificatesSection — Horizontal carousel
+   Classes: .cert-card, .cert-shimmer, .cert-nav-btn, .cert-dot,
+            .cert-eyebrow, .cert-underline-wrap, .cert-card-track,
+            .cert-hint-pulse, .view-link
+   ============================================ */
+
+@keyframes cert-shimmer-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes cert-hint-pulse-anim {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.8; }
+}
+@keyframes cert-eyebrow-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cert-eyebrow {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.cert-eyebrow.in-view {
+  animation: cert-eyebrow-in 1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+}
+
+.cert-underline-wrap {
+  display: flex;
+  justify-content: center;
+}
+.cert-underline-wrap > span {
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cert-underline-wrap.in-view > span {
+  transform: scaleX(1);
+}
+
+.cert-card-track {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cert-card-track::-webkit-scrollbar {
+  display: none;
+}
+
+.cert-card {
+  scroll-snap-align: center;
+  flex: 0 0 auto;
+  width: 85vw;
+  max-width: 380px;
+  min-height: 520px;
+  background: rgba(30, 28, 26, 0.60);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  border: 1px solid rgba(212, 165, 116, 0.06);
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  transform: translateY(0);
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  will-change: transform;
+}
+@media (min-width: 1024px) {
+  .cert-card { width: 380px; }
+}
+
+.cert-card.is-hidden {
+  opacity: 0;
+  transform: scale(0.85) translateY(30px);
+}
+.cert-card.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.cert-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(212, 165, 116, 0.18);
+  box-shadow:
+    inset 0 0 40px rgba(212, 165, 116, 0.06),
+    0 0 40px rgba(212, 165, 116, 0.12),
+    0 0 80px rgba(212, 165, 116, 0.05);
+}
+.cert-card:hover .cert-image {
+  transform: scale(1.04);
+}
+
+.cert-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(212, 165, 116, 0.02) 45%,
+    rgba(212, 165, 116, 0.04) 50%,
+    rgba(212, 165, 116, 0.02) 55%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  transition: opacity 0.5s ease;
+}
+.cert-card:hover .cert-shimmer {
+  opacity: 1;
+  animation: cert-shimmer-sweep 3.5s ease-in-out infinite;
+}
+
+.cert-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(212, 165, 116, 0.12);
+  background: rgba(30, 28, 26, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(212, 165, 116, 0.7);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.cert-nav-btn:hover {
+  background: linear-gradient(135deg, #D4A574, #A67C52);
+  color: #0C0C0C;
+  border-color: transparent;
+  box-shadow: 0 6px 24px -4px rgba(212, 165, 116, 0.4);
+}
+.cert-nav-btn:active {
+  transform: scale(0.94);
+}
+.cert-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cert-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 165, 116, 0.12);
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  padding: 0;
+}
+.cert-dot:hover {
+  border-color: rgba(212, 165, 116, 0.4);
+}
+.cert-dot.is-active {
+  background: linear-gradient(135deg, #D4A574, #A67C52);
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(212, 165, 116, 0.4);
+  transform: scale(1.15);
+}
+
+.view-link {
+  color: rgba(212, 165, 116, 0.5);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+.view-link:hover {
+  color: #D4A574;
+}
+.view-link .arrow-shift {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.view-link:hover .arrow-shift {
+  transform: translateX(3px);
+}
+
+.cert-hint-pulse {
+  animation: cert-hint-pulse-anim 3s ease-in-out infinite;
+}
+
+@media (max-width: 1023px) {
+  .cert-card { width: 85vw !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cert-card.is-hidden {
+    opacity: 1;
+    transform: none;
+  }
+  .cert-card.is-visible {
+    transform: none;
+  }
+  .cert-card:hover {
+    transform: none;
+  }
+  .cert-card:hover .cert-shimmer {
+    opacity: 0;
+  }
+  .cert-eyebrow.in-view {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .cert-underline-wrap.in-view > span {
+    transform: none;
+  }
+  .cert-hint-pulse {
+    animation: none;
+  }
 }
