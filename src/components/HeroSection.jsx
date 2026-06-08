@@ -158,9 +158,9 @@ export default function HeroSection() {
               style={{ fontFamily: "'Kanit', sans-serif" }}
             >
               <WordReveal
-                text="BALLANI VENKATA MANOJ"
+                text="B V MANOJ"
                 delay={0.5}
-                className="bg-gradient-to-r from-[#EDE7D9] via-[#D4A574] to-[#E8C88A] bg-clip-text text-transparent drop-shadow-lg"
+                className="bg-gradient-to-r from-[#EDE7D9] via-[#D4A574] to-[#E8C88A] bg-clip-text drop-shadow-lg"
               />
             </motion.h1>
 

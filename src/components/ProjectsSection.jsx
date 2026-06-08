@@ -554,18 +554,34 @@ export default function ProjectsSection() {
   const trackRef = useRef(null)
   const pauseTimerRef = useRef(null)
 
-  // ── Measure card width on mount ──
+  // Track focused index in a ref to avoid dependency cycles in resize effect
+  const focusedIndexRef = useRef(0)
   useEffect(() => {
-    const track = trackRef.current
-    if (!track || !track.children[0]) return
-    const cardW = track.children[0].offsetWidth
-    const gap = 24
-    const step = cardW + gap
-    setStepWidth(step)
-    setOneSetWidth(step * TOTAL)
+    focusedIndexRef.current = focusedIndex
+  }, [focusedIndex])
 
-    // Initial position: show the "original" set (copy 1, starts at index TOTAL)
-    x.set(-step * TOTAL)
+  // ── Measure card width and handle window resize dynamically ──
+  useEffect(() => {
+    const handleResize = () => {
+      const track = trackRef.current
+      if (!track || !track.children[0]) return
+      const cardW = track.children[0].offsetWidth
+      const gap = 24
+      const step = cardW + gap
+      setStepWidth(step)
+      setOneSetWidth(step * TOTAL)
+
+      // Maintain current card alignment on resize
+      x.set(-step * (TOTAL + focusedIndexRef.current))
+    }
+
+    // Measure initially
+    handleResize()
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
   }, [x])
 
   // ── Gold underline grows after mount ──
@@ -589,8 +605,11 @@ export default function ProjectsSection() {
           if (startAnimFn.current) startAnimFn.current()
         },
       })
+      if (isHovering && autoAnimRef.current) {
+        autoAnimRef.current.pause()
+      }
     }
-  }, [oneSetWidth, x])
+  }, [oneSetWidth, x, isHovering])
 
   // ── Start / stop auto-scroll based on isPlaying ──
   useEffect(() => {

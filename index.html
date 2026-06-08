@@ -20,13 +20,23 @@
   <!-- Vercel Web Analytics (no-op off Vercel) -->
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    (function() {
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var s = document.createElement('script'); s.defer = true; s.src = '/_vercel/insights/script.js';
+        document.head.appendChild(s);
+      }
+    })();
   </script>
-  <script defer src="/_vercel/insights/script.js"></script>
   <!-- Vercel Speed Insights (no-op off Vercel) -->
   <script>
     window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    (function() {
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        var s = document.createElement('script'); s.defer = true; s.src = '/_vercel/speed-insights/script.js';
+        document.head.appendChild(s);
+      }
+    })();
   </script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
 
 <body>

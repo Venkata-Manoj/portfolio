@@ -12,91 +12,91 @@ const CERTS = [
   {
     title: 'AI Fundamentals',
     org: 'DataCamp',
-    date: '2024',
+    date: '2026',
     image: '/certificates/AI_Fundamentals_DC.png',
     accent: '#D4A574',
   },
   {
     title: 'API Fundamentals',
     org: 'DataCamp',
-    date: '2024',
+    date: '2026',
     image: '/certificates/API_DC.png',
     accent: '#D4A574',
   },
   {
     title: 'AI Engineer — Data Science',
     org: 'DataCamp',
-    date: '2024',
+    date: '2026',
     image: '/certificates/AiE_DS_DC.png',
     accent: '#C4956A',
   },
   {
     title: 'AI Engineer — Development',
     org: 'DataCamp',
-    date: '2024',
+    date: '2026',
     image: '/certificates/AiE_dev_DC.png',
     accent: '#A67C52',
   },
   {
     title: 'Intro to Programming',
     org: 'Kaggle',
-    date: '2024',
+    date: '2025',
     image: '/certificates/B V Manoj - Intro to Programming.png',
     accent: '#B8895E',
   },
   {
     title: 'Python Programming',
     org: 'Kaggle',
-    date: '2024',
+    date: '2025',
     image: '/certificates/B V Manoj - Python.png',
     accent: '#B8895E',
   },
   {
     title: 'Season 13 Cohort',
-    org: 'Outskill',
-    date: '2024',
+    org: 'Google Developer Groups',
+    date: '2026',
     image: '/certificates/B V Manoj_certificate_s13.jpeg',
     accent: '#C4956A',
   },
   {
     title: 'Ultimate AI Power Weekend',
     org: 'Outskill',
-    date: '2024',
+    date: '2025',
     image: '/certificates/Certificate - B V Manoj - The Ultimate AI Power Weekend_pages-to-jpg-0001.jpg',
     accent: '#D4A574',
   },
   {
     title: 'Embeddings Fundamentals',
     org: 'DataCamp',
-    date: '2024',
+    date: '2026',
     image: '/certificates/Embeddings_DC.png',
     accent: '#A67C52',
   },
   {
     title: 'Large Language Models',
     org: 'DataCamp',
-    date: '2024',
+    date: '2026',
     image: '/certificates/LLM_DC.png',
     accent: '#D4A574',
   },
   {
     title: 'AI Certification',
     org: 'NIELIT',
-    date: '2024',
+    date: '2026',
     image: '/certificates/NIELIT.png',
     accent: '#C4956A',
   },
   {
     title: 'RAG Bootcamp',
     org: 'KodeKloud',
-    date: '2024',
+    date: '2026',
     image: '/certificates/RAG-BootCamp-KodeKloud.png',
     accent: '#B8895E',
   },
   {
     title: 'Jio Course Certificate',
     org: 'Jio',
-    date: '2024',
+    date: '2026',
     image: '/certificates/course_certificate_jio.png',
     accent: '#A67C52',
   },
@@ -123,7 +123,7 @@ const IS_VERCEL = typeof window !== 'undefined'
   && /vercel\.app$|vercel\.com$/.test(window.location.hostname)
 
 function optimizeImage(path, width, quality = 75) {
-  if (!IS_VERCEL) return path
+  if (!IS_VERCEL) return encodeURI(path)
   return `/_vercel/image?url=${encodeURIComponent(path)}&w=${width}&q=${quality}`
 }
 
@@ -520,9 +520,9 @@ export default function CertificatesSection() {
       const isMobile = window.innerWidth < 1024
       const cardActual = isMobile
         ? Math.min(
-            window.innerWidth * CARD_MOBILE_WIDTH_RATIO,
-            CARD_DESKTOP_WIDTH_PX
-          )
+          window.innerWidth * CARD_MOBILE_WIDTH_RATIO,
+          CARD_DESKTOP_WIDTH_PX
+        )
         : CARD_DESKTOP_WIDTH_PX
       const side = Math.max(
         MIN_SIDE_PADDING_PX,

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
-const ABOUT_TEXT = "I'm an AI & Data Science engineering student at SIMATS Engineering, class of 2028. I build intelligent systems — from RAG pipelines and multi-LLM agent workflows to full-stack applications deployed at scale. Every project starts with the same philosophy: production-grade quality from day one."
+const ABOUT_TEXT = "I'm an AI & Data Science engineering student at SIMATS Engineering, class of 2028. I build intelligent systems - from RAG pipelines and multi-LLM agent workflows to full-stack applications deployed at scale. Every project starts with the same philosophy: production-grade quality from day one."
 
 const SKILL_GROUPS = [
   {
@@ -18,13 +18,18 @@ const SKILL_GROUPS = [
   {
     label: 'AI / ML',
     dotColor: '#C4956A',
-    items: ['LLMs', 'RAG Pipelines', 'FAISS', 'XGBoost', 'PyTorch', 'Ollama', 'Prompt Engineering', 'scikit-learn'],
+    items: ['LLMs', 'RAG Pipelines', 'FAISS', 'NLP', 'PyTorch', 'TensorFlow', 'Ollama', 'Prompt Engineering', 'Transformers', 'scikit-learn'],
   },
   {
     label: 'Tools & Platforms',
     dotColor: '#B8895E',
-    items: ['Vercel', 'Firebase', 'Docker', 'Git', 'Prisma', 'SQLite', 'PostgreSQL', 'MongoDB', 'REST APIs', 'VS Code'],
+    items: ['Vercel', 'Firebase', 'Docker', 'Git', 'Prisma', 'SQLite', 'PostgreSQL', 'MongoDB', 'REST APIs', 'VS Code', 'AI Agents'],
   },
+  // {
+  //   label: 'Spoken Languages',
+  //   dotColor: '#B8895E',
+  //   items: ['English (Fluent)', 'Telugu (Native)', 'Hindi (Conversational)', 'Tamil (Conversational)'],
+  // }
 ]
 
 function SkillPill({ children }) {
@@ -115,14 +120,14 @@ export default function AboutSection() {
             >
               {/* Shimmering gold ring */}
               <div
-                  className="w-full h-full rounded-full p-[4px] relative animate-about-shimmer-border cursor-pointer group"
+                className="w-full h-full rounded-full p-[4px] relative animate-about-shimmer-border cursor-pointer group"
                 style={{
-                background: 'linear-gradient(135deg, #D4A574, #A67C52, #C4956A, #D4A574)',
-                backgroundSize: '300% 300%',
-              }}
-            >
-              {/* will-change optimized — already GPU-composited by shimmer animation */}
-              <div className="absolute -inset-[10px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.12),transparent)] blur-[14px] -z-10 opacity-40 transition-opacity duration-400 group-hover:opacity-60" />
+                  background: 'linear-gradient(135deg, #D4A574, #A67C52, #C4956A, #D4A574)',
+                  backgroundSize: '300% 300%',
+                }}
+              >
+                {/* will-change optimized — already GPU-composited by shimmer animation */}
+                <div className="absolute -inset-[10px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.12),transparent)] blur-[14px] -z-10 opacity-40 transition-opacity duration-400 group-hover:opacity-60" />
                 <div className="w-full h-full rounded-full bg-[#0C0C0C] overflow-hidden transition-colors duration-300 hover:bg-[#11100E]">
                   <img
                     src="/me.jpeg"
@@ -226,7 +231,7 @@ export default function AboutSection() {
                 Technical expertise
               </h3>
               <span className="text-[10px] sm:text-[11px] text-[rgba(237,231,217,0.2)] font-light transition-colors duration-300 group-hover/skills:text-[rgba(212,165,116,0.4)]">
-                33 skills
+                36+ skills
               </span>
             </div>
 
