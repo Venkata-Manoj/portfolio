@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Menu, X, Play } from 'lucide-react'
+import { Menu, X, Play, Download } from 'lucide-react'
 
 const NAV_ITEMS = [
   { id: 'hero', label: 'Home' },
@@ -93,9 +93,11 @@ export default function Navbar({ onStartTour }) {
           onClick={(e) => handleNavClick(e, 'hero')}
           className="flex items-center gap-2.5 group cursor-pointer"
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] flex items-center justify-center font-['Kanit'] font-black text-xs text-white shadow-[0_0_14px_rgba(212,165,116,0.25)] transition-transform duration-300 group-hover:scale-105">
-            M
-          </div>
+          <img
+            src="/favicon.png"
+            alt="B V Manoj"
+            className="w-8 h-8 rounded-full object-cover shadow-[0_0_14px_rgba(212,165,116,0.25)] transition-transform duration-300 group-hover:scale-105"
+          />
           <span className="font-['Kanit'] font-bold tracking-widest text-xs text-[#EDE7D9]/80 group-hover:text-[#EDE7D9] transition-colors duration-300">
             Manoj
           </span>
@@ -127,6 +129,15 @@ export default function Navbar({ onStartTour }) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <a
+            href="/Resume_Manoj.pdf"
+            download="Resume_BV_Manoj.pdf"
+            className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4A574]/30 bg-transparent text-[#D4A574] font-semibold text-[9px] uppercase tracking-widest transition-all duration-300 hover:bg-[#D4A574]/10 hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+          >
+            <Download size={12} />
+            <span>Resume</span>
+          </a>
+
           <button
             type="button"
             onClick={onStartTour}
@@ -183,6 +194,16 @@ export default function Navbar({ onStartTour }) {
         </div>
 
         <div className="h-px bg-[#D4A574]/10 my-1" />
+
+        <a
+          href="/Resume_Manoj.pdf"
+          download="Resume_BV_Manoj.pdf"
+          onClick={() => setIsOpen(false)}
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-[#D4A574]/30 bg-transparent text-[#D4A574] text-[10px] font-semibold uppercase tracking-widest transition-all duration-300 hover:bg-[#D4A574]/10 hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+        >
+          <Download size={14} />
+          <span>Resume</span>
+        </a>
 
         <button
           type="button"
