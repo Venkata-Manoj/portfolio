@@ -7,6 +7,7 @@ import CertificatesSection from './components/CertificatesSection'
 import ProjectsSection from './components/ProjectsSection'
 import ContactSection from './components/ContactSection'
 import PamWidget from './components/PamWidget'
+import { FORMSPREE_FORM_ID } from './constants'
 
 const App = () => {
   useEffect(() => {
@@ -31,7 +32,7 @@ const App = () => {
       <EducationSection />
       <ProjectsSection />
       <CertificatesSection />
-      <ContactSection />
+      <ContactSection formspreeId={FORMSPREE_FORM_ID} />
       <PamWidget tourTrigger={tourTrigger} />
     </main>
   )

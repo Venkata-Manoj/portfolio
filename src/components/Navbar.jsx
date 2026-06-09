@@ -79,7 +79,7 @@ export default function Navbar({ onStartTour }) {
   }, [])
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 transition-all duration-300">
+    <header className="sticky top-2 left-0 right-0 z-50 transition-all duration-300">
       <nav
         className={`mx-auto max-w-5xl rounded-full flex items-center justify-between border transition-all duration-500 px-4 py-3 ${isScrolled
           ? 'bg-[#0C0C0E]/80 backdrop-blur-xl border-[#D4A574]/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.6),0_0_24px_-8px_rgba(212,165,116,0.06)]'

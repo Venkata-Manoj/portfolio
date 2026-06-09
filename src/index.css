@@ -1231,3 +1231,241 @@ a:focus:not(:focus-visible) {
     animation: none;
   }
 }
+
+/* ============================================
+   UTILITY CLASSES — extracted from inline styles
+   Reduces bundle size, enables caching, improves readability
+   ============================================ */
+
+/* Glassmorphism base */
+.glass {
+  background: rgba(30, 28, 26, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(212, 165, 116, 0.06);
+}
+
+.glass-strong {
+  background: rgba(30, 28, 26, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 165, 116, 0.08);
+}
+
+.glass-card {
+  background: rgba(30, 28, 26, 0.5);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border: 1px solid rgba(212, 165, 116, 0.06);
+}
+
+.glass-card-strong {
+  background: rgba(26, 24, 22, 0.96);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(212, 165, 116, 0.08);
+}
+
+/* Gold gradient text utilities */
+.gold-text {
+  background: linear-gradient(135deg, #D4A574, #A67C52);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.gold-text-animated {
+  background: linear-gradient(135deg, #D4A574, #C4956A, #E8C88A, #A67C52, #C4956A, #D4A574, #B8895E, #E8C88A, #D4A574);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: projects-goldTitleSweep 12s ease-in-out infinite;
+  will-change: background-position;
+}
+
+/* Gold accent shimmer */
+.gold-accent-shimmer {
+  animation: projects-goldAccentShimmer 4s ease-in-out infinite;
+  will-change: background-position;
+}
+
+/* Gold number shimmer */
+.gold-number-shimmer {
+  background: linear-gradient(135deg, #D4A574, #A67C52, #D4A574);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: projects-goldNumberShimmer 5s ease-in-out infinite;
+  will-change: background-position;
+}
+
+/* Shimmer sweep for hover effects */
+.shimmer-sweep {
+  background: linear-gradient(105deg, transparent 0%, transparent 30%, rgba(212,165,116,0.02) 45%, rgba(212,165,116,0.04) 50%, rgba(212,165,116,0.02) 55%, transparent 70%, transparent 100%);
+  background-size: 200% 100%;
+}
+
+/* Gold glow border */
+.gold-glow-border {
+  box-shadow: 0 0 0 1px rgba(212, 165, 116, 0.20), 0 0 30px -4px rgba(212, 165, 116, 0.12);
+}
+
+.gold-glow-border-hover:hover {
+  box-shadow: 0 0 0 1px rgba(212, 165, 116, 0.40), 0 0 50px -4px rgba(212, 165, 116, 0.25);
+}
+
+/* Gold ring shimmer */
+.gold-ring-shimmer {
+  animation: projects-goldRingShimmer 2s ease-in-out infinite;
+  will-change: transform, border-color;
+}
+
+/* Blob float animations */
+.gold-blob-float {
+  animation: projects-goldBlobFloat 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+.gold-bg-orb-float {
+  animation: projects-goldBgOrbFloat 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Skill pill */
+.skill-pill {
+  display: inline-flex;
+  padding: 0.875rem 1.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(237, 231, 217, 0.05);
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 0.75rem;
+  color: rgba(237, 231, 217, 0.5);
+  font-weight: 300;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skill-pill:hover {
+  border-color: rgba(212, 165, 116, 0.25);
+  color: #EDE7D9;
+  transform: translateY(-0.125rem) scale(1.02);
+  box-shadow: 0 4px 16px rgba(212, 165, 116, 0.08);
+}
+
+/* Optimized blur radii - max 80px for performance */
+.blur-perf {
+  filter: blur(80px);
+}
+
+.blur-perf-lg {
+  filter: blur(60px);
+}
+
+.blur-perf-md {
+  filter: blur(40px);
+}
+
+.blur-perf-sm {
+  filter: blur(20px);
+}
+
+/* ============================================
+   UTILITY CLASSES — extracted from inline styles
+   Reduces bundle size, enables caching, improves readability
+   ============================================ */
+
+/* Gold/bronze orb gradients — used in Hero, About, Contact, Projects, Education */
+.gold-orb-strong {
+  background: radial-gradient(circle, rgba(212,165,116,0.15), transparent 70%);
+}
+
+.gold-orb-medium {
+  background: radial-gradient(circle, rgba(166,124,82,0.10), transparent 70%);
+}
+
+.gold-orb-subtle {
+  background: radial-gradient(circle, rgba(212,165,116,0.06), transparent 70%);
+}
+
+.bronze-orb-medium {
+  background: radial-gradient(circle, rgba(166,124,82,0.08), transparent 70%);
+}
+
+/* Gold/bronze grid overlay — used in About, Contact, Projects, Education, Certificates */
+.gold-grid-overlay {
+  opacity: 0.08;
+  background-image:
+    linear-gradient(rgba(212,165,116,0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,165,116,0.15) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.gold-grid-overlay-subtle {
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(212,165,116,0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,165,116,0.10) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* Video overlay gradient */
+.video-overlay-gradient {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Gold accent line */
+.gold-accent-line {
+  background: linear-gradient(90deg, transparent, #D4A574, transparent);
+  background-size: 200% 100%;
+}
+
+/* Form input focus styles */
+.form-input-base {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(212,165,116,0.1);
+  color: white;
+}
+
+.form-input-base:focus {
+  border-color: #D4A574;
+  box-shadow: 0 0 0 2px rgba(212,165,116,0.25);
+  background: rgba(255,255,255,0.05);
+}
+
+/* Submit button gradient */
+.submit-btn-gradient {
+  background: linear-gradient(135deg, #D4A574, #C4956A, #D4A574, #A67C52, #D4A574);
+  background-size: 300% 300%;
+}
+
+/* Orbital positioning helpers */
+.orbital-top {
+  top: -133px;
+  left: 0;
+}
+
+.orbital-top-right {
+  top: -41px;
+  left: 127px;
+}
+
+.orbital-middle-right {
+  top: 108px;
+  left: 78px;
+}
+
+.orbital-middle-left {
+  top: 108px;
+  left: -78px;
+}
+
+.orbital-top-left {
+  top: -41px;
+  left: -127px;
+}
+
+.orbital-center {
+  transform: translate(-50%, -50%);
+}

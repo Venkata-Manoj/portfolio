@@ -54,20 +54,13 @@ export default function AboutSection() {
       className="relative min-h-screen w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
     >
       {/* Background grid */}
-      <div
-        className="absolute inset-0 opacity-[0.012] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(237,231,217,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(237,231,217,0.08) 1px, transparent 1px)',
-          backgroundSize: '80px 80px',
-        }}
-      />
+      <div className="absolute inset-0 opacity-[0.012] pointer-events-none gold-grid-overlay-subtle" />
 
       {/* Floating gold orbs */}
       {/* Reduced blur radii — blur >80px has diminishing visual returns but high GPU cost */}
-      <div className="absolute top-[5%] -left-[5%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.08),transparent)] blur-[80px] pointer-events-none animate-about-float-a" />
-      <div className="absolute bottom-[5%] -right-[5%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(166,124,82,0.06),transparent)] blur-[100px] pointer-events-none animate-about-float-b" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(212,165,116,0.04),transparent)] blur-[60px] pointer-events-none animate-about-float-a-reverse" />
+      <div className="absolute top-[5%] -left-[5%] w-[500px] h-[500px] rounded-full gold-orb-medium blur-perf pointer-events-none animate-about-float-a" />
+      <div className="absolute bottom-[5%] -right-[5%] w-[600px] h-[600px] rounded-full bronze-orb-medium blur-perf pointer-events-none animate-about-float-b" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full gold-orb-subtle blur-perf-md pointer-events-none animate-about-float-a-reverse" />
 
       <div className="relative z-10 mx-auto max-w-6xl">
         {/* === Heading === */}

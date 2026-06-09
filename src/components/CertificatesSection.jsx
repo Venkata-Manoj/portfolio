@@ -150,92 +150,21 @@ function CertificateCard({ cert, index, isVisible }) {
       role="group"
       aria-roledescription="slide"
       aria-label={`${(index % TOTAL) + 1} of ${TOTAL}: ${cert.title}`}
-      style={{
-        scrollSnapAlign: 'center',
-        flex: '0 0 auto',
-        width: '85vw',
-        maxWidth: '380px',
-        minHeight: '520px',
-        background: 'rgba(30,28,26,0.60)',
-        backdropFilter: 'blur(20px) saturate(1.1)',
-        WebkitBackdropFilter: 'blur(20px) saturate(1.1)',
-        border: '1px solid rgba(212,165,116,0.06)',
-        borderRadius: '24px',
-        overflow: 'hidden',
-        position: 'relative',
-        willChange: 'transform',
-        transitionDelay: `${staggerDelay}ms`,
-      }}
+      style={{ transitionDelay: `${staggerDelay}ms` }}
     >
       {/* Top gold streak */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: '10%',
-          right: '10%',
-          height: '2px',
-          background:
-            'linear-gradient(90deg, transparent, #D4A574 30%, #A67C52 70%, transparent)',
-          zIndex: 4,
-          pointerEvents: 'none',
-        }}
-      />
+      <div className="absolute top-0 left-[10%] right-[10%] h-[2px] z-4 pointer-events-none bg-gradient-to-r from-transparent via-[#D4A574] via-[30%] via-[#A67C52] via-[70%] to-transparent" aria-hidden="true" />
 
       {/* Watermark number (top-right) */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: '70px',
-          right: '16px',
-          fontFamily: "'JetBrains Mono', monospace",
-          fontWeight: 900,
-          fontSize: '6rem',
-          lineHeight: 1,
-          zIndex: 2,
-          pointerEvents: 'none',
-          background: 'linear-gradient(135deg, #D4A574, #A67C52)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          color: 'transparent',
-          opacity: 0.06,
-          letterSpacing: '-0.04em',
-        }}
-      >
+      <span className="absolute top-[70px] right-4 font-mono font-black text-[6rem] leading-none z-2 pointer-events-none gold-text opacity-6" style={{ letterSpacing: '-0.04em' }} aria-hidden="true">
         {String((index % TOTAL) + 1).padStart(2, '0')}
       </span>
 
       {/* Shimmer overlay (hover only) */}
-      <div
-        className="cert-shimmer"
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          opacity: 0,
-          zIndex: 5,
-          borderRadius: 'inherit',
-          background:
-            'linear-gradient(105deg, transparent 0%, transparent 30%, rgba(212,165,116,0.02) 45%, rgba(212,165,116,0.04) 50%, rgba(212,165,116,0.02) 55%, transparent 70%, transparent 100%)',
-          backgroundSize: '200% 100%',
-          transition: 'opacity 0.5s ease',
-        }}
-      />
+      <div className="cert-shimmer" aria-hidden="true" />
 
       {/* Image area */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '240px',
-          background: 'rgba(12,12,12,0.5)',
-          overflow: 'hidden',
-        }}
-      >
+      <div className="relative w-full h-[240px] bg-black/50 overflow-hidden">
         <img
           src={optimizeImage(cert.image, 640)}
           srcSet={`
@@ -484,6 +413,10 @@ export default function CertificatesSection() {
   }, [])
 
   /* ── Navigation helpers ── */
+  const togglePlayPause = useCallback(() => {
+    setIsPlaying((prev) => !prev)
+  }, [])
+
   const next = useCallback(() => {
     if (stepWidth === 0) return
     if (autoAnimRef.current) autoAnimRef.current.stop()
@@ -552,29 +485,26 @@ export default function CertificatesSection() {
     >
       {/* ── Ambient orbs (3 layers, gold/bronze drifting) ── */}
       <div
-        className="pointer-events-none absolute top-[-120px] right-[-80px] w-[500px] h-[500px] rounded-full"
+        className="pointer-events-none absolute top-[-120px] right-[-80px] w-[500px] h-[500px] rounded-full blur-perf"
         style={{
           background:
             'radial-gradient(circle, rgba(212,165,116,0.07), transparent)',
-          filter: 'blur(120px)',
           animation: 'orbFloatSlow 8s ease-in-out infinite',
         }}
       />
       <div
-        className="pointer-events-none absolute bottom-[-100px] left-[-100px] w-[450px] h-[450px] rounded-full"
+        className="pointer-events-none absolute bottom-[-100px] left-[-100px] w-[450px] h-[450px] rounded-full blur-perf"
         style={{
           background:
             'radial-gradient(circle, rgba(196,149,106,0.06), transparent)',
-          filter: 'blur(120px)',
           animation: 'orbFloatMedium 6s ease-in-out infinite',
         }}
       />
       <div
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full blur-perf"
         style={{
           background:
             'radial-gradient(circle, rgba(196,149,106,0.06), transparent)',
-          filter: 'blur(120px)',
           animation: 'orbFloatFast 4s ease-in-out infinite',
         }}
       />
@@ -678,6 +608,8 @@ export default function CertificatesSection() {
             id="track"
             className="flex gap-6"
             style={{ x }}
+            aria-live="polite"
+            aria-atomic="false"
           >
             {ALL_CERTS.map((cert, i) => (
               <CertificateCard
@@ -690,7 +622,7 @@ export default function CertificatesSection() {
           </motion.div>
         </div>
 
-        {/* ── Navigation row (prev / dots / next) ── */}
+        {/* ── Navigation row (prev / play-pause / dots / next) ── */}
         <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
           <button
             type="button"
@@ -699,6 +631,26 @@ export default function CertificatesSection() {
             aria-label="Previous certificate"
           >
             <ChevronLeft size={18} />
+          </button>
+
+          {/* Play/Pause toggle */}
+          <button
+            type="button"
+            onClick={togglePlayPause}
+            className="cert-nav-btn"
+            aria-label={isPlaying ? 'Pause auto-scroll' : 'Resume auto-scroll'}
+            aria-pressed={!isPlaying}
+          >
+            {isPlaying ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            )}
           </button>
 
           <div

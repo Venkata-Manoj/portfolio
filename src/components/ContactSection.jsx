@@ -3,11 +3,11 @@ import { motion, useInView } from 'framer-motion'
 import { Mail, Linkedin, Github, Send } from 'lucide-react'
 import { useForm } from '@formspree/react'
 
-export default function ContactSection() {
+export default function ContactSection({ formspreeId }) {
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
 
-  const [state, handleSubmit] = useForm('xaqzelqw')
+  const [state, handleSubmit] = useForm(formspreeId)
 
   const handleFormSubmit = (e) => {
     e.preventDefault()
@@ -33,30 +33,14 @@ export default function ContactSection() {
       {/* Ambient background — matches other sections */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div
-          className="absolute bottom-0 right-0 w-96 h-96 rounded-full animate-contact-orb-float"
-          style={{
-            background: 'radial-gradient(circle, rgba(212,165,116,0.08), transparent 70%)',
-            filter: 'blur(150px)',
-          }}
+          className="absolute bottom-0 right-0 w-96 h-96 rounded-full blur-perf animate-contact-orb-float gold-orb-medium"
         />
         <div
-          className="absolute top-0 left-0 w-80 h-80 rounded-full animate-contact-orb-float"
-          style={{
-            background: 'radial-gradient(circle, rgba(166,124,82,0.06), transparent 70%)',
-            filter: 'blur(120px)',
-            animationDelay: '-9s',
-          }}
+          className="absolute top-0 left-0 w-80 h-80 rounded-full blur-perf animate-contact-orb-float bronze-orb-medium"
+          style={{ animationDelay: '-9s' }}
         />
         {/* Gold grid overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{
-            opacity: 0.08,
-            backgroundImage:
-              'linear-gradient(rgba(212,165,116,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(212,165,116,0.15) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
+        <div className="pointer-events-none absolute inset-0 z-0 gold-grid-overlay" />
       </div>
 
       <div className="mx-auto max-w-6xl relative z-10">
@@ -78,10 +62,7 @@ export default function ContactSection() {
             Get in Touch
           </motion.h2>
           {/* Shimmer underline */}
-          <div
-            className="mx-auto mt-4 h-[2px] w-48 bg-[linear-gradient(90deg,transparent,#D4A574,transparent)] animate-shimmer-border rounded-full"
-            style={{ backgroundSize: '200% 100%' }}
-          />
+          <div className="mx-auto mt-4 h-[2px] w-48 gold-accent-line animate-shimmer-border rounded-full" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">

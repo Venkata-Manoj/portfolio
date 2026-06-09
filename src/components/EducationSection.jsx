@@ -38,42 +38,16 @@ function EducationCard({ item, index }) {
         delay: index * 0.15,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="group relative rounded-3xl overflow-hidden"
-      style={{
-        background: 'rgba(30,28,26,0.6)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(212,165,116,0.06)',
-      }}
+      className="group relative rounded-3xl overflow-hidden glass"
     >
       {/* Gold top streak */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-4/5 rounded-full z-10 transition-all duration-500"
-        style={{
-          background: 'linear-gradient(90deg, transparent, rgba(212,165,116,0.30), transparent)',
-        }}
-      />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[2px] w-4/5 rounded-full z-10 transition-all duration-500 bg-gradient-to-r from-transparent via-[rgba(212,165,116,0.30)] to-transparent" />
 
       {/* Shimmer on hover */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"
-        style={{
-          background: 'linear-gradient(90deg, transparent, rgba(212,165,116,0.04), transparent)',
-          transform: 'skewX(-20deg)',
-        }}
-      />
+      <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 bg-gradient-to-r from-transparent via-[rgba(212,165,116,0.04)] to-transparent skew-x-[-20deg]" />
 
       {/* Watermark number */}
-      <span
-        className="absolute top-[-0.05em] right-[0.05em] text-[7rem] font-black leading-none pointer-events-none select-none z-0"
-        style={{
-          background: 'linear-gradient(135deg, rgba(212,165,116,0.06), rgba(166,124,82,0.06))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          letterSpacing: '-0.04em',
-        }}
-      >
+      <span className="absolute top-[-0.05em] right-[0.05em] text-[7rem] font-black leading-none pointer-events-none select-none z-0 gold-text" style={{ letterSpacing: '-0.04em' }}>
         {String(index + 1).padStart(2, '0')}
       </span>
 
@@ -140,26 +114,23 @@ export default function EducationSection() {
     >
       {/* Ambient gold orbs */}
       <div
-        className="pointer-events-none absolute top-[-120px] left-[-160px] w-[500px] h-[500px] rounded-full"
+        className="pointer-events-none absolute top-[-120px] left-[-160px] w-[500px] h-[500px] rounded-full blur-perf"
         style={{
           background: 'radial-gradient(circle, rgba(212,165,116,0.07), transparent)',
-          filter: 'blur(120px)',
           animation: 'orbFloatSlow 8s ease-in-out infinite',
         }}
       />
       <div
-        className="pointer-events-none absolute bottom-[-100px] right-[-140px] w-[450px] h-[450px] rounded-full"
+        className="pointer-events-none absolute bottom-[-100px] right-[-140px] w-[450px] h-[450px] rounded-full blur-perf"
         style={{
           background: 'radial-gradient(circle, rgba(196,149,106,0.06), transparent)',
-          filter: 'blur(120px)',
           animation: 'orbFloatMedium 6s ease-in-out infinite',
         }}
       />
       <div
-        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full blur-perf"
         style={{
           background: 'radial-gradient(circle, rgba(196,149,106,0.06), transparent)',
-          filter: 'blur(120px)',
           animation: 'orbFloatFast 4s ease-in-out infinite',
         }}
       />

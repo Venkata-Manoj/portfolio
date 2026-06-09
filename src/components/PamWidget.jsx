@@ -94,6 +94,7 @@ export default function PamWidget({ tourTrigger }) {
   const lastAutoScrollRef = useRef(0)
   const audioRef = useRef(null)
   const isSeekingRef = useRef(false)
+  const tourTriggerHandledRef = useRef(0)
 
   const currentTrack = TRACKS[currentTrackIndex]
 
@@ -147,7 +148,7 @@ export default function PamWidget({ tourTrigger }) {
     const audio = audioRef.current
     audio.src = `/audio/${currentTrack.id}.mp3`
     audio.currentTime = 0
-    audio.preload = 'auto'
+    audio.preload = 'metadata'
     
     const handleCanPlay = () => {
       if (pamState === 'playing') {
@@ -180,8 +181,7 @@ export default function PamWidget({ tourTrigger }) {
       audio.pause()
       audio.src = ''
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTrackIndex, currentTrack.id, handleTrackEnd])
+  }, [currentTrackIndex, currentTrack.id, handleTrackEnd, pamState])
 
   useEffect(() => {
     if (!audioRef.current || isSeekingRef.current) return
@@ -202,12 +202,14 @@ export default function PamWidget({ tourTrigger }) {
   }, [pamState])
 
   useEffect(() => {
-    if (tourTrigger > 0 && pamState === 'idle') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      startTour()
+    if (tourTrigger > 0 && pamState === 'idle' && tourTriggerHandledRef.current !== tourTrigger) {
+      tourTriggerHandledRef.current = tourTrigger
+      setPamState('playing')
+      setCurrentTrackIndex(0)
+      setCurrentTime(0)
+      setShowOverride(false)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourTrigger])
+  }, [tourTrigger, pamState])
 
   useEffect(() => {
     if (pamState !== 'playing') return
@@ -225,7 +227,7 @@ export default function PamWidget({ tourTrigger }) {
 
   return (
     <>
-      <audio ref={audioRef} preload="auto" />
+      <audio ref={audioRef} preload="metadata" />
       <AnimatePresence mode="wait">
         {pamState === 'idle' ? (
           <motion.button

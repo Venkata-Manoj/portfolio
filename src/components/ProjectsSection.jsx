@@ -115,9 +115,7 @@ function ProjectCard({ project, index }) {
 
   // --- Flip handler ---
   const handleFlip = useCallback(
-    (e) => {
-      // Don't flip on link/button clicks
-      if (e.target.closest('a') || e.target.closest('button')) return
+    () => {
       if (flippingRef.current) return
       flippingRef.current = true
 
@@ -163,18 +161,8 @@ function ProjectCard({ project, index }) {
         delay: (index % TOTAL) * 0.1,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] cursor-pointer"
-      style={{
-        minHeight: 480,
-        background: 'rgba(30,28,26,0.6)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(212,165,116,0.06)',
-      }}
-      onClick={handleFlip}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={0}
+      className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] glass"
+      style={{ minHeight: 480 }}
       whileHover={{ y: -6 }}
     >
       {/* ── Background gradient ── */}
@@ -204,14 +192,10 @@ function ProjectCard({ project, index }) {
       >
         {/* ══════ FRONT FACE ══════ */}
         <div
-          className="card-face absolute inset-0 rounded-[24px] overflow-hidden flex z-[2]"
+          className="card-face absolute inset-0 rounded-[24px] overflow-hidden flex z-[2] glass-card"
           style={{
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            background: 'rgba(30,28,26,0.50)',
-            backdropFilter: 'blur(16px) saturate(1.1)',
-            WebkitBackdropFilter: 'blur(16px) saturate(1.1)',
-            border: '1px solid rgba(212,165,116,0.06)',
           }}
         >
           {/* ── Left panel (58%) ── */}
@@ -281,8 +265,32 @@ function ProjectCard({ project, index }) {
               ))}
             </div>
 
-            {/* "Click to flip" hint — sr-only accessible text */}
-            <span className="sr-only">Click to flip</span>
+            {/* Flip button — accessible trigger */}
+            <button
+              type="button"
+              onClick={handleFlip}
+              onKeyDown={handleKeyDown}
+              className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(212,165,116,0.15)] border border-[rgba(212,165,116,0.3)] text-[rgba(212,165,116,0.8)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.25)] hover:border-[rgba(212,165,116,0.5)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[rgba(212,165,116,0.5)]"
+              aria-label={isFlipped ? 'Flip to front' : 'Flip to back'}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={isFlipped ? 'rotate-180' : ''}
+                style={{ transition: 'transform 0.3s ease' }}
+              >
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M3 12a9 9 0 1 1 9-9c-2.52 0-4.93 1-6.74 2.74L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+            </button>
           </div>
 
           {/* ── Right panel (42%) — Gold/bronze gradient blobs ── */}
@@ -386,8 +394,32 @@ function ProjectCard({ project, index }) {
             )}
           </div>
 
-          {/* Back hint — sr-only accessible text */}
-          <span className="sr-only absolute bottom-[24px] right-[32px]">Flip back</span>
+          {/* Back flip button — accessible trigger */}
+          <button
+            type="button"
+            onClick={handleFlip}
+            onKeyDown={handleKeyDown}
+            className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(212,165,116,0.15)] border border-[rgba(212,165,116,0.3)] text-[rgba(212,165,116,0.8)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.25)] hover:border-[rgba(212,165,116,0.5)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[rgba(212,165,116,0.5)]"
+            aria-label={isFlipped ? 'Flip to front' : 'Flip to back'}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={isFlipped ? 'rotate-180' : ''}
+              style={{ transition: 'transform 0.3s ease' }}
+            >
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+              <path d="M3 12a9 9 0 1 1 9-9c-2.52 0-4.93 1-6.74 2.74L3 16" />
+              <path d="M3 21v-5h5" />
+            </svg>
+          </button>
         </div>
 
         {/* ── Shimmer overlay (hover gold sweep) ── */}
@@ -658,6 +690,10 @@ export default function ProjectsSection() {
   }, [])
 
   // ── Navigation helpers ──
+  const togglePlayPause = useCallback(() => {
+    setIsPlaying((prev) => !prev)
+  }, [])
+
   const goNext = useCallback(() => {
     if (stepWidth === 0) return
     if (autoAnimRef.current) autoAnimRef.current.stop()
@@ -743,35 +779,35 @@ export default function ProjectsSection() {
           ═══════════════════════════════════════════════════════════════ */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div
-          className="absolute w-[800px] h-[800px] rounded-full blur-[80px] opacity-[0.08] top-[-20%] left-[-10%] animate-projects-float-a"
+          className="absolute w-[800px] h-[800px] rounded-full blur-perf opacity-[0.08] top-[-20%] left-[-10%] animate-projects-float-a"
           style={{
             background:
               'radial-gradient(circle, rgba(212,165,116,0.18), transparent 70%)',
           }}
         />
         <div
-          className="absolute w-[600px] h-[600px] rounded-full blur-[80px] opacity-[0.06] top-[30%] right-[-15%] animate-projects-float-b"
+          className="absolute w-[600px] h-[600px] rounded-full blur-perf opacity-[0.06] top-[30%] right-[-15%] animate-projects-float-b"
           style={{
             background:
               'radial-gradient(circle, rgba(166,124,82,0.14), transparent 70%)',
           }}
         />
         <div
-          className="absolute w-[700px] h-[700px] rounded-full blur-[80px] opacity-[0.04] bottom-[-15%] left-[20%] animate-projects-float-a"
+          className="absolute w-[700px] h-[700px] rounded-full blur-perf opacity-[0.04] bottom-[-15%] left-[20%] animate-projects-float-a"
           style={{
             background:
               'radial-gradient(circle, rgba(196,149,106,0.10), transparent 70%)',
           }}
         />
         <div
-          className="absolute w-[500px] h-[500px] rounded-full blur-[80px] opacity-[0.03] top-[10%] left-[40%] animate-projects-float-b"
+          className="absolute w-[500px] h-[500px] rounded-full blur-perf opacity-[0.03] top-[10%] left-[40%] animate-projects-float-b"
           style={{
             background:
               'radial-gradient(circle, rgba(184,137,94,0.08), transparent 70%)',
           }}
         />
         <div
-          className="absolute w-[450px] h-[450px] rounded-full blur-[80px] opacity-[0.02] bottom-[20%] right-[10%] animate-projects-float-a"
+          className="absolute w-[450px] h-[450px] rounded-full blur-perf opacity-[0.02] bottom-[20%] right-[10%] animate-projects-float-a"
           style={{
             background:
               'radial-gradient(circle, rgba(212,165,116,0.06), transparent 70%)',
@@ -866,6 +902,8 @@ export default function ProjectsSection() {
             ref={trackRef}
             className="flex gap-6"
             style={{ x }}
+            aria-live="polite"
+            aria-atomic="false"
           >
             {ITEMS.map((project, i) => {
               // Distinguish regular projects from the GitHub CTA card
@@ -901,6 +939,26 @@ export default function ProjectsSection() {
             aria-label="Previous project"
           >
             <ChevronLeft size={20} />
+          </button>
+
+          {/* Play/Pause toggle */}
+          <button
+            type="button"
+            onClick={togglePlayPause}
+            className="flex items-center justify-center w-10 h-10 rounded-full border border-[rgba(212,165,116,0.20)] text-[rgba(212,165,116,0.60)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.40)] hover:text-[#D4A574] active:scale-90"
+            aria-label={isPlaying ? 'Pause auto-scroll' : 'Resume auto-scroll'}
+            aria-pressed={!isPlaying}
+          >
+            {isPlaying ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            )}
           </button>
 
           {/* Dot indicators */}

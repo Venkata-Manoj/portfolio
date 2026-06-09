@@ -119,28 +119,23 @@ export default function HeroSection() {
         muted
         playsInline
         preload="metadata"
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ filter: 'brightness(0.6)' }}
+        poster="/me.jpeg"
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover brightness-60"
       >
         <source src="/video/intro.mp4" type="video/mp4" />
       </video>
 
       {/* Gradient overlays */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.7) 100%)',
-        }}
-      />
+      <div className="absolute inset-0 pointer-events-none video-overlay-gradient" />
 
       {/* Noise texture removed — SVG @ 3% opacity had negligible visual impact but costly GPU compositing */}
 
       {/* Ambient glow — gold/bronze animated orbs */}
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full blur-[100px] pointer-events-none animate-hero-orb-float" style={{ background: 'radial-gradient(circle, rgba(212,165,116,0.15), transparent 70%)' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-[80px] pointer-events-none animate-hero-orb-float-delayed" style={{ background: 'radial-gradient(circle, rgba(166,124,82,0.10), transparent 70%)' }} />
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full blur-perf pointer-events-none animate-hero-orb-float gold-orb-strong" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-perf pointer-events-none animate-hero-orb-float-delayed gold-orb-medium" />
       {/* Third subtle central orb */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full blur-[120px] pointer-events-none animate-hero-orb-float-delayed" style={{ background: 'radial-gradient(circle, rgba(212,165,116,0.06), transparent 70%)', animationDelay: '-10s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full blur-perf pointer-events-none animate-hero-orb-float-delayed gold-orb-subtle" style={{ animationDelay: '-10s' }} />
 
       {/* Main content */}
       <motion.div
@@ -154,8 +149,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase"
-              style={{ fontFamily: "'Kanit', sans-serif" }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase font-['Kanit']"
             >
               <WordReveal
                 text="B V MANOJ"
