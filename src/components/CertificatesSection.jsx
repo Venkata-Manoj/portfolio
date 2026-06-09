@@ -1,5 +1,10 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react'
+import {
+  motion,
+  useMotionValue,
+  animate,
+  useInView,
+} from 'framer-motion'
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
 
 /* =====================================================================
@@ -103,15 +108,20 @@ const CERTS = [
 ]
 
 /* =====================================================================
-   CONSTANTS — auto-play, debounce, sizing
+   CONSTANTS — auto-play, sizing
    ===================================================================== */
 const AUTOPLAY_INTERVAL_MS = 5000
-const SCROLL_DEBOUNCE_MS = 80
-const CARD_GAP_FALLBACK_PX = 24
+const CARD_GAP_PX = 24
 const CARD_DESKTOP_WIDTH_PX = 380
 const CARD_MOBILE_WIDTH_RATIO = 0.85
-const MIN_SIDE_PADDING_PX = 24
 const TOTAL = CERTS.length
+const CLONE_COUNT = 3
+
+// Build flat array of clones for infinite scroll (4 full sets)
+const ALL_CERTS = []
+for (let i = 0; i < CLONE_COUNT + 1; i++) {
+  ALL_CERTS.push(...CERTS)
+}
 
 /* =====================================================================
    IMAGE OPTIMIZATION — Vercel Image Optimization
@@ -130,17 +140,16 @@ function optimizeImage(path, width, quality = 75) {
 /* =====================================================================
    CERTIFICATE CARD
    ===================================================================== */
-function CertificateCard({ cert, index, isVisible, registerFirstRef }) {
-  const staggerDelay = (index % TOTAL) * 100 // ms
+function CertificateCard({ cert, index, isVisible }) {
+  const staggerDelay = (index % TOTAL) * 100
 
   return (
     <article
-      ref={index === 0 ? registerFirstRef : null}
       className={`cert-card group ${isVisible ? 'is-visible' : 'is-hidden'}`}
       data-index={index}
       role="group"
       aria-roledescription="slide"
-      aria-label={`${index + 1} of ${TOTAL}: ${cert.title}`}
+      aria-label={`${(index % TOTAL) + 1} of ${TOTAL}: ${cert.title}`}
       style={{
         scrollSnapAlign: 'center',
         flex: '0 0 auto',
@@ -196,7 +205,7 @@ function CertificateCard({ cert, index, isVisible, registerFirstRef }) {
           letterSpacing: '-0.04em',
         }}
       >
-        {String(index + 1).padStart(2, '0')}
+        {String((index % TOTAL) + 1).padStart(2, '0')}
       </span>
 
       {/* Shimmer overlay (hover only) */}
@@ -346,19 +355,26 @@ function CertificateCard({ cert, index, isVisible, registerFirstRef }) {
 }
 
 /* =====================================================================
-   CERTIFICATES SECTION
+   CERTIFICATES SECTION — Horizontal infinite auto-scrolling carousel
    ===================================================================== */
 export default function CertificatesSection() {
   const headerRef = useRef(null)
   const trackRef = useRef(null)
-  const firstCardRef = useRef(null)
-  const autoplayTimerRef = useRef(null)
-  const currentIndexRef = useRef(0)
+  const x = useMotionValue(0)
+  const autoAnimRef = useRef(null)
+  const startAnimRef = useRef(null)
+  const pauseTimerRef = useRef(null)
+  const isInitialisedRef = useRef(false)
+  const prevIndexRef = useRef(0)
 
-  const headerInView = useInView(headerRef, { once: true })
+  const [stepWidth, setStepWidth] = useState(0)
+  const [oneSetWidth, setOneSetWidth] = useState(0)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [cardsVisible, setCardsVisible] = useState(false)
-  // Lazy initializer — runs once on first render (client-only SPA)
+  const [isHovering, setIsHovering] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(true)
+
+  const headerInView = useInView(headerRef, { once: true })
   const [prefersReducedMotion] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -366,206 +382,168 @@ export default function CertificatesSection() {
 
   /* ── Card entrance — triggered when header scrolls into view ── */
   useEffect(() => {
-    if (!headerInView || cardsVisible) return undefined
-    const id = requestAnimationFrame(() => {
-      setCardsVisible(true)
-    })
+    if (!headerInView || cardsVisible) return
+    const id = requestAnimationFrame(() => setCardsVisible(true))
     return () => cancelAnimationFrame(id)
   }, [headerInView, cardsVisible])
 
-  /* ── Measure single card + gap ── */
-  const cardWidth = useCallback(() => {
-    const track = trackRef.current
-    const first = firstCardRef.current
-    if (!track || !first) return 0
-    const styles = window.getComputedStyle(track)
-    const gap = parseFloat(
-      styles.columnGap || styles.gap || `${CARD_GAP_FALLBACK_PX}`
-    )
-    return first.getBoundingClientRect().width + gap
-  }, [])
-
-  /* ── Scroll to specific index (wraps on out-of-range) ── */
-  const scrollToIndex = useCallback(
-    (idx) => {
-      // JS-correct modulo for negative numbers
-      const wrapped = ((idx % TOTAL) + TOTAL) % TOTAL
-      setCurrentIndex(wrapped)
-      currentIndexRef.current = wrapped
+  /* ── Measure card width and handle window resize dynamically ── */
+  useLayoutEffect(() => {
+    const handleResize = () => {
       const track = trackRef.current
-      if (!track) return
-      const step = cardWidth()
-      track.scrollTo({ left: step * wrapped, behavior: 'smooth' })
-    },
-    [cardWidth]
-  )
-
-  const next = useCallback(() => {
-    scrollToIndex(currentIndexRef.current + 1)
-  }, [scrollToIndex])
-
-  const prev = useCallback(() => {
-    scrollToIndex(currentIndexRef.current - 1)
-  }, [scrollToIndex])
-
-  /* ── Autoplay control (no-op if reduced motion) ── */
-  const stopAutoplay = useCallback(() => {
-    if (autoplayTimerRef.current) {
-      clearInterval(autoplayTimerRef.current)
-      autoplayTimerRef.current = null
-    }
-  }, [])
-
-  const startAutoplay = useCallback(() => {
-    if (prefersReducedMotion) return
-    if (autoplayTimerRef.current) return
-    autoplayTimerRef.current = setInterval(() => {
-      const idx = currentIndexRef.current
-      // Autoplay runs left→right: cards enter from the left edge and exit to the right.
-      // `scrollToIndex` handles negative wrap via `((idx % TOTAL) + TOTAL) % TOTAL`,
-      // so `idx - 1` is safe. (User-facing `next`/`prev` buttons keep their +1/-1 semantics.)
-      scrollToIndex(idx - 1)
-    }, AUTOPLAY_INTERVAL_MS)
-  }, [prefersReducedMotion, scrollToIndex])
-
-  /* ── Wire up mouse / focus / visibility listeners + start autoplay ── */
-  useEffect(() => {
-    const track = trackRef.current
-    if (!track) return undefined
-
-    const onMouseEnter = () => stopAutoplay()
-    const onMouseLeave = () => startAutoplay()
-    const onFocusIn = () => stopAutoplay()
-    const onFocusOut = () => startAutoplay()
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        stopAutoplay()
-      } else {
-        startAutoplay()
-      }
-    }
-
-    track.addEventListener('mouseenter', onMouseEnter)
-    track.addEventListener('mouseleave', onMouseLeave)
-    track.addEventListener('focusin', onFocusIn)
-    track.addEventListener('focusout', onFocusOut)
-    document.addEventListener('visibilitychange', onVisibilityChange)
-
-    // Initial autoplay start
-    startAutoplay()
-
-    return () => {
-      track.removeEventListener('mouseenter', onMouseEnter)
-      track.removeEventListener('mouseleave', onMouseLeave)
-      track.removeEventListener('focusin', onFocusIn)
-      track.removeEventListener('focusout', onFocusOut)
-      document.removeEventListener('visibilitychange', onVisibilityChange)
-      stopAutoplay()
-    }
-  }, [startAutoplay, stopAutoplay])
-
-  /* ── Active dot sync — debounced scroll listener ── */
-  useEffect(() => {
-    const track = trackRef.current
-    if (!track) return undefined
-
-    let debounceTimer = null
-
-    const onScroll = () => {
-      if (debounceTimer) clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => {
-        const step = cardWidth()
-        if (step <= 0) return
-        const idx = Math.round(track.scrollLeft / step)
-        if (
-          idx !== currentIndexRef.current &&
-          idx >= 0 &&
-          idx < TOTAL
-        ) {
-          setCurrentIndex(idx)
-          currentIndexRef.current = idx
-        }
-      }, SCROLL_DEBOUNCE_MS)
-    }
-
-    track.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      track.removeEventListener('scroll', onScroll)
-      if (debounceTimer) clearTimeout(debounceTimer)
-    }
-  }, [cardWidth])
-
-  /* ── Keyboard nav on track ── */
-  useEffect(() => {
-    const track = trackRef.current
-    if (!track) return undefined
-
-    const onKeyDown = (e) => {
-      if (e.key === 'ArrowRight') {
-        e.preventDefault()
-        next()
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault()
-        prev()
-      }
-    }
-
-    track.addEventListener('keydown', onKeyDown)
-    return () => track.removeEventListener('keydown', onKeyDown)
-  }, [next, prev])
-
-  /* ── Side padding + resize handler ── */
-  useEffect(() => {
-    const recomputeSidePadding = () => {
+      if (!track || !track.children[0]) return
       const isMobile = window.innerWidth < 1024
-      const cardActual = isMobile
-        ? Math.min(
-          window.innerWidth * CARD_MOBILE_WIDTH_RATIO,
-          CARD_DESKTOP_WIDTH_PX
-        )
+      const cardW = isMobile
+        ? Math.min(window.innerWidth * CARD_MOBILE_WIDTH_RATIO, CARD_DESKTOP_WIDTH_PX)
         : CARD_DESKTOP_WIDTH_PX
-      const side = Math.max(
-        MIN_SIDE_PADDING_PX,
-        (window.innerWidth - cardActual) / 2
-      )
-      if (trackRef.current) {
-        trackRef.current.style.paddingInline = `${side}px`
+      const step = cardW + CARD_GAP_PX
+      setStepWidth(step)
+      setOneSetWidth(step * TOTAL)
+
+      if (!isInitialisedRef.current) {
+        x.set(-step * TOTAL)
+        isInitialisedRef.current = true
+      } else {
+        const currentX = x.get()
+        const setOffset = step * TOTAL
+        // Keep within bounds: if position drifted, snap to nearest valid offset
+        const remainder = ((currentX % setOffset) + setOffset) % setOffset
+        x.set(-(setOffset + remainder % step))
       }
     }
 
-    const onResize = () => {
-      recomputeSidePadding()
-      // Keep current card in view
-      const track = trackRef.current
-      if (track) {
-        const step = cardWidth()
-        track.scrollTo({
-          left: step * currentIndexRef.current,
-          behavior: 'auto',
-        })
-      }
-    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [x])
 
-    recomputeSidePadding()
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [cardWidth])
-
-  /* ── Initial scroll to index 0 ── */
+  /* ── Auto-scroll function ── */
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      const track = trackRef.current
-      if (track) {
-        track.scrollTo({ left: 0, behavior: 'auto' })
+    if (prefersReducedMotion) return
+
+    startAnimRef.current = () => {
+      if (!oneSetWidth) return
+      const currentX = x.get()
+      const targetX = currentX - oneSetWidth
+      if (autoAnimRef.current) autoAnimRef.current.stop()
+      autoAnimRef.current = animate(x, [currentX, targetX], {
+        duration: 40,
+        ease: 'linear',
+        onComplete: () => {
+          x.set(x.get() + oneSetWidth)
+          if (startAnimRef.current) startAnimRef.current()
+        },
+      })
+      if (isHovering && autoAnimRef.current) {
+        autoAnimRef.current.pause()
+      }
+    }
+  }, [oneSetWidth, x, isHovering, prefersReducedMotion])
+
+  /* ── Start / stop auto-scroll based on isPlaying ── */
+  useEffect(() => {
+    if (prefersReducedMotion) return
+    if (isPlaying && oneSetWidth > 0) {
+      startAnimRef.current()
+    } else if (autoAnimRef.current) {
+      autoAnimRef.current.stop()
+    }
+    return () => {
+      if (autoAnimRef.current) autoAnimRef.current.stop()
+    }
+  }, [isPlaying, oneSetWidth, prefersReducedMotion])
+
+  /* ── Pause / resume on hover ── */
+  useEffect(() => {
+    if (!autoAnimRef.current) return
+    if (isHovering) {
+      autoAnimRef.current.pause()
+    } else if (isPlaying) {
+      autoAnimRef.current.play()
+    }
+  }, [isHovering, isPlaying])
+
+  /* ── Track focused index from x position ── */
+  useEffect(() => {
+    if (!stepWidth) return
+    const unsubscribe = x.on('change', (latest) => {
+      const absScroll = Math.abs(latest)
+      const cardAtLeft = Math.floor(absScroll / stepWidth)
+      const index = cardAtLeft % TOTAL
+      if (index >= 0 && index < TOTAL && index !== prevIndexRef.current) {
+        prevIndexRef.current = index
+        setCurrentIndex(index)
       }
     })
-    return () => cancelAnimationFrame(id)
-  }, [cardWidth])
+    return unsubscribe
+  }, [stepWidth, x])
 
-  /* ── Callback ref for the first card (used to measure step) ── */
-  const registerFirstRef = useCallback((node) => {
-    firstCardRef.current = node
+  /* ── Cleanup timers on unmount ── */
+  useEffect(() => {
+    return () => clearTimeout(pauseTimerRef.current)
   }, [])
+
+  /* ── Navigation helpers ── */
+  const next = useCallback(() => {
+    if (stepWidth === 0) return
+    if (autoAnimRef.current) autoAnimRef.current.stop()
+    clearTimeout(pauseTimerRef.current)
+    setIsPlaying(false)
+
+    const currentX = x.get()
+    const targetX = currentX - stepWidth
+
+    animate(x, [currentX, targetX], {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      onComplete: () => {
+        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
+      },
+    })
+  }, [stepWidth, x])
+
+  const prev = useCallback(() => {
+    if (stepWidth === 0) return
+    if (autoAnimRef.current) autoAnimRef.current.stop()
+    clearTimeout(pauseTimerRef.current)
+    setIsPlaying(false)
+
+    const currentX = x.get()
+    const targetX = currentX + stepWidth
+
+    animate(x, [currentX, targetX], {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      onComplete: () => {
+        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
+      },
+    })
+  }, [stepWidth, x])
+
+  const scrollToIndex = useCallback(
+    (targetIndex) => {
+      if (stepWidth === 0) return
+      if (autoAnimRef.current) autoAnimRef.current.stop()
+      clearTimeout(pauseTimerRef.current)
+      setIsPlaying(false)
+
+      let delta = targetIndex - currentIndex
+      if (delta > TOTAL / 2) delta -= TOTAL
+      if (delta < -(TOTAL / 2)) delta += TOTAL
+
+      const currentX = x.get()
+      const targetX = currentX - delta * stepWidth
+
+      animate(x, [currentX, targetX], {
+        duration: 0.5 + Math.abs(delta) * 0.1,
+        ease: [0.22, 1, 0.36, 1],
+        onComplete: () => {
+          pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
+        },
+      })
+    },
+    [stepWidth, x, currentIndex]
+  )
 
   return (
     <section
@@ -687,28 +665,29 @@ export default function CertificatesSection() {
           aria-roledescription="carousel"
           aria-label="Certificates carousel"
           className="relative"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => {
+            setIsHovering(false)
+            if (autoAnimRef.current && isPlaying) {
+              autoAnimRef.current.play()
+            }
+          }}
         >
-          <div
+          <motion.div
             ref={trackRef}
             id="track"
-            tabIndex={0}
-            className="cert-card-track flex gap-6 overflow-x-auto pb-6"
-            style={{
-              scrollSnapType: 'x mandatory',
-              scrollBehavior: 'smooth',
-              paddingInline: `${MIN_SIDE_PADDING_PX}px`,
-            }}
+            className="flex gap-6"
+            style={{ x }}
           >
-            {CERTS.map((cert, index) => (
+            {ALL_CERTS.map((cert, i) => (
               <CertificateCard
-                key={cert.title}
+                key={`${cert.title}-${i}`}
                 cert={cert}
-                index={index}
+                index={i}
                 isVisible={cardsVisible}
-                registerFirstRef={registerFirstRef}
               />
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* ── Navigation row (prev / dots / next) ── */}

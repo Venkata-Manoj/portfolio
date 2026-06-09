@@ -110,7 +110,7 @@ export default function HeroSection() {
   }
 
   return (
-    <div ref={containerRef} id="hero" className="relative h-screen w-full overflow-hidden bg-background">
+    <div ref={containerRef} id="hero" className="relative -mt-16 h-[calc(100vh+4rem)] w-full overflow-hidden bg-background">
       {/* Video Background — preload=metadata avoids downloading entire video on page load */}
       <video
         ref={videoRef}

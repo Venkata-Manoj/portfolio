@@ -28,24 +28,36 @@ export default function ContactSection() {
   return (
     <section
       id="contact"
-      className="relative z-10 w-full bg-transparent px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36"
+      className="relative z-10 w-full bg-[#0C0C0C] px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 overflow-hidden"
     >
-      {/* Background gold glow orbs */}
-      <div
-        className="absolute bottom-0 right-0 w-96 h-96 rounded-full pointer-events-none animate-contact-orb-float"
-        style={{
-          background: 'radial-gradient(circle, rgba(212,165,116,0.08), transparent 70%)',
-          filter: 'blur(150px)',
-        }}
-      />
-      <div
-        className="absolute top-0 left-0 w-80 h-80 rounded-full pointer-events-none animate-contact-orb-float"
-        style={{
-          background: 'radial-gradient(circle, rgba(166,124,82,0.06), transparent 70%)',
-          filter: 'blur(120px)',
-          animationDelay: '-9s',
-        }}
-      />
+      {/* Ambient background — matches other sections */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div
+          className="absolute bottom-0 right-0 w-96 h-96 rounded-full animate-contact-orb-float"
+          style={{
+            background: 'radial-gradient(circle, rgba(212,165,116,0.08), transparent 70%)',
+            filter: 'blur(150px)',
+          }}
+        />
+        <div
+          className="absolute top-0 left-0 w-80 h-80 rounded-full animate-contact-orb-float"
+          style={{
+            background: 'radial-gradient(circle, rgba(166,124,82,0.06), transparent 70%)',
+            filter: 'blur(120px)',
+            animationDelay: '-9s',
+          }}
+        />
+        {/* Gold grid overlay */}
+        <div
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            opacity: 0.08,
+            backgroundImage:
+              'linear-gradient(rgba(212,165,116,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(212,165,116,0.15) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
+      </div>
 
       <div className="mx-auto max-w-6xl relative z-10">
         {/* Section Heading */}

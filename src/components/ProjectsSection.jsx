@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react'
 import {
   motion,
   useMotionValue,
@@ -544,7 +544,7 @@ function GitHubCard({ project, index }) {
 export default function ProjectsSection() {
   const x = useMotionValue(0)
   const autoAnimRef = useRef(null)
-  const startAnimFn = useRef(null)
+  const startAnimRef = useRef(null)
   const [stepWidth, setStepWidth] = useState(0)
   const [oneSetWidth, setOneSetWidth] = useState(0)
   const [focusedIndex, setFocusedIndex] = useState(0)
@@ -553,6 +553,7 @@ export default function ProjectsSection() {
   const [underlineVisible, setUnderlineVisible] = useState(false)
   const trackRef = useRef(null)
   const pauseTimerRef = useRef(null)
+  const isInitialisedRef = useRef(false)
 
   // Track focused index in a ref to avoid dependency cycles in resize effect
   const focusedIndexRef = useRef(0)
@@ -561,7 +562,8 @@ export default function ProjectsSection() {
   }, [focusedIndex])
 
   // ── Measure card width and handle window resize dynamically ──
-  useEffect(() => {
+  // Use useLayoutEffect to measure before first paint, avoiding flash
+  useLayoutEffect(() => {
     const handleResize = () => {
       const track = trackRef.current
       if (!track || !track.children[0]) return
@@ -571,17 +573,18 @@ export default function ProjectsSection() {
       setStepWidth(step)
       setOneSetWidth(step * TOTAL)
 
-      // Maintain current card alignment on resize
-      x.set(-step * (TOTAL + focusedIndexRef.current))
+      // Position at "original" set (index TOTAL) so first visible card is videoreverse
+      if (!isInitialisedRef.current) {
+        x.set(-step * TOTAL)
+        isInitialisedRef.current = true
+      } else {
+        x.set(-step * (TOTAL + focusedIndexRef.current))
+      }
     }
 
-    // Measure initially
     handleResize()
-
     window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-    }
+    return () => window.removeEventListener('resize', handleResize)
   }, [x])
 
   // ── Gold underline grows after mount ──
@@ -592,7 +595,7 @@ export default function ProjectsSection() {
 
   // ── Auto-scroll function ──
   useEffect(() => {
-    startAnimFn.current = () => {
+    startAnimRef.current = () => {
       if (!oneSetWidth) return
       const currentX = x.get()
       const targetX = currentX - oneSetWidth
@@ -602,7 +605,7 @@ export default function ProjectsSection() {
         ease: 'linear',
         onComplete: () => {
           x.set(x.get() + oneSetWidth)
-          if (startAnimFn.current) startAnimFn.current()
+          if (startAnimRef.current) startAnimRef.current()
         },
       })
       if (isHovering && autoAnimRef.current) {
@@ -614,7 +617,7 @@ export default function ProjectsSection() {
   // ── Start / stop auto-scroll based on isPlaying ──
   useEffect(() => {
     if (isPlaying && oneSetWidth > 0) {
-      startAnimFn.current()
+      startAnimRef.current()
     } else if (autoAnimRef.current) {
       autoAnimRef.current.stop()
     }
