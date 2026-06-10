@@ -6,7 +6,7 @@ import {
   useInView,
 } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
-import { useIsMobile } from '../hooks/useIsMobile'
+
 
 /* =====================================================================
    DATA — 13 certificates (gold/bronze palette accents)
@@ -287,7 +287,7 @@ export default function CertificatesSection() {
   const [cardsVisible, setCardsVisible] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [isPlaying, setIsPlaying] = useState(true)
-  const isMobile = useIsMobile()
+
 
   const headerInView = useInView(headerRef, { once: true })
   const [prefersReducedMotion] = useState(() => {
@@ -295,20 +295,9 @@ export default function CertificatesSection() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   })
 
-  // Track if we've already handled the mobile transition to avoid cascading renders
-  const mobileHandledRef = useRef(false)
 
-  // ── Disable auto-scroll on mobile (uses shared useIsMobile hook) ──
-  useEffect(() => {
-    if (isMobile && isPlaying && !mobileHandledRef.current) {
-      mobileHandledRef.current = true
-      setIsPlaying(false)
-    }
-    // Reset when switching back to desktop
-    if (!isMobile) {
-      mobileHandledRef.current = false
-    }
-  }, [isMobile, isPlaying])
+
+
 
   /* ── Card entrance — triggered when header scrolls into view ── */
   useEffect(() => {
@@ -370,10 +359,10 @@ export default function CertificatesSection() {
     }
   }, [oneSetWidth, x, isHovering, prefersReducedMotion])
 
-  /* ── Start / stop auto-scroll based on isPlaying (and not mobile) ── */
+  /* ── Start / stop auto-scroll based on isPlaying ── */
   useEffect(() => {
     if (prefersReducedMotion) return
-    if (isPlaying && oneSetWidth > 0 && !isMobile) {
+    if (isPlaying && oneSetWidth > 0) {
       startAnimRef.current()
     } else if (autoAnimRef.current) {
       autoAnimRef.current.stop()
@@ -381,17 +370,17 @@ export default function CertificatesSection() {
     return () => {
       if (autoAnimRef.current) autoAnimRef.current.stop()
     }
-  }, [isPlaying, oneSetWidth, isMobile, prefersReducedMotion])
+  }, [isPlaying, oneSetWidth, prefersReducedMotion])
 
-  /* ── Pause / resume on hover (respect mobile) ── */
+  /* ── Pause / resume on hover ── */
   useEffect(() => {
-    if (!autoAnimRef.current || isMobile) return
+    if (!autoAnimRef.current) return
     if (isHovering) {
       autoAnimRef.current.pause()
     } else if (isPlaying) {
       autoAnimRef.current.play()
     }
-  }, [isHovering, isPlaying, isMobile])
+  }, [isHovering, isPlaying])
 
   /* ── Track focused index from x position ── */
   useEffect(() => {
@@ -417,6 +406,31 @@ export default function CertificatesSection() {
   const togglePlayPause = useCallback(() => {
     setIsPlaying((prev) => !prev)
   }, [])
+
+  // ── Drag handlers ──
+  const handleDragStart = useCallback(() => {
+    if (autoAnimRef.current) autoAnimRef.current.stop()
+    clearTimeout(pauseTimerRef.current)
+    setIsPlaying(false)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    if (stepWidth === 0) return
+    const currentX = x.get()
+    const nearestCardIndex = Math.round(-currentX / stepWidth)
+    const targetX = -nearestCardIndex * stepWidth
+
+    animate(x, [currentX, targetX], {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      onComplete: () => {
+        const indexInSet = ((nearestCardIndex % TOTAL) + TOTAL) % TOTAL
+        const wrappedIndex = TOTAL + indexInSet
+        x.set(-wrappedIndex * stepWidth)
+        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
+      },
+    })
+  }, [stepWidth, x])
 
   const next = useCallback(() => {
     if (stepWidth === 0) return
@@ -607,8 +621,14 @@ export default function CertificatesSection() {
           <motion.div
             ref={trackRef}
             id="track"
-            className="flex gap-6"
+            className="flex gap-6 cursor-grab active:cursor-grabbing"
             style={{ x }}
+            drag="x"
+            dragConstraints={{ left: -oneSetWidth * 2.5, right: -oneSetWidth * 0.5 }}
+            dragElastic={0.15}
+            dragMomentum={false}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
             aria-live="polite"
             aria-atomic="false"
           >

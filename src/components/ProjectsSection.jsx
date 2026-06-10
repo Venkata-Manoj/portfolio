@@ -127,11 +127,8 @@ function ProjectCard({ project, index, isMobile }) {
       const newFlipped = !isFlipped
       setIsFlipped(newFlipped)
 
-      // On mobile: simple show/hide without 3D flip
+      // On mobile: simple show/hide without 3D flip (handled via state-driven style transitions on children)
       if (isMobile) {
-        el.style.transition = 'opacity 0.3s ease, transform 0.3s ease'
-        el.style.opacity = newFlipped ? '0' : '1'
-        el.style.transform = newFlipped ? 'scale(0.95)' : 'scale(1)'
         setTimeout(() => {
           flippingRef.current = false
         }, 300)
@@ -216,6 +213,12 @@ function ProjectCard({ project, index, isMobile }) {
           style={{
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
+            ...(isMobile ? {
+              opacity: isFlipped ? 0 : 1,
+              pointerEvents: isFlipped ? 'none' : 'auto',
+              transition: 'opacity 0.3s ease, transform 0.3s ease',
+              transform: isFlipped ? 'scale(0.95)' : 'scale(1)',
+            } : {})
           }}
         >
           {/* ── Left panel (58%) ── */}
@@ -351,11 +354,19 @@ function ProjectCard({ project, index, isMobile }) {
           style={{
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg)',
+            transform: isMobile
+              ? (isFlipped ? 'scale(1)' : 'scale(0.95)')
+              : 'rotateY(180deg)',
             background: 'rgba(26,24,22,0.96)',
             backdropFilter: 'blur(16px) saturate(1.2)',
             WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
             border: '1px solid rgba(212,165,116,0.08)',
+            ...(isMobile ? {
+              opacity: isFlipped ? 1 : 0,
+              pointerEvents: isFlipped ? 'auto' : 'none',
+              transition: 'opacity 0.3s ease, transform 0.3s ease',
+              zIndex: isFlipped ? 10 : 1,
+            } : {})
           }}
         >
           {/* Back description */}
@@ -653,14 +664,7 @@ export default function ProjectsSection() {
     return () => clearTimeout(timer)
   }, [])
 
-  // ── Disable auto-scroll on mobile (uses shared useIsMobile hook) ──
-  useEffect(() => {
-    if (isMobile && isPlaying) {
-      // Defer to avoid synchronous setState in effect
-      const timer = setTimeout(() => setIsPlaying(false), 0)
-      return () => clearTimeout(timer)
-    }
-  }, [isMobile, isPlaying])
+
 
   // ── Auto-scroll function ──
   useEffect(() => {
@@ -683,9 +687,9 @@ export default function ProjectsSection() {
     }
   }, [oneSetWidth, x, isHovering])
 
-  // ── Start / stop auto-scroll based on isPlaying (and not mobile) ──
+  // ── Start / stop auto-scroll based on isPlaying ──
   useEffect(() => {
-    if (isPlaying && oneSetWidth > 0 && !isMobile) {
+    if (isPlaying && oneSetWidth > 0) {
       startAnimRef.current()
     } else if (autoAnimRef.current) {
       autoAnimRef.current.stop()
@@ -693,17 +697,17 @@ export default function ProjectsSection() {
     return () => {
       if (autoAnimRef.current) autoAnimRef.current.stop()
     }
-  }, [isPlaying, oneSetWidth, isMobile])
+  }, [isPlaying, oneSetWidth])
 
-  // ── Pause / resume on hover (respect mobile) ──
+  // ── Pause / resume on hover ──
   useEffect(() => {
-    if (!autoAnimRef.current || isMobile) return
+    if (!autoAnimRef.current) return
     if (isHovering) {
       autoAnimRef.current.pause()
     } else if (isPlaying) {
       autoAnimRef.current.play()
     }
-  }, [isHovering, isPlaying, isMobile])
+  }, [isHovering, isPlaying])
 
   // ── Track focused index from x position ──
   useEffect(() => {
@@ -730,6 +734,31 @@ export default function ProjectsSection() {
   const togglePlayPause = useCallback(() => {
     setIsPlaying((prev) => !prev)
   }, [])
+
+  // ── Drag handlers ──
+  const handleDragStart = useCallback(() => {
+    if (autoAnimRef.current) autoAnimRef.current.stop()
+    clearTimeout(pauseTimerRef.current)
+    setIsPlaying(false)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    if (stepWidth === 0) return
+    const currentX = x.get()
+    const nearestCardIndex = Math.round(-currentX / stepWidth)
+    const targetX = -nearestCardIndex * stepWidth
+
+    animate(x, [currentX, targetX], {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+      onComplete: () => {
+        const indexInSet = ((nearestCardIndex % TOTAL) + TOTAL) % TOTAL
+        const wrappedIndex = TOTAL + indexInSet
+        x.set(-wrappedIndex * stepWidth)
+        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), 3000)
+      },
+    })
+  }, [stepWidth, x])
 
   const goNext = useCallback(() => {
     if (stepWidth === 0) return
@@ -937,8 +966,14 @@ export default function ProjectsSection() {
         >
           <motion.div
             ref={trackRef}
-            className="flex gap-6"
+            className="flex gap-6 cursor-grab active:cursor-grabbing"
             style={{ x }}
+            drag="x"
+            dragConstraints={{ left: -oneSetWidth * 2.5, right: -oneSetWidth * 0.5 }}
+            dragElastic={0.15}
+            dragMomentum={false}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
             aria-live="polite"
             aria-atomic="false"
           >
