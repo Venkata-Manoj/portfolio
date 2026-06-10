@@ -155,9 +155,9 @@ function CertificateCard({ cert, index, isVisible }) {
       {/* Image area */}
       <div className="relative w-full h-[240px] bg-black/50 overflow-hidden">
         <img
-          src={cert.image}
+          src={encodeURI(cert.image)}
           srcSet={`
-            ${cert.image} 380w
+            ${encodeURI(cert.image)} 380w
           `}
           sizes="380px"
           alt={`${cert.title} certificate`}
@@ -241,7 +241,7 @@ function CertificateCard({ cert, index, isVisible }) {
           {cert.date}
         </p>
         <a
-          href={cert.image}
+          href={encodeURI(cert.image)}
           target="_blank"
           rel="noopener noreferrer"
           className="view-link"
