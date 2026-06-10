@@ -129,12 +129,19 @@ for (let i = 0; i < CLONE_COUNT + 1; i++) {
    /_vercel/image?url=...&w=...&q=...&f=webp for auto-WebP + resize.
    Off-Vercel (local dev, GitHub Pages, etc.) returns the original path.
    ===================================================================== */
-const IS_VERCEL = typeof window !== 'undefined'
-  && /vercel\.app$|vercel\.com$/.test(window.location.hostname)
+
+// Check for Vercel at build time (import.meta.env.VERCEL is injected by Vite)
+// and at runtime for preview deployments (*.vercel.app) and custom domains
+const IS_VERCEL_BUILD = typeof import.meta !== 'undefined' && import.meta.env?.VERCEL === 'true'
+const IS_VERCEL_RUNTIME = typeof window !== 'undefined'
+  && (window.location.hostname.endsWith('.vercel.app') || window.location.hostname === 'vercel.app')
+const IS_VERCEL = IS_VERCEL_BUILD || IS_VERCEL_RUNTIME
 
 function optimizeImage(path, width, quality = 75) {
   if (!IS_VERCEL) return encodeURI(path)
-  return `/_vercel/image?url=${encodeURIComponent(path)}&w=${width}&q=${quality}`
+  // Properly encode the path for URL parameter, handling spaces and special chars
+  const encodedPath = encodeURIComponent(path)
+  return `/_vercel/image?url=${encodedPath}&w=${width}&q=${quality}&f=webp`
 }
 
 /* =====================================================================
@@ -187,7 +194,13 @@ function CertificateCard({ cert, index, isVisible }) {
               'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
           onError={(e) => {
-            e.currentTarget.style.opacity = '0.15'
+            // Fallback to original image if Vercel optimization fails
+            if (IS_VERCEL && e.currentTarget.src.includes('/_vercel/image')) {
+              e.currentTarget.src = encodeURI(cert.image)
+              e.currentTarget.srcSet = ''
+            } else {
+              e.currentTarget.style.opacity = '0.15'
+            }
           }}
         />
         <div
