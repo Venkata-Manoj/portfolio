@@ -152,22 +152,8 @@ function CertificateCard({ cert, index, isVisible }) {
   const staggerDelay = (index % TOTAL) * 100
   const isMobile = useIsMobile()
 
-  // Simplified entrance animation on mobile
-  const initialVariants = isMobile
-    ? { opacity: 0, y: 20 }
-    : { opacity: 0, scale: 0.85, y: 30 }
-  const animateVariants = isMobile
-    ? { opacity: 1, y: 0 }
-    : { opacity: 1, scale: 1, y: 0 }
-  const transitionConfig = isMobile
-    ? { duration: 0.4, delay: staggerDelay, ease: [0.22, 1, 0.36, 1] }
-    : { duration: 0.6, delay: staggerDelay, ease: [0.22, 1, 0.36, 1] }
-
   return (
-    <motion.article
-      initial={initialVariants}
-      animate={isVisible ? animateVariants : {}}
-      transition={transitionConfig}
+    <article
       className={`cert-card group ${isVisible ? 'is-visible' : 'is-hidden'}`}
       data-index={index}
       role="group"
@@ -309,9 +295,9 @@ function CertificateCard({ cert, index, isVisible }) {
           </span>
         </a>
         </div>
-      </motion.article>
-    )
-  }
+    </article>
+  )
+}
 
 /* =====================================================================
    CERTIFICATES SECTION — Horizontal infinite auto-scrolling carousel
