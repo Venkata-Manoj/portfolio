@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const ABOUT_TEXT = "I'm an AI & Data Science engineering student at SIMATS Engineering, class of 2028. I build intelligent systems - from RAG pipelines and multi-LLM agent workflows to full-stack applications deployed at scale. Every project starts with the same philosophy: production-grade quality from day one."
 
@@ -47,6 +48,12 @@ export default function AboutSection() {
   const bioInView = useInView(bioRef, { once: true, margin: '-40px' })
   const skillsRef = useRef(null)
   const skillsInView = useInView(skillsRef, { once: true, margin: '-40px' })
+  const isMobile = useIsMobile()
+
+  // Simplified animation variants for mobile
+  const fadeInUp = isMobile
+    ? { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
+    : { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
 
   return (
     <section
@@ -66,17 +73,16 @@ export default function AboutSection() {
         {/* === Heading === */}
         <div ref={headingRef} className="text-center mb-16 sm:mb-20 group/heading">
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={headingInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            {...fadeInUp}
+            animate={headingInView ? fadeInUp.animate : fadeInUp.initial}
             className="text-[10px] uppercase tracking-[0.3em] text-[rgba(237,231,217,0.25)] font-normal mb-3"
           >
             Discover my story
           </motion.p>
           <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={headingInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            {...fadeInUp}
+            animate={headingInView ? fadeInUp.animate : fadeInUp.initial}
+            transition={{ duration: isMobile ? 0.5 : 0.7, delay: 0.2 }}
             className="font-['Kanit'] font-black uppercase leading-none tracking-tighter text-[#EDE7D9] transition-transform duration-500 group-hover/heading:scale-[1.01]"
             style={{ fontSize: 'clamp(3rem, 9vw, 7.5rem)' }}
           >
@@ -88,7 +94,7 @@ export default function AboutSection() {
           <motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={headingInView ? { width: 80, opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ duration: isMobile ? 0.4 : 0.6, delay: 0.3 }}
             className="h-[2px] mx-auto mt-4 rounded-full bg-gradient-to-r from-[rgba(212,165,116,0.6)] via-[rgba(166,124,82,0.2)] to-transparent transition-all duration-500 group-hover/heading:w-[120px]"
           />
         </div>

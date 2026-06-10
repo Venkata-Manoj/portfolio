@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { useIsMobile } from '../hooks/useIsMobile'
+
 
 /* =====================================================================
    DATA — 6 projects with gold/bronze palette accent colors
@@ -106,7 +108,7 @@ for (let i = 0; i < CLONE_COUNT + 1; i++) {
 /* =====================================================================
    PROJECT CARD — Click-to-flip with shimmer + gold glow
    ===================================================================== */
-function ProjectCard({ project, index }) {
+function ProjectCard({ project, index, isMobile }) {
   const [isFlipped, setIsFlipped] = useState(false)
   const flippingRef = useRef(false)
   const cardRef = useRef(null)
@@ -125,7 +127,18 @@ function ProjectCard({ project, index }) {
       const newFlipped = !isFlipped
       setIsFlipped(newFlipped)
 
-      // Set smooth flip transition
+      // On mobile: simple show/hide without 3D flip
+      if (isMobile) {
+        el.style.transition = 'opacity 0.3s ease, transform 0.3s ease'
+        el.style.opacity = newFlipped ? '0' : '1'
+        el.style.transform = newFlipped ? 'scale(0.95)' : 'scale(1)'
+        setTimeout(() => {
+          flippingRef.current = false
+        }, 300)
+        return
+      }
+
+      // Desktop: full 3D flip animation
       el.style.transition =
         'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease'
       el.style.transform = newFlipped
@@ -138,7 +151,7 @@ function ProjectCard({ project, index }) {
         flippingRef.current = false
       }, 700)
     },
-    [isFlipped]
+    [isFlipped, isMobile]
   )
 
   const handleKeyDown = useCallback(
@@ -151,19 +164,26 @@ function ProjectCard({ project, index }) {
     [handleFlip]
   )
 
+  // Simplified entrance animation on mobile
+  const initialVariants = isMobile
+    ? { opacity: 0, y: 20 }
+    : { opacity: 0, scale: 0.85, y: 30 }
+  const animateVariants = isMobile
+    ? { opacity: 1, y: 0 }
+    : { opacity: 1, scale: 1, y: 0 }
+  const transitionConfig = isMobile
+    ? { duration: 0.4, delay: (index % TOTAL) * 0.05, ease: [0.22, 1, 0.36, 1] }
+    : { duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] }
+
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, scale: 0.85, y: 30 }}
-      animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
-      transition={{
-        duration: 0.6,
-        delay: (index % TOTAL) * 0.1,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      initial={initialVariants}
+      animate={inView ? animateVariants : {}}
+      transition={transitionConfig}
       className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] glass"
       style={{ minHeight: 480 }}
-      whileHover={{ y: -6 }}
+      whileHover={isMobile ? {} : { y: -6 }}
     >
       {/* ── Background gradient ── */}
       <div className="absolute inset-0 z-[1] pointer-events-none">
@@ -448,7 +468,7 @@ function ProjectCard({ project, index }) {
 /* =====================================================================
    GITHUB CARD — Special CTA card (no flip)
    ===================================================================== */
-function GitHubCard({ project, index }) {
+function GitHubCard({ project, index, isMobile }) {
   const cardRef = useRef(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
 
@@ -462,16 +482,23 @@ function GitHubCard({ project, index }) {
     [project.github]
   )
 
+  // Simplified entrance animation on mobile
+  const initialVariants = isMobile
+    ? { opacity: 0, y: 20 }
+    : { opacity: 0, scale: 0.85, y: 30 }
+  const animateVariants = isMobile
+    ? { opacity: 1, y: 0 }
+    : { opacity: 1, scale: 1, y: 0 }
+  const transitionConfig = isMobile
+    ? { duration: 0.4, delay: (index % TOTAL) * 0.05, ease: [0.22, 1, 0.36, 1] }
+    : { duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] }
+
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, scale: 0.85, y: 30 }}
-      animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
-      transition={{
-        duration: 0.6,
-        delay: (index % TOTAL) * 0.1,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      initial={initialVariants}
+      animate={inView ? animateVariants : {}}
+      transition={transitionConfig}
       className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] cursor-pointer"
       style={{
         minHeight: 480,
@@ -486,7 +513,7 @@ function GitHubCard({ project, index }) {
       onKeyDown={handleGitHubKey}
       role="button"
       tabIndex={0}
-      whileHover={{ y: -6 }}
+      whileHover={isMobile ? {} : { y: -6 }}
     >
       {/* ── Background layer ── */}
       <div className="absolute inset-0 z-[1] pointer-events-none">
@@ -583,6 +610,7 @@ export default function ProjectsSection() {
   const [isHovering, setIsHovering] = useState(false)
   const [isPlaying, setIsPlaying] = useState(true)
   const [underlineVisible, setUnderlineVisible] = useState(false)
+  const isMobile = useIsMobile()
   const trackRef = useRef(null)
   const pauseTimerRef = useRef(null)
   const isInitialisedRef = useRef(false)
@@ -625,6 +653,15 @@ export default function ProjectsSection() {
     return () => clearTimeout(timer)
   }, [])
 
+  // ── Disable auto-scroll on mobile (uses shared useIsMobile hook) ──
+  useEffect(() => {
+    if (isMobile && isPlaying) {
+      // Defer to avoid synchronous setState in effect
+      const timer = setTimeout(() => setIsPlaying(false), 0)
+      return () => clearTimeout(timer)
+    }
+  }, [isMobile, isPlaying])
+
   // ── Auto-scroll function ──
   useEffect(() => {
     startAnimRef.current = () => {
@@ -646,9 +683,9 @@ export default function ProjectsSection() {
     }
   }, [oneSetWidth, x, isHovering])
 
-  // ── Start / stop auto-scroll based on isPlaying ──
+  // ── Start / stop auto-scroll based on isPlaying (and not mobile) ──
   useEffect(() => {
-    if (isPlaying && oneSetWidth > 0) {
+    if (isPlaying && oneSetWidth > 0 && !isMobile) {
       startAnimRef.current()
     } else if (autoAnimRef.current) {
       autoAnimRef.current.stop()
@@ -656,17 +693,17 @@ export default function ProjectsSection() {
     return () => {
       if (autoAnimRef.current) autoAnimRef.current.stop()
     }
-  }, [isPlaying, oneSetWidth])
+  }, [isPlaying, oneSetWidth, isMobile])
 
-  // ── Pause / resume on hover ──
+  // ── Pause / resume on hover (respect mobile) ──
   useEffect(() => {
-    if (!autoAnimRef.current) return
+    if (!autoAnimRef.current || isMobile) return
     if (isHovering) {
       autoAnimRef.current.pause()
     } else if (isPlaying) {
       autoAnimRef.current.play()
     }
-  }, [isHovering, isPlaying])
+  }, [isHovering, isPlaying, isMobile])
 
   // ── Track focused index from x position ──
   useEffect(() => {
@@ -915,12 +952,14 @@ export default function ProjectsSection() {
                   key={`github-${i}`}
                   project={project}
                   index={itemIndex}
+                  isMobile={isMobile}
                 />
               ) : (
                 <ProjectCard
                   key={`project-${project.number}-${i}`}
                   project={project}
                   index={itemIndex}
+                  isMobile={isMobile}
                 />
               )
             })}

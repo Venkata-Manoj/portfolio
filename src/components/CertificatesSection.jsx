@@ -6,6 +6,7 @@ import {
   useInView,
 } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 /* =====================================================================
    DATA — 13 certificates (gold/bronze palette accents)
@@ -149,15 +150,31 @@ function optimizeImage(path, width, quality = 75) {
    ===================================================================== */
 function CertificateCard({ cert, index, isVisible }) {
   const staggerDelay = (index % TOTAL) * 100
+  const isMobile = useIsMobile()
+
+  // Simplified entrance animation on mobile
+  const initialVariants = isMobile
+    ? { opacity: 0, y: 20 }
+    : { opacity: 0, scale: 0.85, y: 30 }
+  const animateVariants = isMobile
+    ? { opacity: 1, y: 0 }
+    : { opacity: 1, scale: 1, y: 0 }
+  const transitionConfig = isMobile
+    ? { duration: 0.4, delay: staggerDelay, ease: [0.22, 1, 0.36, 1] }
+    : { duration: 0.6, delay: staggerDelay, ease: [0.22, 1, 0.36, 1] }
 
   return (
-    <article
+    <motion.article
+      initial={initialVariants}
+      animate={isVisible ? animateVariants : {}}
+      transition={transitionConfig}
       className={`cert-card group ${isVisible ? 'is-visible' : 'is-hidden'}`}
       data-index={index}
       role="group"
       aria-roledescription="slide"
       aria-label={`${(index % TOTAL) + 1} of ${TOTAL}: ${cert.title}`}
       style={{ transitionDelay: `${staggerDelay}ms` }}
+      whileHover={isMobile ? {} : { y: -6 }}
     >
       {/* Top gold streak */}
       <div className="absolute top-0 left-[10%] right-[10%] h-[2px] z-4 pointer-events-none bg-gradient-to-r from-transparent via-[#D4A574] via-[30%] via-[#A67C52] via-[70%] to-transparent" aria-hidden="true" />
@@ -291,10 +308,10 @@ function CertificateCard({ cert, index, isVisible }) {
             <ArrowUpRight size={14} />
           </span>
         </a>
-      </div>
-    </article>
-  )
-}
+        </div>
+      </motion.article>
+    )
+  }
 
 /* =====================================================================
    CERTIFICATES SECTION — Horizontal infinite auto-scrolling carousel
@@ -315,12 +332,28 @@ export default function CertificatesSection() {
   const [cardsVisible, setCardsVisible] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [isPlaying, setIsPlaying] = useState(true)
+  const isMobile = useIsMobile()
 
   const headerInView = useInView(headerRef, { once: true })
   const [prefersReducedMotion] = useState(() => {
     if (typeof window === 'undefined') return false
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
   })
+
+  // Track if we've already handled the mobile transition to avoid cascading renders
+  const mobileHandledRef = useRef(false)
+
+  // ── Disable auto-scroll on mobile (uses shared useIsMobile hook) ──
+  useEffect(() => {
+    if (isMobile && isPlaying && !mobileHandledRef.current) {
+      mobileHandledRef.current = true
+      setIsPlaying(false)
+    }
+    // Reset when switching back to desktop
+    if (!isMobile) {
+      mobileHandledRef.current = false
+    }
+  }, [isMobile, isPlaying])
 
   /* ── Card entrance — triggered when header scrolls into view ── */
   useEffect(() => {
@@ -382,10 +415,10 @@ export default function CertificatesSection() {
     }
   }, [oneSetWidth, x, isHovering, prefersReducedMotion])
 
-  /* ── Start / stop auto-scroll based on isPlaying ── */
+  /* ── Start / stop auto-scroll based on isPlaying (and not mobile) ── */
   useEffect(() => {
     if (prefersReducedMotion) return
-    if (isPlaying && oneSetWidth > 0) {
+    if (isPlaying && oneSetWidth > 0 && !isMobile) {
       startAnimRef.current()
     } else if (autoAnimRef.current) {
       autoAnimRef.current.stop()
@@ -393,17 +426,17 @@ export default function CertificatesSection() {
     return () => {
       if (autoAnimRef.current) autoAnimRef.current.stop()
     }
-  }, [isPlaying, oneSetWidth, prefersReducedMotion])
+  }, [isPlaying, oneSetWidth, isMobile, prefersReducedMotion])
 
-  /* ── Pause / resume on hover ── */
+  /* ── Pause / resume on hover (respect mobile) ── */
   useEffect(() => {
-    if (!autoAnimRef.current) return
+    if (!autoAnimRef.current || isMobile) return
     if (isHovering) {
       autoAnimRef.current.pause()
     } else if (isPlaying) {
       autoAnimRef.current.play()
     }
-  }, [isHovering, isPlaying])
+  }, [isHovering, isPlaying, isMobile])
 
   /* ── Track focused index from x position ── */
   useEffect(() => {

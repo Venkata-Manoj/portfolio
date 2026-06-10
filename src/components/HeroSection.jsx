@@ -120,6 +120,10 @@ export default function HeroSection() {
         playsInline
         preload="metadata"
         poster="/me.jpeg"
+        fetchPriority="high"
+        decoding="async"
+        width="1920"
+        height="1080"
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover brightness-60"
       >
