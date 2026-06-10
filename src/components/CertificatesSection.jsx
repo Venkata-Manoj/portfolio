@@ -19,91 +19,91 @@ const CERTS = [
     title: 'AI Fundamentals',
     org: 'DataCamp',
     date: '2026',
-    image: '/certificates/AI_Fundamentals_DC.png',
+    image: '/certificates/AI_Fundamentals_DC.webp',
     accent: '#D4A574',
   },
   {
     title: 'API Fundamentals',
     org: 'DataCamp',
     date: '2026',
-    image: '/certificates/API_DC.png',
+    image: '/certificates/API_DC.webp',
     accent: '#D4A574',
   },
   {
     title: 'AI Engineer — Data Science',
     org: 'DataCamp',
     date: '2026',
-    image: '/certificates/AiE_DS_DC.png',
+    image: '/certificates/AiE_DS_DC.webp',
     accent: '#C4956A',
   },
   {
     title: 'AI Engineer — Development',
     org: 'DataCamp',
     date: '2026',
-    image: '/certificates/AiE_dev_DC.png',
+    image: '/certificates/AiE_dev_DC.webp',
     accent: '#A67C52',
   },
   {
     title: 'Intro to Programming',
     org: 'Kaggle',
     date: '2025',
-    image: '/certificates/B V Manoj - Intro to Programming.png',
+    image: '/certificates/B V Manoj - Intro to Programming.webp',
     accent: '#B8895E',
   },
   {
     title: 'Python Programming',
     org: 'Kaggle',
     date: '2025',
-    image: '/certificates/B V Manoj - Python.png',
+    image: '/certificates/B V Manoj - Python.webp',
     accent: '#B8895E',
   },
   {
     title: 'Season 13 Cohort',
     org: 'Google Developer Groups',
     date: '2026',
-    image: '/certificates/B V Manoj_certificate_s13.jpeg',
+    image: '/certificates/B V Manoj_certificate_s13.webp',
     accent: '#C4956A',
   },
   {
     title: 'Ultimate AI Power Weekend',
     org: 'Outskill',
     date: '2025',
-    image: '/certificates/Certificate - B V Manoj - The Ultimate AI Power Weekend_pages-to-jpg-0001.jpg',
+    image: '/certificates/Certificate - B V Manoj - The Ultimate AI Power Weekend_pages-to-jpg-0001.webp',
     accent: '#D4A574',
   },
   {
     title: 'Embeddings Fundamentals',
     org: 'DataCamp',
     date: '2026',
-    image: '/certificates/Embeddings_DC.png',
+    image: '/certificates/Embeddings_DC.webp',
     accent: '#A67C52',
   },
   {
     title: 'Large Language Models',
     org: 'DataCamp',
     date: '2026',
-    image: '/certificates/LLM_DC.png',
+    image: '/certificates/LLM_DC.webp',
     accent: '#D4A574',
   },
   {
     title: 'AI Certification',
     org: 'NIELIT',
     date: '2026',
-    image: '/certificates/NIELIT.png',
+    image: '/certificates/NIELIT.webp',
     accent: '#C4956A',
   },
   {
     title: 'RAG Bootcamp',
     org: 'KodeKloud',
     date: '2026',
-    image: '/certificates/RAG-BootCamp-KodeKloud.png',
+    image: '/certificates/RAG-BootCamp-KodeKloud.webp',
     accent: '#B8895E',
   },
   {
     title: 'Jio Course Certificate',
     org: 'Jio',
     date: '2026',
-    image: '/certificates/course_certificate_jio.png',
+    image: '/certificates/course_certificate_jio.webp',
     accent: '#A67C52',
   },
 ]
@@ -124,33 +124,13 @@ for (let i = 0; i < CLONE_COUNT + 1; i++) {
   ALL_CERTS.push(...CERTS)
 }
 
-/* =====================================================================
-   IMAGE OPTIMIZATION — Vercel Image Optimization
-   On Vercel deployments, routes /certificates/foo.png through
-   /_vercel/image?url=...&w=...&q=...&f=webp for auto-WebP + resize.
-   Off-Vercel (local dev, GitHub Pages, etc.) returns the original path.
-   ===================================================================== */
 
-// Check for Vercel at build time (import.meta.env.VERCEL is injected by Vite)
-// and at runtime for preview deployments (*.vercel.app) and custom domains
-const IS_VERCEL_BUILD = typeof import.meta !== 'undefined' && import.meta.env?.VERCEL === 'true'
-const IS_VERCEL_RUNTIME = typeof window !== 'undefined'
-  && (window.location.hostname.endsWith('.vercel.app') || window.location.hostname === 'vercel.app')
-const IS_VERCEL = IS_VERCEL_BUILD || IS_VERCEL_RUNTIME
-
-function optimizeImage(path, width, quality = 75) {
-  if (!IS_VERCEL) return encodeURI(path)
-  // Properly encode the path for URL parameter, handling spaces and special chars
-  const encodedPath = encodeURIComponent(path)
-  return `/_vercel/image?url=${encodedPath}&w=${width}&q=${quality}&f=webp`
-}
 
 /* =====================================================================
    CERTIFICATE CARD
    ===================================================================== */
 function CertificateCard({ cert, index, isVisible }) {
   const staggerDelay = (index % TOTAL) * 100
-  const isMobile = useIsMobile()
 
   return (
     <article
@@ -160,7 +140,6 @@ function CertificateCard({ cert, index, isVisible }) {
       aria-roledescription="slide"
       aria-label={`${(index % TOTAL) + 1} of ${TOTAL}: ${cert.title}`}
       style={{ transitionDelay: `${staggerDelay}ms` }}
-      whileHover={isMobile ? {} : { y: -6 }}
     >
       {/* Top gold streak */}
       <div className="absolute top-0 left-[10%] right-[10%] h-[2px] z-4 pointer-events-none bg-gradient-to-r from-transparent via-[#D4A574] via-[30%] via-[#A67C52] via-[70%] to-transparent" aria-hidden="true" />
@@ -176,13 +155,11 @@ function CertificateCard({ cert, index, isVisible }) {
       {/* Image area */}
       <div className="relative w-full h-[240px] bg-black/50 overflow-hidden">
         <img
-          src={optimizeImage(cert.image, 640)}
+          src={cert.image}
           srcSet={`
-            ${optimizeImage(cert.image, 320)} 320w,
-            ${optimizeImage(cert.image, 640)} 640w,
-            ${optimizeImage(cert.image, 960)} 960w
+            ${cert.image} 380w
           `}
-          sizes="(max-width: 768px) 85vw, 380px"
+          sizes="380px"
           alt={`${cert.title} certificate`}
           loading="lazy"
           decoding="async"
@@ -196,15 +173,7 @@ function CertificateCard({ cert, index, isVisible }) {
             transition:
               'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
-          onError={(e) => {
-            // Fallback to original image if Vercel optimization fails
-            if (IS_VERCEL && e.currentTarget.src.includes('/_vercel/image')) {
-              e.currentTarget.src = encodeURI(cert.image)
-              e.currentTarget.srcSet = ''
-            } else {
-              e.currentTarget.style.opacity = '0.15'
-            }
-          }}
+          onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
         />
         <div
           aria-hidden="true"
