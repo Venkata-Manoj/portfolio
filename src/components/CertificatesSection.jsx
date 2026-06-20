@@ -1,12 +1,7 @@
-import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react'
-import {
-  motion,
-  useMotionValue,
-  animate,
-  useInView,
-} from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
-
+import { useInfiniteCarousel } from '../hooks/useInfiniteCarousel'
 
 /* =====================================================================
    DATA — 13 certificates (gold/bronze palette accents)
@@ -123,8 +118,6 @@ const ALL_CERTS = []
 for (let i = 0; i < CLONE_COUNT + 1; i++) {
   ALL_CERTS.push(...CERTS)
 }
-
-
 
 /* =====================================================================
    CERTIFICATE CARD
@@ -263,7 +256,7 @@ function CertificateCard({ cert, index, isVisible }) {
             <ArrowUpRight size={14} />
           </span>
         </a>
-        </div>
+      </div>
     </article>
   )
 }
@@ -272,233 +265,33 @@ function CertificateCard({ cert, index, isVisible }) {
    CERTIFICATES SECTION — Horizontal infinite auto-scrolling carousel
    ===================================================================== */
 export default function CertificatesSection() {
-  const headerRef = useRef(null)
-  const trackRef = useRef(null)
-  const x = useMotionValue(0)
-  const autoAnimRef = useRef(null)
-  const startAnimRef = useRef(null)
-  const pauseTimerRef = useRef(null)
-  const isInitialisedRef = useRef(false)
-  const prevIndexRef = useRef(0)
-
-  const [stepWidth, setStepWidth] = useState(0)
-  const [oneSetWidth, setOneSetWidth] = useState(0)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [cardsVisible, setCardsVisible] = useState(false)
-  const [isHovering, setIsHovering] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(true)
-
-
-  const headerInView = useInView(headerRef, { once: true })
-  const [prefersReducedMotion] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const { trackRef, x, isPlaying, currentIndex, oneSetWidth, goNext, goPrev, goToIndex, togglePlayPause, setIsHovering } = useInfiniteCarousel({
+    total: TOTAL,
+    cardWidth: 380,
+    gap: 24,
+    autoplayMs: AUTOPLAY_INTERVAL_MS,
+    reducedMotion: false,
   })
 
+  // Track focused index from carousel hook
+  const [focusedIndex, setFocusedIndex] = useState(currentIndex)
 
-
-
-
-  /* ── Card entrance — triggered when header scrolls into view ── */
   useEffect(() => {
-    if (!headerInView || cardsVisible) return
-    const id = requestAnimationFrame(() => setCardsVisible(true))
-    return () => cancelAnimationFrame(id)
-  }, [headerInView, cardsVisible])
+    setFocusedIndex(currentIndex)
+  }, [currentIndex])
 
-  /* ── Measure card width and handle window resize dynamically ── */
-  useLayoutEffect(() => {
-    const handleResize = () => {
-      const track = trackRef.current
-      if (!track || !track.children[0]) return
-      const isMobile = window.innerWidth < 1024
-      const cardW = isMobile
-        ? Math.min(window.innerWidth * CARD_MOBILE_WIDTH_RATIO, CARD_DESKTOP_WIDTH_PX)
-        : CARD_DESKTOP_WIDTH_PX
-      const step = cardW + CARD_GAP_PX
-      setStepWidth(step)
-      setOneSetWidth(step * TOTAL)
-
-      if (!isInitialisedRef.current) {
-        x.set(-step * TOTAL)
-        isInitialisedRef.current = true
-      } else {
-        const currentX = x.get()
-        const setOffset = step * TOTAL
-        // Keep within bounds: if position drifted, snap to nearest valid offset
-        const remainder = ((currentX % setOffset) + setOffset) % setOffset
-        x.set(-(setOffset + remainder % step))
-      }
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [x])
-
-  /* ── Auto-scroll function ── */
-  useEffect(() => {
-    if (prefersReducedMotion) return
-
-    startAnimRef.current = () => {
-      if (!oneSetWidth) return
-      const currentX = x.get()
-      const targetX = currentX - oneSetWidth
-      if (autoAnimRef.current) autoAnimRef.current.stop()
-      autoAnimRef.current = animate(x, [currentX, targetX], {
-        duration: 40,
-        ease: 'linear',
-        onComplete: () => {
-          x.set(x.get() + oneSetWidth)
-          if (startAnimRef.current) startAnimRef.current()
-        },
-      })
-      if (isHovering && autoAnimRef.current) {
-        autoAnimRef.current.pause()
-      }
-    }
-  }, [oneSetWidth, x, isHovering, prefersReducedMotion])
-
-  /* ── Start / stop auto-scroll based on isPlaying ── */
-  useEffect(() => {
-    if (prefersReducedMotion) return
-    if (isPlaying && oneSetWidth > 0) {
-      startAnimRef.current()
-    } else if (autoAnimRef.current) {
-      autoAnimRef.current.stop()
-    }
-    return () => {
-      if (autoAnimRef.current) autoAnimRef.current.stop()
-    }
-  }, [isPlaying, oneSetWidth, prefersReducedMotion])
-
-  /* ── Pause / resume on hover ── */
-  useEffect(() => {
-    if (!autoAnimRef.current) return
-    if (isHovering) {
-      autoAnimRef.current.pause()
-    } else if (isPlaying) {
-      autoAnimRef.current.play()
-    }
-  }, [isHovering, isPlaying])
-
-  /* ── Track focused index from x position ── */
-  useEffect(() => {
-    if (!stepWidth) return
-    const unsubscribe = x.on('change', (latest) => {
-      const absScroll = Math.abs(latest)
-      const cardAtLeft = Math.floor(absScroll / stepWidth)
-      const index = cardAtLeft % TOTAL
-      if (index >= 0 && index < TOTAL && index !== prevIndexRef.current) {
-        prevIndexRef.current = index
-        setCurrentIndex(index)
-      }
-    })
-    return unsubscribe
-  }, [stepWidth, x])
-
-  /* ── Cleanup timers on unmount ── */
-  useEffect(() => {
-    return () => clearTimeout(pauseTimerRef.current)
-  }, [])
-
-  /* ── Navigation helpers ── */
-  const togglePlayPause = useCallback(() => {
-    setIsPlaying((prev) => !prev)
-  }, [])
-
-  // ── Drag handlers ──
-  const handleDragStart = useCallback(() => {
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-  }, [])
-
-  const handleDragEnd = useCallback(() => {
-    if (stepWidth === 0) return
-    const currentX = x.get()
-    const nearestCardIndex = Math.round(-currentX / stepWidth)
-    const targetX = -nearestCardIndex * stepWidth
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        const indexInSet = ((nearestCardIndex % TOTAL) + TOTAL) % TOTAL
-        const wrappedIndex = TOTAL + indexInSet
-        x.set(-wrappedIndex * stepWidth)
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
-      },
-    })
-  }, [stepWidth, x])
-
-  const next = useCallback(() => {
-    if (stepWidth === 0) return
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-
-    const currentX = x.get()
-    const targetX = currentX - stepWidth
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
-      },
-    })
-  }, [stepWidth, x])
-
-  const prev = useCallback(() => {
-    if (stepWidth === 0) return
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-
-    const currentX = x.get()
-    const targetX = currentX + stepWidth
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
-      },
-    })
-  }, [stepWidth, x])
-
-  const scrollToIndex = useCallback(
-    (targetIndex) => {
-      if (stepWidth === 0) return
-      if (autoAnimRef.current) autoAnimRef.current.stop()
-      clearTimeout(pauseTimerRef.current)
-      setIsPlaying(false)
-
-      let delta = targetIndex - currentIndex
-      if (delta > TOTAL / 2) delta -= TOTAL
-      if (delta < -(TOTAL / 2)) delta += TOTAL
-
-      const currentX = x.get()
-      const targetX = currentX - delta * stepWidth
-
-      animate(x, [currentX, targetX], {
-        duration: 0.5 + Math.abs(delta) * 0.1,
-        ease: [0.22, 1, 0.36, 1],
-        onComplete: () => {
-          pauseTimerRef.current = setTimeout(() => setIsPlaying(true), AUTOPLAY_INTERVAL_MS)
-        },
-      })
-    },
-    [stepWidth, x, currentIndex]
-  )
+  // Header animation state
+  const headerRef = useRef(null)
+  const headerInView = useInView(headerRef, { once: true })
 
   return (
     <section
       id="certificates"
       className="relative w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C] min-h-screen"
     >
-      {/* ── Ambient orbs (3 layers, gold/bronze drifting) ── */}
+      {/* ═══════════════════════════════════════════════════════════════
+          AMBIENT ORBS — 3 layers, gold/bronze drifting
+          ═══════════════════════════════════════════════════════════════ */}
       <div
         className="pointer-events-none absolute top-[-120px] right-[-80px] w-[500px] h-[500px] rounded-full blur-perf"
         style={{
@@ -524,7 +317,9 @@ export default function CertificatesSection() {
         }}
       />
 
-      {/* ── Gold grid overlay (60×60, masked radial) ── */}
+      {/* ═══════════════════════════════════════════════════════════════
+          GOLD GRID OVERLAY — 60×60, masked radial
+          ═══════════════════════════════════════════════════════════════ */}
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
@@ -536,7 +331,9 @@ export default function CertificatesSection() {
       />
 
       <div className="relative z-10 mx-auto max-w-[1400px]">
-        {/* ── Header (eyebrow + heading + underline + subtitle) ── */}
+        {/* ═══════════════════════════════════════════════════════════════
+            HEADER — Eyebrow + heading + underline + subtitle
+            ═══════════════════════════════════════════════════════════════ */}
         <div ref={headerRef}>
           <p
             className={`cert-eyebrow text-center text-[0.75rem] font-medium uppercase tracking-[0.3em] mb-1 ${headerInView ? 'in-view' : ''}`}
@@ -604,19 +401,16 @@ export default function CertificatesSection() {
           </motion.p>
         </div>
 
-        {/* ── Carousel body ── */}
+        {/* ═══════════════════════════════════════════════════════════════
+            CAROUSEL — Horizontal infinite auto-scroll
+            ═══════════════════════════════════════════════════════════════ */}
         <div
           id="carouselRoot"
           aria-roledescription="carousel"
           aria-label="Certificates carousel"
           className="relative"
           onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => {
-            setIsHovering(false)
-            if (autoAnimRef.current && isPlaying) {
-              autoAnimRef.current.play()
-            }
-          }}
+          onMouseLeave={() => setIsHovering(false)}
         >
           <motion.div
             ref={trackRef}
@@ -627,8 +421,6 @@ export default function CertificatesSection() {
             dragConstraints={{ left: -oneSetWidth * 2.5, right: -oneSetWidth * 0.5 }}
             dragElastic={0.15}
             dragMomentum={false}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
             aria-live="polite"
             aria-atomic="false"
           >
@@ -637,18 +429,20 @@ export default function CertificatesSection() {
                 key={`${cert.title}-${i}`}
                 cert={cert}
                 index={i}
-                isVisible={cardsVisible}
+                isVisible={headerInView}
               />
             ))}
           </motion.div>
         </div>
 
-        {/* ── Navigation row (prev / play-pause / dots / next) ── */}
+        {/* ═══════════════════════════════════════════════════════════════
+            NAVIGATION ROW — prev / play-pause / dots / next
+            ═══════════════════════════════════════════════════════════════ */}
         <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
           <button
             type="button"
             className="cert-nav-btn"
-            onClick={prev}
+            onClick={goPrev}
             aria-label="Previous certificate"
           >
             <ChevronLeft size={18} />
@@ -684,11 +478,11 @@ export default function CertificatesSection() {
               <button
                 key={i}
                 type="button"
-                className={i === currentIndex ? 'cert-dot is-active' : 'cert-dot'}
+                className={i === focusedIndex ? 'cert-dot is-active' : 'cert-dot'}
                 role="tab"
                 aria-label={`Go to certificate ${i + 1}`}
-                aria-selected={i === currentIndex ? 'true' : 'false'}
-                onClick={() => scrollToIndex(i)}
+                aria-selected={i === focusedIndex ? 'true' : 'false'}
+                onClick={() => goToIndex(i)}
               />
             ))}
           </div>
@@ -696,14 +490,16 @@ export default function CertificatesSection() {
           <button
             type="button"
             className="cert-nav-btn"
-            onClick={next}
+            onClick={goNext}
             aria-label="Next certificate"
           >
             <ChevronRight size={18} />
           </button>
         </div>
 
-        {/* ── Hint text ── */}
+        {/* ═══════════════════════════════════════════════════════════════
+            HINT TEXT — Drag to scroll · Use arrows to navigate
+            ═══════════════════════════════════════════════════════════════ */}
         <p
           className="cert-hint-pulse text-center text-[0.7rem] sm:text-xs font-light tracking-[0.25em] uppercase mt-6"
           style={{ color: 'rgba(237,231,217,0.4)' }}

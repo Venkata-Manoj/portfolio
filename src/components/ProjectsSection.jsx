@@ -1,19 +1,8 @@
-import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react'
-import {
-  motion,
-  useMotionValue,
-  animate,
-  useInView,
-} from 'framer-motion'
-import {
-  Github,
-  ExternalLink,
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react'
+import { useRef, useState, useCallback, useEffect } from 'react'
+import { motion, useInView } from 'framer-motion'
+import { Github, ExternalLink, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
-
+import { useInfiniteCarousel } from '../hooks/useInfiniteCarousel'
 
 /* =====================================================================
    DATA — 6 projects with gold/bronze palette accent colors
@@ -23,8 +12,7 @@ const PROJECTS = [
     number: '01',
     emoji: '🎬',
     name: 'videoreverse',
-    description:
-      'Tool to deconstruct videos into production-ready prompts for video AI models.',
+    description: 'Tool to deconstruct videos into production-ready prompts for video AI models.',
     tech: ['Python'],
     accent: '#D4A574', // Warm Gold
     accent2: '#B8895E',
@@ -35,8 +23,7 @@ const PROJECTS = [
     number: '02',
     emoji: '🤖',
     name: 'AI-News-Bot',
-    description:
-      'Autonomous news intelligence with a 6-LLM fallback chain — scrapes 6 sources and delivers rich Telegram cards every 45 minutes.',
+    description: 'Autonomous news intelligence with a 6-LLM fallback chain — scrapes 6 sources and delivers rich Telegram cards every 45 minutes.',
     tech: ['Python', 'Multi-LLM', 'SQLite'],
     accent: '#A67C52', // Bronze
     accent2: '#8B6642',
@@ -47,8 +34,7 @@ const PROJECTS = [
     number: '03',
     emoji: '🔬',
     name: 'WhatIF',
-    description:
-      'AI-powered UI component analyzer — paste any React/Vue/HTML component for instant risk identification and exportable PDF reports.',
+    description: 'AI-powered UI component analyzer — paste any React/Vue/HTML component for instant risk identification and exportable PDF reports.',
     tech: ['TypeScript', 'Next.js', 'Firebase', 'Genkit'],
     accent: '#C4956A', // Antique Gold
     accent2: '#A67C52',
@@ -59,8 +45,7 @@ const PROJECTS = [
     number: '04',
     emoji: '📄',
     name: 'Capstone-Forage',
-    description:
-      'RAG-powered report generator — ingests PDFs, DOCX, and images to produce institution-compliant capstone reports via FAISS + Ollama.',
+    description: 'RAG-powered report generator — ingests PDFs, DOCX, and images to produce institution-compliant capstone reports via FAISS + Ollama.',
     tech: ['Python', 'FastAPI', 'FAISS', 'Ollama'],
     accent: '#B8895E', // Copper
     accent2: '#9A7048',
@@ -71,8 +56,7 @@ const PROJECTS = [
     number: '05',
     emoji: '🛡️',
     name: 'Resilience-Ops-Env',
-    description:
-      'Gym-style RL environment for IT incident response — AI agents learn triage, diagnosis, and recovery across progressive difficulty levels.',
+    description: 'Gym-style RL environment for IT incident response — AI agents learn triage, diagnosis, and recovery across progressive difficulty levels.',
     tech: ['Python', 'RL', 'OpenAI Gym'],
     accent: '#E8B4A0', // Rose Gold
     accent2: '#D49A84',
@@ -86,8 +70,7 @@ const GITHUB_CARD = {
   number: '06',
   emoji: '📦',
   name: 'Explore More on GitHub',
-  description:
-    'Discover all my open-source repositories, contributions, and ongoing projects.',
+  description: 'Discover all my open-source repositories, contributions, and ongoing projects.',
   accent: '#C0B8A8', // Warm Silver
   accent2: '#A89F90',
   github: 'https://github.com/Venkata-Manoj',
@@ -295,314 +278,173 @@ function ProjectCard({ project, index, isMobile }) {
               onKeyDown={handleKeyDown}
               className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(212,165,116,0.15)] border border-[rgba(212,165,116,0.3)] text-[rgba(212,165,116,0.8)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.25)] hover:border-[rgba(212,165,116,0.5)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[rgba(212,165,116,0.5)]"
               aria-label={isFlipped ? 'Flip to front' : 'Flip to back'}
+              aria-expanded={isFlipped}
+              aria-controls={`project-card-${index}`}
             >
               <svg
-                width="18"
-                height="18"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className={isFlipped ? 'rotate-180' : ''}
-                style={{ transition: 'transform 0.3s ease' }}
               >
-                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M3 12a9 9 0 1 1 9-9c-2.52 0-4.93 1-6.74 2.74L3 16" />
-                <path d="M3 21v-5h5" />
+                <path d="m10 17 5-5-5-5" />
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0118 0" />
               </svg>
             </button>
           </div>
 
-          {/* ── Right panel (42%) — Gold/bronze gradient blobs ── */}
-          <div className="card-front-right flex-1 relative overflow-hidden flex items-center justify-center max-md:hidden">
-            <div
-              className="absolute w-[350px] h-[350px] rounded-full blur-[40px] opacity-[0.30] top-[10%] right-[20%] animate-projects-gold-blob"
+          {/* ── Right panel (42%) ── */}
+          <div
+            className="card-front-right flex-[0_0_42%] flex flex-col justify-center px-[clamp(1.5rem,3vw,3rem)] py-[clamp(2rem,4vw,4rem)] relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(212,165,116,0.03), rgba(212,165,116,0.08), rgba(212,165,116,0.03))',
+              borderLeft: '1px solid rgba(212,165,116,0.08)',
+            }}
+          >
+            {/* Project description */}
+            <p
+              className="text-[0.95rem] font-light leading-relaxed text-[rgba(237,231,217,0.6)] mb-6"
               style={{
-                background: `radial-gradient(circle, ${project.accent}, transparent 70%)`,
+                display: '-webkit-box',
+                WebkitLineClamp: 4,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
               }}
-            />
-            <div
-              className="absolute w-[280px] h-[280px] rounded-full blur-[40px] opacity-[0.25] bottom-[15%] right-[35%] animate-projects-gold-blob"
-              style={{
-                background: `radial-gradient(circle, ${project.accent2}, transparent 70%)`,
-                animationDelay: '-3s',
-              }}
-            />
-            <div
-              className="absolute w-[200px] h-[200px] rounded-full blur-[40px] opacity-[0.20] top-[50%] right-[10%] animate-projects-gold-blob"
-              style={{
-                background: `radial-gradient(circle, ${project.accent}, transparent 70%)`,
-                animationDelay: '-6s',
-              }}
-            />
-            <div
-              className="absolute w-[150px] h-[150px] rounded-full blur-[40px] opacity-[0.15] top-[25%] right-[45%] animate-projects-gold-blob"
-              style={{
-                background: `radial-gradient(circle, ${project.accent2}, transparent 70%)`,
-                animationDelay: '-2s',
-              }}
-            />
+            >
+              {project.description}
+            </p>
+
+            {/* Tech stack tags */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {project.tech.map((t) => (
+                <span
+                  key={t}
+                  className="tech-tag inline-block px-[12px] py-[4px] rounded-full border border-[rgba(212,165,116,0.12)] bg-[rgba(212,165,116,0.04)] text-[rgba(212,165,116,0.6)] text-[0.65rem] font-medium transition-all duration-300 hover:border-[rgba(212,165,116,0.25)] hover:text-[#D4A574] hover:scale-105"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            {/* GitHub link */}
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[0.85rem] font-medium text-[rgba(212,165,116,0.7)] hover:text-[#D4A574] transition-colors duration-300"
+            >
+              <Github size={16} />
+              <span>View on GitHub</span>
+              <ArrowUpRight size={14} className="transition-transform duration-300 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5" />
+            </a>
           </div>
         </div>
 
         {/* ══════ BACK FACE ══════ */}
         <div
-          className="card-face absolute inset-0 rounded-[24px] overflow-hidden flex flex-col justify-center px-[clamp(2rem,4vw,5rem)] py-[clamp(1.5rem,3vw,3.5rem)] z-[1]"
+          className="card-face absolute inset-0 rounded-[24px] overflow-hidden flex z-[1] glass-card-back"
           style={{
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            transform: isMobile
-              ? (isFlipped ? 'scale(1)' : 'scale(0.95)')
-              : 'rotateY(180deg)',
-            background: 'rgba(26,24,22,0.96)',
-            backdropFilter: 'blur(16px) saturate(1.2)',
-            WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
-            border: '1px solid rgba(212,165,116,0.08)',
+            transform: 'rotateY(180deg)',
             ...(isMobile ? {
               opacity: isFlipped ? 1 : 0,
               pointerEvents: isFlipped ? 'auto' : 'none',
               transition: 'opacity 0.3s ease, transform 0.3s ease',
-              zIndex: isFlipped ? 10 : 1,
+              transform: isFlipped ? 'scale(1)' : 'scale(0.95)',
             } : {})
           }}
         >
-          {/* Back description */}
-          <p className="card-back-desc text-[clamp(0.88rem,1.2vw,1.05rem)] font-light leading-[1.7] text-[rgba(237,231,217,0.65)] max-w-[640px] mb-6">
-            {project.description}
-          </p>
-
-          {/* Back tech pills */}
-          <div className="card-back-tags flex flex-wrap gap-2 mb-6">
-            {project.tech.map((t) => (
-              <span
-                key={t}
-                className="card-back-tag inline-block text-[0.72rem] font-medium px-[14px] py-[5px] rounded-full border text-[rgba(237,231,217,0.85)] tracking-[0.02em] cursor-default transition-all duration-300 hover:bg-[#D4A574] hover:text-[#0C0C0C] hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-[0_0_20px_-4px_rgba(212,165,116,0.20)] active:translate-y-0 active:scale-[0.95]"
-                style={{
-                  background: 'rgba(212,165,116,0.08)',
-                  borderColor: 'rgba(212,165,116,0.25)',
-                }}
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-
-          {/* Back links */}
-          <div className="card-back-links flex gap-[14px] flex-wrap items-center">
-            {/* GitHub button */}
+          {/* GitHub CTA content */}
+          <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-6"
+              style={{
+                background: `linear-gradient(135deg, ${project.accent}, ${project.accent2})`,
+                boxShadow: `0 0 40px ${project.accent}40`,
+              }}
+            >
+              {project.emoji}
+            </div>
+            <h3
+              className="text-2xl font-bold text-[#EDE7D9] mb-3"
+              style={{
+                textShadow: `0 0 20px ${project.accent}40`,
+              }}
+            >
+              {project.name}
+            </h3>
+            <p
+              className="text-[0.9rem] font-light text-[rgba(237,231,217,0.5)] mb-6 leading-relaxed"
+            >
+              {project.description}
+            </p>
             <a
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="card-back-link github inline-flex items-center gap-[6px] text-[0.82rem] font-medium px-[22px] py-[9px] rounded-[12px] no-underline transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] border border-[rgba(212,165,116,0.25)] text-[rgba(212,165,116,0.70)] hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.50)] hover:text-[#D4A574] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.3),0_0_20px_-4px_rgba(212,165,116,0.10)] active:translate-y-0 active:scale-[0.96]"
-              onClick={(e) => e.stopPropagation()}
-              aria-label={`View ${project.name} on GitHub`}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] font-semibold rounded-full hover:shadow-[0_0_30px_rgba(212,165,116,0.3)] hover:scale-105 transition-all duration-300"
             >
-              <Github size={16} />
-              GitHub
+              <span>Explore All Projects</span>
+              <ArrowUpRight size={16} />
             </a>
-
-            {/* Live Demo button (only if live URL exists) */}
-            {project.live && (
-              <a
-                href={project.live}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="card-back-link demo inline-flex items-center gap-[6px] text-[0.82rem] font-semibold px-[22px] py-[9px] rounded-[12px] no-underline transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-[#0C0C0C] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_-4px_rgba(212,165,116,0.40)] hover:brightness-110 active:translate-y-0 active:scale-[0.96]"
-                style={{
-                  background: 'linear-gradient(135deg, #D4A574, #A67C52)',
-                  border: 'none',
-                }}
-                onClick={(e) => e.stopPropagation()}
-                aria-label={`Live Demo of ${project.name}`}
-              >
-                <ExternalLink size={16} />
-                Live Demo
-              </a>
-            )}
           </div>
-
-          {/* Back flip button — accessible trigger */}
-          <button
-            type="button"
-            onClick={handleFlip}
-            onKeyDown={handleKeyDown}
-            className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(212,165,116,0.15)] border border-[rgba(212,165,116,0.3)] text-[rgba(212,165,116,0.8)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.25)] hover:border-[rgba(212,165,116,0.5)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[rgba(212,165,116,0.5)]"
-            aria-label={isFlipped ? 'Flip to front' : 'Flip to back'}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={isFlipped ? 'rotate-180' : ''}
-              style={{ transition: 'transform 0.3s ease' }}
-            >
-              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-              <path d="M21 3v5h-5" />
-              <path d="M3 12a9 9 0 1 1 9-9c-2.52 0-4.93 1-6.74 2.74L3 16" />
-              <path d="M3 21v-5h5" />
-            </svg>
-          </button>
         </div>
-
-        {/* ── Shimmer overlay (hover gold sweep) ── */}
-        <div
-          className="card-shimmer absolute inset-0 z-[5] pointer-events-none opacity-0 transition-opacity duration-500 rounded-[24px]"
-          style={{
-            background:
-              'linear-gradient(105deg, transparent 0%, transparent 30%, rgba(212,165,116,0.02) 45%, rgba(212,165,116,0.04) 50%, rgba(212,165,116,0.02) 55%, transparent 70%, transparent 100%)',
-            backgroundSize: '200% 100%',
-          }}
-        />
-
-        {/* ── Gold glow edge on hover ── */}
-        <div
-          className="card-glow absolute -inset-[1px] rounded-[25px] pointer-events-none opacity-0 transition-opacity duration-500 z-[6]"
-          style={{
-            boxShadow:
-              '0 0 0 1px rgba(212,165,116,0.20), 0 0 30px -4px rgba(212,165,116,0.12)',
-          }}
-        />
       </div>
     </motion.div>
   )
 }
 
 /* =====================================================================
-   GITHUB CARD — Special CTA card (no flip)
+   GITHUB CARD — Static, no flip
    ===================================================================== */
 function GitHubCard({ project, index, isMobile }) {
-  const cardRef = useRef(null)
-  const inView = useInView(cardRef, { once: true, margin: '-40px' })
-
-  const handleGitHubKey = useCallback(
-    (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        window.open(project.github, '_blank', 'noopener noreferrer')
-      }
-    },
-    [project.github]
-  )
-
-  // Simplified entrance animation on mobile
-  const initialVariants = isMobile
-    ? { opacity: 0, y: 20 }
-    : { opacity: 0, scale: 0.85, y: 30 }
-  const animateVariants = isMobile
-    ? { opacity: 1, y: 0 }
-    : { opacity: 1, scale: 1, y: 0 }
-  const transitionConfig = isMobile
-    ? { duration: 0.4, delay: (index % TOTAL) * 0.05, ease: [0.22, 1, 0.36, 1] }
-    : { duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] }
-
   return (
     <motion.div
-      ref={cardRef}
-      initial={initialVariants}
-      animate={inView ? animateVariants : {}}
-      transition={transitionConfig}
-      className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] cursor-pointer"
-      style={{
-        minHeight: 480,
-        background: 'rgba(30,28,26,0.6)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(212,165,116,0.06)',
-      }}
-      onClick={() =>
-        window.open(project.github, '_blank', 'noopener noreferrer')
-      }
-      onKeyDown={handleGitHubKey}
-      role="button"
-      tabIndex={0}
-      whileHover={isMobile ? {} : { y: -6 }}
+      initial={{ opacity: 0, y: 30, scale: 0.85 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] glass"
+      style={{ minHeight: 480 }}
+      whileHover={{ y: -6 }}
     >
-      {/* ── Background layer ── */}
-      <div className="absolute inset-0 z-[1] pointer-events-none">
+      {/* GitHub CTA content */}
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-6"
           style={{
-            background: [
-              `radial-gradient(ellipse 80% 60% at 30% 40%, ${project.accent} 0%, transparent 70%)`,
-              `radial-gradient(ellipse 60% 70% at 70% 60%, ${project.accent2} 0%, transparent 70%)`,
-              `linear-gradient(145deg, ${project.accent}, ${project.accent2})`,
-            ].join(', '),
-          }}
-        />
-      </div>
-
-      {/* ── Content ── */}
-      <div
-        className="relative z-[3] w-full h-full min-h-[480px] rounded-[24px] overflow-hidden flex flex-col items-center justify-center gap-6 group/card transition-all duration-500"
-        style={{
-          background: 'rgba(30,28,26,0.50)',
-          backdropFilter: 'blur(16px) saturate(1.1)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.1)',
-          border: '1px solid rgba(212,165,116,0.06)',
-        }}
-      >
-        {/* Shimmer border on hover */}
-        <div className="absolute inset-[-1px] rounded-[25px] pointer-events-none opacity-0 transition-opacity duration-500 group-hover/card:opacity-100 animate-projects-gold-border" />
-
-        {/* Glow orbs */}
-        <div
-          className="absolute w-[400px] h-[400px] rounded-full blur-[60px] opacity-[0.08] top-[20%] left-[30%] pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${project.accent}, transparent 70%)`,
-          }}
-        />
-        <div
-          className="absolute w-[300px] h-[300px] rounded-full blur-[50px] opacity-[0.06] bottom-[10%] right-[20%] pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${project.accent2}, transparent 70%)`,
-          }}
-        />
-
-        {/* GitHub logo */}
-        <div
-          className="w-[100px] h-[100px] rounded-full flex items-center justify-center transition-all duration-500 group-hover/card:scale-110 group-hover/card:shadow-[0_0_50px_-4px_rgba(212,165,116,0.30)]"
-          style={{
-            background:
-              'radial-gradient(circle at 30% 30%, rgba(212,165,116,0.20), rgba(166,124,82,0.08) 60%, transparent 80%)',
-            border: '2px solid rgba(212,165,116,0.25)',
-            boxShadow: '0 0 30px -6px rgba(212,165,116,0.12)',
+            background: `linear-gradient(135deg, ${project.accent}, ${project.accent2})`,
+            boxShadow: `0 0 40px ${project.accent}40`,
           }}
         >
-          <Github size={48} className="text-[rgba(212,165,116,0.7)]" />
+          {project.emoji}
         </div>
-
-        {/* Title */}
-        <h2 className="text-[clamp(1.8rem,4vw,3rem)] font-bold text-white text-center">
+        <h3
+          className="text-2xl font-bold text-[#EDE7D9] mb-3"
+          style={{
+            textShadow: `0 0 20px ${project.accent}40`,
+          }}
+        >
           {project.name}
-        </h2>
-
-        {/* Description */}
-        <p className="text-[clamp(0.9rem,1.2vw,1.1rem)] font-light leading-[1.6] text-[rgba(237,231,217,0.5)] max-w-[500px] text-center">
+        </h3>
+        <p
+          className="text-[0.9rem] font-light text-[rgba(237,231,217,0.5)] mb-6 leading-relaxed"
+        >
           {project.description}
         </p>
-
-        {/* CTA Button */}
-        <div
-          className="inline-flex items-center gap-3 text-[0.9rem] font-semibold px-[28px] py-[12px] rounded-[14px] transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] text-[#0C0C0C] group-hover/card:-translate-y-0.5 group-hover/card:shadow-[0_8px_28px_-4px_rgba(212,165,116,0.40)] group-hover/card:brightness-110 active:scale-[0.96]"
-          style={{
-            background: 'linear-gradient(135deg, #D4A574, #A67C52)',
-          }}
+        <a
+          href={project.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] font-semibold rounded-full hover:shadow-[0_0_30px_rgba(212,165,116,0.3)] hover:scale-105 transition-all duration-300"
         >
-          View all repositories on GitHub{' '}
-          <ArrowUpRight
-            size={18}
-            className="transition-transform duration-300 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5"
-          />
-        </div>
+          <span>Explore All Projects</span>
+          <ArrowUpRight size={16} />
+        </a>
       </div>
     </motion.div>
   )
@@ -612,217 +454,32 @@ function GitHubCard({ project, index, isMobile }) {
    PROJECTS SECTION — Horizontal infinite auto-scrolling carousel
    ===================================================================== */
 export default function ProjectsSection() {
-  const x = useMotionValue(0)
-  const autoAnimRef = useRef(null)
-  const startAnimRef = useRef(null)
-  const [stepWidth, setStepWidth] = useState(0)
-  const [oneSetWidth, setOneSetWidth] = useState(0)
-  const [focusedIndex, setFocusedIndex] = useState(0)
-  const [isHovering, setIsHovering] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [underlineVisible, setUnderlineVisible] = useState(false)
   const isMobile = useIsMobile()
-  const trackRef = useRef(null)
-  const pauseTimerRef = useRef(null)
-  const isInitialisedRef = useRef(false)
+  const { trackRef, x, isPlaying, currentIndex, stepWidth, goNext, goPrev, goToIndex, togglePlayPause, setIsHovering } = useInfiniteCarousel({
+    total: TOTAL,
+    cardWidth: 380,
+    gap: 24,
+    autoplayMs: 3000,
+    reducedMotion: false,
+  })
 
   // Track focused index in a ref to avoid dependency cycles in resize effect
   const focusedIndexRef = useRef(0)
+  const [focusedIndex, setFocusedIndex] = useState(0)
+
   useEffect(() => {
     focusedIndexRef.current = focusedIndex
   }, [focusedIndex])
 
-  // ── Measure card width and handle window resize dynamically ──
-  // Use useLayoutEffect to measure before first paint, avoiding flash
-  useLayoutEffect(() => {
-    const handleResize = () => {
-      const track = trackRef.current
-      if (!track || !track.children[0]) return
-      const cardW = track.children[0].offsetWidth
-      const gap = 24
-      const step = cardW + gap
-      setStepWidth(step)
-      setOneSetWidth(step * TOTAL)
-
-      // Position at "original" set (index TOTAL) so first visible card is videoreverse
-      if (!isInitialisedRef.current) {
-        x.set(-step * TOTAL)
-        isInitialisedRef.current = true
-      } else {
-        x.set(-step * (TOTAL + focusedIndexRef.current))
-      }
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [x])
-
-  // ── Gold underline grows after mount ──
+  // Update currentIndex from carousel hook
   useEffect(() => {
-    const timer = setTimeout(() => setUnderlineVisible(true), 600)
-    return () => clearTimeout(timer)
-  }, [])
+    setFocusedIndex(currentIndex)
+  }, [currentIndex])
 
+  // Progress bar percentage
+  const progressPercent = (focusedIndex / (TOTAL - 1)) * 100
 
-
-  // ── Auto-scroll function ──
-  useEffect(() => {
-    startAnimRef.current = () => {
-      if (!oneSetWidth) return
-      const currentX = x.get()
-      const targetX = currentX - oneSetWidth
-      if (autoAnimRef.current) autoAnimRef.current.stop()
-      autoAnimRef.current = animate(x, [currentX, targetX], {
-        duration: 40,
-        ease: 'linear',
-        onComplete: () => {
-          x.set(x.get() + oneSetWidth)
-          if (startAnimRef.current) startAnimRef.current()
-        },
-      })
-      if (isHovering && autoAnimRef.current) {
-        autoAnimRef.current.pause()
-      }
-    }
-  }, [oneSetWidth, x, isHovering])
-
-  // ── Start / stop auto-scroll based on isPlaying ──
-  useEffect(() => {
-    if (isPlaying && oneSetWidth > 0) {
-      startAnimRef.current()
-    } else if (autoAnimRef.current) {
-      autoAnimRef.current.stop()
-    }
-    return () => {
-      if (autoAnimRef.current) autoAnimRef.current.stop()
-    }
-  }, [isPlaying, oneSetWidth])
-
-  // ── Pause / resume on hover ──
-  useEffect(() => {
-    if (!autoAnimRef.current) return
-    if (isHovering) {
-      autoAnimRef.current.pause()
-    } else if (isPlaying) {
-      autoAnimRef.current.play()
-    }
-  }, [isHovering, isPlaying])
-
-  // ── Track focused index from x position ──
-  useEffect(() => {
-    if (!stepWidth) return
-    const unsubscribe = x.on('change', (latest) => {
-      const absScroll = Math.abs(latest)
-      const cardAtLeft = Math.floor(absScroll / stepWidth)
-      const index = cardAtLeft % TOTAL
-      if (index >= 0 && index < TOTAL) {
-        setFocusedIndex(index)
-      }
-    })
-    return unsubscribe
-  }, [stepWidth, x])
-
-  // ── Cleanup pause timer on unmount ──
-  useEffect(() => {
-    return () => {
-      clearTimeout(pauseTimerRef.current)
-    }
-  }, [])
-
-  // ── Navigation helpers ──
-  const togglePlayPause = useCallback(() => {
-    setIsPlaying((prev) => !prev)
-  }, [])
-
-  // ── Drag handlers ──
-  const handleDragStart = useCallback(() => {
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-  }, [])
-
-  const handleDragEnd = useCallback(() => {
-    if (stepWidth === 0) return
-    const currentX = x.get()
-    const nearestCardIndex = Math.round(-currentX / stepWidth)
-    const targetX = -nearestCardIndex * stepWidth
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        const indexInSet = ((nearestCardIndex % TOTAL) + TOTAL) % TOTAL
-        const wrappedIndex = TOTAL + indexInSet
-        x.set(-wrappedIndex * stepWidth)
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), 3000)
-      },
-    })
-  }, [stepWidth, x])
-
-  const goNext = useCallback(() => {
-    if (stepWidth === 0) return
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-
-    const currentX = x.get()
-    const targetX = currentX - stepWidth
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), 3000)
-      },
-    })
-  }, [stepWidth, x])
-
-  const goPrev = useCallback(() => {
-    if (stepWidth === 0) return
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-
-    const currentX = x.get()
-    const targetX = currentX + stepWidth
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), 3000)
-      },
-    })
-  }, [stepWidth, x])
-
-  const goToCard = useCallback(
-    (targetIndex) => {
-      if (stepWidth === 0) return
-      if (autoAnimRef.current) autoAnimRef.current.stop()
-      clearTimeout(pauseTimerRef.current)
-      setIsPlaying(false)
-
-      // Calculate the shortest delta in steps
-      let delta = targetIndex - focusedIndex
-      if (delta > TOTAL / 2) delta -= TOTAL
-      if (delta < -(TOTAL / 2)) delta += TOTAL
-
-      const currentX = x.get()
-      const targetX = currentX - delta * stepWidth
-
-      animate(x, [currentX, targetX], {
-        duration: 0.5 + Math.abs(delta) * 0.1,
-        ease: [0.22, 1, 0.36, 1],
-        onComplete: () => {
-          pauseTimerRef.current = setTimeout(() => setIsPlaying(true), 3000)
-        },
-      })
-    },
-    [stepWidth, focusedIndex, x]
-  )
-
-  // ── Keyboard navigation ──
+  // Keyboard navigation
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'ArrowLeft') goPrev()
@@ -831,9 +488,6 @@ export default function ProjectsSection() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [goPrev, goNext])
-
-  // ── Progress bar percentage ──
-  const progressPercent = (focusedIndex / (TOTAL - 1)) * 100
 
   return (
     <section
@@ -925,7 +579,7 @@ export default function ProjectsSection() {
               style={{
                 background:
                   'linear-gradient(90deg, transparent, #D4A574, #A67C52, transparent)',
-                width: underlineVisible ? '120px' : '0px',
+                width: '120px',
                 transition: 'width 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
               }}
             />
@@ -959,8 +613,8 @@ export default function ProjectsSection() {
           onMouseLeave={() => {
             setIsHovering(false)
             // Restore auto-scroll if it was paused by hover
-            if (autoAnimRef.current && isPlaying) {
-              autoAnimRef.current.play()
+            if (isPlaying) {
+              // The hook handles this automatically
             }
           }}
         >
@@ -969,11 +623,9 @@ export default function ProjectsSection() {
             className="flex gap-6 cursor-grab active:cursor-grabbing"
             style={{ x }}
             drag="x"
-            dragConstraints={{ left: -oneSetWidth * 2.5, right: -oneSetWidth * 0.5 }}
+            dragConstraints={{ left: -stepWidth * 2.5, right: -stepWidth * 0.5 }}
             dragElastic={0.15}
             dragMomentum={false}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
             aria-live="polite"
             aria-atomic="false"
           >
@@ -1002,94 +654,65 @@ export default function ProjectsSection() {
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            CONTROLS — Arrows + dot indicators + project indicator
+            NAVIGATION CONTROLS — Prev / Play-Pause / Dots / Next
             ═══════════════════════════════════════════════════════════════ */}
-        <div className="flex items-center justify-center gap-6 mt-8 sm:mt-10">
-          {/* Left arrow */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
           <button
             type="button"
+            className="projects-nav-btn"
             onClick={goPrev}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-[rgba(212,165,116,0.20)] text-[rgba(212,165,116,0.60)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.40)] hover:text-[#D4A574] active:scale-90"
             aria-label="Previous project"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
 
           {/* Play/Pause toggle */}
           <button
             type="button"
             onClick={togglePlayPause}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-[rgba(212,165,116,0.20)] text-[rgba(212,165,116,0.60)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.40)] hover:text-[#D4A574] active:scale-90"
+            className="projects-nav-btn"
             aria-label={isPlaying ? 'Pause auto-scroll' : 'Resume auto-scroll'}
             aria-pressed={!isPlaying}
           >
             {isPlaying ? (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <rect x="6" y="4" width="4" height="16" />
                 <rect x="14" y="4" width="4" height="16" />
               </svg>
             ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <polygon points="5,3 19,12 5,21" />
               </svg>
             )}
           </button>
 
-          {/* Dot indicators */}
-          <div className="flex items-center gap-2" role="tablist" aria-label="Project navigation">
-            {ALL_PROJECTS.map((_, i) => (
+          <div
+            id="dots"
+            className="flex items-center gap-2 sm:gap-2.5 flex-wrap justify-center"
+            role="tablist"
+            aria-label="Project slides"
+          >
+            {PROJECTS.map((_, i) => (
               <button
-                type="button"
                 key={i}
-                onClick={() => goToCard(i)}
+                type="button"
+                className={i === focusedIndex ? 'projects-dot is-active' : 'projects-dot'}
                 role="tab"
-                aria-selected={focusedIndex === i}
                 aria-label={`Go to project ${i + 1}`}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  focusedIndex === i
-                    ? 'bg-[#D4A574] w-6 shadow-[0_0_8px_rgba(212,165,116,0.40)]'
-                    : 'bg-[rgba(212,165,116,0.20)] hover:bg-[rgba(212,165,116,0.40)]'
-                }`}
+                aria-selected={i === focusedIndex ? 'true' : 'false'}
+                onClick={() => goToIndex(i)}
               />
             ))}
           </div>
 
-          {/* Right arrow */}
           <button
             type="button"
+            className="projects-nav-btn"
             onClick={goNext}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-[rgba(212,165,116,0.20)] text-[rgba(212,165,116,0.60)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.10)] hover:border-[rgba(212,165,116,0.40)] hover:text-[#D4A574] active:scale-90"
             aria-label="Next project"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
-        </div>
-
-        {/* Project indicator — gold gradient number + OF label */}
-        <div className="flex items-center justify-center gap-3 mt-5" aria-hidden="true">
-          <div className="w-[30px] h-[1px]" style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(212,165,116,0.35), transparent)',
-          }} />
-          <span
-            className="text-[1.2rem] font-bold leading-none tracking-[0.02em]"
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              background: 'linear-gradient(135deg, #D4A574, #A67C52)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            {String(focusedIndex + 1).padStart(2, '0')}
-          </span>
-          <span className="text-[0.65rem] font-normal text-[rgba(212,165,116,0.40)] tracking-[0.12em]">
-            OF {String(TOTAL).padStart(2, '0')}
-          </span>
-          <div className="w-[30px] h-[1px]" style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(212,165,116,0.35), transparent)',
-          }} />
         </div>
       </div>
     </section>
