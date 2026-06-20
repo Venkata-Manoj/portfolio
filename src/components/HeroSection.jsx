@@ -189,6 +189,15 @@ export default function HeroSection() {
             >
               <WordReveal text="AI Engineer · Data Scientist · Full-Stack Developer" delay={1.5} />
             </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.8 }}
+              className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#D4A574]/60 mt-2"
+            >
+              Open to AI/ML internships &amp; research collaborations
+            </motion.p>
           </div>
 
           {/* CTA */}
