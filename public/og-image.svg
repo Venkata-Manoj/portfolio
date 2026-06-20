@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0C0C0C"/>
+      <stop offset="50%" stop-color="#141010"/>
+      <stop offset="100%" stop-color="#0C0C0C"/>
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4A574"/>
+      <stop offset="35%" stop-color="#E8C88A"/>
+      <stop offset="65%" stop-color="#D4A574"/>
+      <stop offset="100%" stop-color="#A67C52"/>
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D4A574" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#E8C88A" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#D4A574" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="goldFade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4A574" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#E8C88A" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#A67C52" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="taglineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C8A87C"/>
+      <stop offset="50%" stop-color="#E0C090"/>
+      <stop offset="100%" stop-color="#C8A87C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgDark)"/>
+
+  <!-- Subtle radial glow top-right -->
+  <circle cx="1000" cy="100" r="400" fill="url(#goldFade)"/>
+
+  <!-- Subtle radial glow bottom-left -->
+  <circle cx="200" cy="530" r="300" fill="url(#goldFade)"/>
+
+  <!-- Decorative large circle top-left -->
+  <circle cx="80" cy="80" r="60" fill="none" stroke="url(#goldAccent)" stroke-width="1" opacity="0.3"/>
+
+  <!-- Decorative circle bottom-right -->
+  <circle cx="1120" cy="550" r="80" fill="none" stroke="url(#goldAccent)" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- Decorative small circles -->
+  <circle cx="300" cy="500" r="12" fill="#D4A574" opacity="0.15"/>
+  <circle cx="900" cy="120" r="8" fill="#E8C88A" opacity="0.2"/>
+  <circle cx="500" cy="560" r="6" fill="#D4A574" opacity="0.12"/>
+  <circle cx="1100" cy="200" r="5" fill="#A67C52" opacity="0.2"/>
+
+  <!-- Horizontal decorative lines -->
+  <line x1="350" y1="100" x2="850" y2="100" stroke="url(#goldAccent)" stroke-width="0.5" opacity="0.15"/>
+  <line x1="350" y1="530" x2="850" y2="530" stroke="url(#goldAccent)" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- Gold accent line above name -->
+  <line x1="380" y1="245" x2="820" y2="245" stroke="url(#goldAccent)" stroke-width="3" opacity="0.6"/>
+
+  <!-- Tagline -->
+  <text x="600" y="300" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="22" font-weight="300" fill="url(#taglineGrad)" letter-spacing="4" opacity="0.9">AI ENGINEER · DATA SCIENTIST · FULL-STACK DEVELOPER</text>
+
+  <!-- Name -->
+  <text x="600" y="400" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="76" font-weight="700" fill="url(#goldGradient)" letter-spacing="6">B V MANOJ</text>
+
+  <!-- Subtle accent line below name -->
+  <line x1="440" y1="430" x2="760" y2="430" stroke="url(#goldAccent)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Bottom row: domain -->
+  <text x="600" y="530" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#8A7A6A" letter-spacing="3" opacity="0.6">venkata-manoj.vercel.app</text>
+
+  <!-- Small diamond ornament -->
+  <polygon points="600,470 605,478 600,486 595,478" fill="#D4A574" opacity="0.3"/>
+</svg>
