@@ -124,6 +124,11 @@ export default function PamWidget({ tourTrigger }) {
     setCurrentTrackIndex(0)
     setCurrentTime(0)
     setShowOverride(false)
+    // iOS Safari requires user-gesture-initiated play()
+    if (audioRef.current) {
+      audioRef.current.src = `/audio/${TRACKS[0].id}.mp3`
+      audioRef.current.play().catch(() => {})
+    }
     // Focus the panel after render
     setTimeout(() => {
       const panel = document.querySelector('[data-pam-panel]')

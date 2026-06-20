@@ -33,40 +33,58 @@ export default function Navbar({ onStartTour }) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Active section detection via IntersectionObserver (no per-scroll DOM reads)
+  // Active section detection via IntersectionObserver (fallback to scroll)
   useEffect(() => {
-    const observers = []
-    NAV_ITEMS.forEach((item) => {
-      const el = document.getElementById(item.id)
-      if (!el) return
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveSection(item.id)
-            }
-          })
-        },
-        { rootMargin: '-30% 0px -50% 0px', threshold: 0 }
-      )
-      observer.observe(el)
-      observers.push(observer)
-    })
-
-    // Bottom-of-page fallback: when scrolled to end, force 'contact' active
-    const handleBottom = () => {
-      if (
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 60
-      ) {
-        setActiveSection('contact')
+    if (typeof IntersectionObserver !== 'undefined') {
+      const observers = []
+      NAV_ITEMS.forEach((item) => {
+        const el = document.getElementById(item.id)
+        if (!el) return
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                setActiveSection(item.id)
+              }
+            })
+          },
+          { rootMargin: '-30% 0px -50% 0px', threshold: 0 }
+        )
+        observer.observe(el)
+        observers.push(observer)
+      })
+      
+      // Bottom-of-page fallback
+      const handleBottom = () => {
+        if (
+          window.innerHeight + window.scrollY >=
+          document.documentElement.scrollHeight - 60
+        ) {
+          setActiveSection('contact')
+        }
       }
-    }
-    window.addEventListener('scroll', handleBottom, { passive: true })
-
-    return () => {
-      observers.forEach((o) => o.disconnect())
-      window.removeEventListener('scroll', handleBottom)
+      window.addEventListener('scroll', handleBottom, { passive: true })
+      
+      return () => {
+        observers.forEach((o) => o.disconnect())
+        window.removeEventListener('scroll', handleBottom)
+      }
+    } else {
+      // Fallback: scroll-based detection for older browsers
+      const handleScroll = () => {
+        const scrollPos = window.scrollY + window.innerHeight * 0.3
+        let current = 'hero'
+        NAV_ITEMS.forEach((item) => {
+          const el = document.getElementById(item.id)
+          if (el && el.offsetTop <= scrollPos) {
+            current = item.id
+          }
+        })
+        setActiveSection(current)
+      }
+      window.addEventListener('scroll', handleScroll, { passive: true })
+      handleScroll()
+      return () => window.removeEventListener('scroll', handleScroll)
     }
   }, [])
 

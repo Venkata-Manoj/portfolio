@@ -152,6 +152,9 @@ function CertificateCard({ cert, index, isVisible }) {
         {!imgLoaded && (
           <div className="absolute inset-0 bg-[rgba(237,231,217,0.03)] animate-pulse rounded-lg z-[1]" />
         )}
+        <div className="cert-fallback hidden absolute inset-0 flex items-center justify-center bg-[rgba(237,231,217,0.03)] rounded-lg z-[1]">
+          <span className="text-[rgba(237,231,217,0.2)] text-xs">Image unavailable</span>
+        </div>
         <img
           src={encodeURI(cert.image)}
           srcSet={`
@@ -173,8 +176,8 @@ function CertificateCard({ cert, index, isVisible }) {
           }}
           onLoad={() => setImgLoaded(true)}
           onError={(e) => {
-            setImgLoaded(true)
-            e.currentTarget.style.opacity = '0.15'
+            e.currentTarget.style.display = 'none'
+            e.currentTarget.parentElement.querySelector('.cert-fallback')?.classList.remove('hidden')
           }}
         />
         <div
@@ -424,7 +427,7 @@ export default function CertificatesSection() {
             id="track"
             className="flex gap-6 cursor-grab active:cursor-grabbing"
             style={{ x }}
-            drag="x"
+            drag={oneSetWidth > 0 ? 'x' : false}
             dragConstraints={{ left: -oneSetWidth * 2.5, right: -oneSetWidth * 0.5 }}
             dragElastic={0.15}
             dragMomentum={false}

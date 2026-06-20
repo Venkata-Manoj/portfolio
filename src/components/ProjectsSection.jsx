@@ -635,7 +635,7 @@ export default function ProjectsSection() {
             ref={trackRef}
             className="flex gap-6 cursor-grab active:cursor-grabbing"
             style={{ x }}
-            drag="x"
+            drag={stepWidth > 0 ? 'x' : false}
             dragConstraints={{ left: -stepWidth * 2.5, right: -stepWidth * 0.5 }}
             dragElastic={0.15}
             dragMomentum={false}

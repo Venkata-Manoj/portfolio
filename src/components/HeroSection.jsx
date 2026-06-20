@@ -57,7 +57,7 @@ export default function HeroSection() {
       if (!hero) return
       const rect = hero.getBoundingClientRect()
       const isVisible = rect.bottom > 0 && rect.top < window.innerHeight
-      if (!isVisible && !videoRef.current.muted) {
+      if (!isVisible && videoRef.current && !videoRef.current.muted) {
         setIsMuted(true)
         if (videoRef.current) videoRef.current.muted = true
       }
