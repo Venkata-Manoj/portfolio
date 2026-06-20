@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting…</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0C0C0C;
+      color: #EDE7D9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    .container { max-width: 400px; }
+    h1 { color: #D4A574; font-size: 1.5rem; margin-bottom: 0.75rem; }
+    p { color: rgba(237,231,217,0.5); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    a {
+      display: inline-block;
+      padding: 0.625rem 1.5rem;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #D4A574, #A67C52);
+      color: #0C0C0C;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+  </style>
+  <script>
+    // SPA fallback: redirect to root (Vercel rewrites will handle it)
+    sessionStorage.setItem('redirected', 'true')
+    window.location.replace('/')
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Page not found</h1>
+    <p>This page doesn't exist, but you'll be redirected to the home page momentarily.</p>
+    <a href="/">Go home</a>
+  </div>
+</body>
+</html>
