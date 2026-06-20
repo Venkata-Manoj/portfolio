@@ -66,7 +66,7 @@ function EducationCard({ item, index, prefersReducedMotion }) {
         {/* Image overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(12,12,12,0.7)] via-transparent to-transparent" />
         {/* Year badge on image */}
-        <span className="absolute bottom-3 right-3 px-3 py-1 rounded-full text-[0.7rem] font-medium tracking-wider bg-[rgba(12,12,12,0.6)] backdrop-blur-sm border border-[rgba(212,165,116,0.1)] text-[rgba(212,165,116,0.7)]">
+        <span className="absolute bottom-3 right-3 px-3 py-1 rounded-full text-xs font-medium tracking-wider bg-[rgba(12,12,12,0.6)] backdrop-blur-sm border border-[rgba(212,165,116,0.1)] text-[rgba(212,165,116,0.7)]">
           {item.year}
         </span>
       </div>
@@ -76,15 +76,15 @@ function EducationCard({ item, index, prefersReducedMotion }) {
         <h3 className="text-lg sm:text-xl font-bold text-[#EDE7D9] mb-1 font-['Kanit'] leading-tight">
           {item.title}
         </h3>
-        <p className="text-sm text-[rgba(212,165,116,0.6)] mb-3 font-medium">
+        <p className="text-sm text-[rgba(212,165,116,0.8)] mb-3 font-medium">
           {item.institution}
         </p>
-        <p className="text-[0.88rem] text-[rgba(237,231,217,0.45)] font-light leading-relaxed mb-4">
+        <p className="text-sm text-[rgba(237,231,217,0.7)] font-light leading-relaxed mb-4">
           {item.description}
         </p>
         {/* Marks highlight */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[rgba(212,165,116,0.12)] bg-[rgba(212,165,116,0.04)]">
-          <span className="text-[0.65rem] uppercase tracking-[0.15em] text-[rgba(212,165,116,0.4)] font-medium">
+          <span className="text-xs uppercase tracking-[0.15em] text-[rgba(212,165,116,0.65)] font-medium">
             Marks
           </span>
           <span className="text-sm font-bold text-[#D4A574]">{item.marks}</span>
@@ -111,6 +111,8 @@ export default function EducationSection() {
   return (
     <section
       id="education"
+      role="region"
+      aria-label="Education"
       className="relative w-full overflow-hidden min-h-screen px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
     >
       {/* Ambient gold orbs */}
@@ -153,8 +155,8 @@ export default function EducationSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-center text-[0.75rem] font-medium uppercase tracking-[0.3em] mb-1"
-            style={{ color: 'rgba(212,165,116,0.50)' }}
+            className="text-center text-xs font-medium uppercase tracking-[0.3em] mb-1"
+            style={{ color: 'rgba(212,165,116,0.75)' }}
           >
             My Journey
           </motion.p>
@@ -173,7 +175,7 @@ export default function EducationSection() {
               }}
             />
             <h2
-              className="font-['Kanit'] font-black uppercase leading-none tracking-[0.12em] whitespace-nowrap"
+              className="font-['Kanit'] font-black uppercase leading-none tracking-[0.12em] whitespace-nowrap text-[#D4A574]"
               style={{
                 fontSize: 'clamp(3rem, 9vw, 7.5rem)',
                 background: 'linear-gradient(135deg, #D4A574, #A67C52)',
@@ -208,8 +210,8 @@ export default function EducationSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-center text-[0.90rem] font-light tracking-[0.15em] mb-12 max-sm:mb-8"
-            style={{ color: 'rgba(237,231,217,0.40)' }}
+            className="text-center text-sm font-light tracking-[0.15em] mb-12 max-sm:mb-8"
+            style={{ color: 'rgba(237,231,217,0.65)' }}
           >
             Academic background & achievements
           </motion.p>

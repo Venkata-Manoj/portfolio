@@ -85,7 +85,8 @@ const CLONE_COUNT = 3
 // [clone copy 0, clone copy 1, original copy, clone copy 2, clone copy 3]
 const ITEMS = []
 for (let i = 0; i < CLONE_COUNT + 1; i++) {
-  ITEMS.push(...ALL_PROJECTS)
+  const isCloneSet = i < CLONE_COUNT
+  ITEMS.push(...ALL_PROJECTS.map(p => ({ ...p, isClone: isCloneSet })))
 }
 // 24 items total
 
@@ -165,6 +166,8 @@ function ProjectCard({ project, index, isMobile }) {
       className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] glass"
       style={{ minHeight: 480 }}
       whileHover={isMobile ? {} : { y: -6 }}
+      tabIndex={project.isClone ? -1 : 0}
+      aria-hidden={project.isClone}
     >
       {/* ── Background gradient ── */}
       <div className="absolute inset-0 z-[1] pointer-events-none">
@@ -194,6 +197,7 @@ function ProjectCard({ project, index, isMobile }) {
         {/* ══════ FRONT FACE ══════ */}
         <div
           className="card-face absolute inset-0 rounded-[24px] overflow-hidden flex z-[2] glass-card"
+          aria-hidden={isFlipped ? 'true' : 'false'}
           style={{
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
@@ -264,7 +268,7 @@ function ProjectCard({ project, index, isMobile }) {
               {project.tech.map((t) => (
                 <span
                   key={t}
-                  className="card-front-tag inline-block text-[0.7rem] font-medium px-[14px] py-[5px] rounded-full border border-[rgba(212,165,116,0.08)] text-[rgba(237,231,217,0.55)] tracking-[0.02em] cursor-default transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[rgba(212,165,116,0.12)] hover:border-[rgba(212,165,116,0.30)] hover:text-[#EDE7D9] hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-[0_0_20px_-4px_rgba(212,165,116,0.10)] active:translate-y-0 active:scale-[0.98]"
+                  className="card-front-tag inline-block text-xs font-medium px-[14px] py-[5px] rounded-full border border-[rgba(212,165,116,0.08)] text-[rgba(237,231,217,0.8)] tracking-[0.02em] cursor-default transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[rgba(212,165,116,0.12)] hover:border-[rgba(212,165,116,0.30)] hover:text-[#EDE7D9] hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-[0_0_20px_-4px_rgba(212,165,116,0.10)] active:translate-y-0 active:scale-[0.98]"
                   style={{ background: 'rgba(255,255,255,0.04)' }}
                 >
                   {t}
@@ -277,7 +281,7 @@ function ProjectCard({ project, index, isMobile }) {
               type="button"
               onClick={handleFlip}
               onKeyDown={handleKeyDown}
-              className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(212,165,116,0.15)] border border-[rgba(212,165,116,0.3)] text-[rgba(212,165,116,0.8)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.25)] hover:border-[rgba(212,165,116,0.5)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[rgba(212,165,116,0.5)]"
+              className="absolute bottom-4 right-4 z-10 flex items-center justify-center w-11 h-11 rounded-full bg-[rgba(212,165,116,0.15)] border border-[rgba(212,165,116,0.3)] text-[rgba(212,165,116,0.8)] transition-all duration-300 hover:bg-[rgba(212,165,116,0.25)] hover:border-[rgba(212,165,116,0.5)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[rgba(212,165,116,0.5)]"
               aria-label={isFlipped ? 'Flip to front' : 'Flip to back'}
               aria-expanded={isFlipped}
               aria-controls={`project-card-${index}`}
@@ -324,7 +328,7 @@ function ProjectCard({ project, index, isMobile }) {
               {project.tech.map((t) => (
                 <span
                   key={t}
-                  className="tech-tag inline-block px-[12px] py-[4px] rounded-full border border-[rgba(212,165,116,0.12)] bg-[rgba(212,165,116,0.04)] text-[rgba(212,165,116,0.6)] text-[0.65rem] font-medium transition-all duration-300 hover:border-[rgba(212,165,116,0.25)] hover:text-[#D4A574] hover:scale-105"
+                  className="tech-tag inline-block px-[12px] py-[4px] rounded-full border border-[rgba(212,165,116,0.12)] bg-[rgba(212,165,116,0.04)] text-[rgba(212,165,116,0.8)] text-xs font-medium transition-all duration-300 hover:border-[rgba(212,165,116,0.25)] hover:text-[#D4A574] hover:scale-105"
                 >
                   {t}
                 </span>
@@ -348,6 +352,7 @@ function ProjectCard({ project, index, isMobile }) {
         {/* ══════ BACK FACE ══════ */}
         <div
           className="card-face absolute inset-0 rounded-[24px] overflow-hidden flex z-[1] glass-card-back"
+          aria-hidden={isFlipped ? 'false' : 'true'}
           style={{
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
@@ -380,7 +385,7 @@ function ProjectCard({ project, index, isMobile }) {
               {project.name}
             </h3>
             <p
-              className="text-[0.9rem] font-light text-[rgba(237,231,217,0.5)] mb-6 leading-relaxed"
+              className="text-sm font-light text-[rgba(237,231,217,0.75)] mb-6 leading-relaxed"
             >
               {project.description}
             </p>
@@ -412,6 +417,8 @@ function GitHubCard({ project, index }) {
       className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] glass"
       style={{ minHeight: 480 }}
       whileHover={{ y: -6 }}
+      tabIndex={project.isClone ? -1 : 0}
+      aria-hidden={project.isClone}
     >
       {/* GitHub CTA content */}
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -433,7 +440,7 @@ function GitHubCard({ project, index }) {
           {project.name}
         </h3>
         <p
-          className="text-[0.9rem] font-light text-[rgba(237,231,217,0.5)] mb-6 leading-relaxed"
+          className="text-sm font-light text-[rgba(237,231,217,0.75)] mb-6 leading-relaxed"
         >
           {project.description}
         </p>
@@ -482,6 +489,12 @@ export default function ProjectsSection() {
       
       if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev() }
       if (e.key === 'ArrowRight') { e.preventDefault(); goNext() }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        // Move focus away from carousel
+        const dots = section?.querySelector('[role="tablist"]')
+        if (dots) dots.focus()
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -490,6 +503,8 @@ export default function ProjectsSection() {
   return (
     <section
       id="projects"
+      role="region"
+      aria-label="Projects"
       className="relative w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C]"
     >
       {/* ═══════════════════════════════════════════════════════════════
@@ -550,12 +565,12 @@ export default function ProjectsSection() {
             ═══════════════════════════════════════════════════════════════ */}
         <header className="text-center mb-8 sm:mb-10">
           {/* Eyebrow */}
-          <div className="eyebrow text-[0.7rem] font-medium tracking-[0.3em] text-[rgba(212,165,116,0.50)] uppercase mb-[6px] animate-projects-eyebrow-fade-in">
+          <div className="eyebrow text-xs font-medium tracking-[0.3em] text-[rgba(212,165,116,0.75)] uppercase mb-[6px] animate-projects-eyebrow-fade-in">
             Featured Work
           </div>
 
           {/* Main title — "PROJECTS" with gold gradient */}
-          <h1
+          <h2
             className="gradient-title text-[clamp(3rem,9vw,7.5rem)] font-black leading-none tracking-[0.04em]"
             style={{
               background:
@@ -567,7 +582,7 @@ export default function ProjectsSection() {
             }}
           >
             PROJECTS
-          </h1>
+          </h2>
 
           {/* Title ornaments: dots + animated underline */}
           <div className="title-ornaments flex items-center justify-center gap-[12px] mt-[4px] h-[10px]">
@@ -626,6 +641,7 @@ export default function ProjectsSection() {
             dragMomentum={false}
             aria-live="polite"
             aria-atomic="false"
+            aria-orientation="horizontal"
           >
             {ITEMS.map((project, i) => {
               // Distinguish regular projects from the GitHub CTA card
@@ -656,7 +672,7 @@ export default function ProjectsSection() {
         <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
           <button
             type="button"
-            className="projects-nav-btn"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-[#D4A574]/20 bg-[rgba(12,12,12,0.7)] backdrop-blur-sm text-[#D4A574]/70 hover:text-[#D4A574] hover:border-[#D4A574]/40 transition-all duration-300 active:scale-90"
             onClick={goPrev}
             aria-label="Previous project"
           >
@@ -667,7 +683,7 @@ export default function ProjectsSection() {
           <button
             type="button"
             onClick={togglePlayPause}
-            className="projects-nav-btn"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-[#D4A574]/20 bg-[rgba(12,12,12,0.7)] backdrop-blur-sm text-[#D4A574]/70 hover:text-[#D4A574] hover:border-[#D4A574]/40 transition-all duration-300 active:scale-90"
             aria-label={isPlaying ? 'Pause auto-scroll' : 'Resume auto-scroll'}
             aria-pressed={!isPlaying}
           >
@@ -693,18 +709,20 @@ export default function ProjectsSection() {
               <button
                 key={i}
                 type="button"
-                className={i === currentIndex ? 'projects-dot is-active' : 'projects-dot'}
+                className="w-11 h-11 flex items-center justify-center"
                 role="tab"
                 aria-label={`Go to project ${i + 1}`}
                 aria-selected={i === currentIndex ? 'true' : 'false'}
                 onClick={() => goToIndex(i)}
-              />
+              >
+                <span className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentIndex ? 'bg-[#D4A574] scale-125' : 'bg-white/20 hover:bg-white/40'}`} />
+              </button>
             ))}
           </div>
 
           <button
             type="button"
-            className="projects-nav-btn"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-[#D4A574]/20 bg-[rgba(12,12,12,0.7)] backdrop-blur-sm text-[#D4A574]/70 hover:text-[#D4A574] hover:border-[#D4A574]/40 transition-all duration-300 active:scale-90"
             onClick={goNext}
             aria-label="Next project"
           >

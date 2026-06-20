@@ -1,13 +1,29 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Mail, Linkedin, Github, Send } from 'lucide-react'
 import { useForm } from '@formspree/react'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
 export default function ContactSection({ formspreeId }) {
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
 
   const [state, handleSubmit] = useForm(formspreeId)
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  )
+
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true)
+    const goOffline = () => setIsOnline(false)
+    window.addEventListener('online', goOnline)
+    window.addEventListener('offline', goOffline)
+    return () => {
+      window.removeEventListener('online', goOnline)
+      window.removeEventListener('offline', goOffline)
+    }
+  }, [])
 
   const handleFormSubmit = (e) => {
     e.preventDefault()
@@ -28,6 +44,8 @@ export default function ContactSection({ formspreeId }) {
   return (
     <section
       id="contact"
+      role="region"
+      aria-label="Contact"
       className="relative z-10 w-full bg-[#0C0C0C] px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 overflow-hidden"
     >
       {/* Ambient background — matches other sections */}
@@ -47,10 +65,10 @@ export default function ContactSection({ formspreeId }) {
         {/* Section Heading */}
         <div ref={headerRef} className="text-center mb-16 sm:mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={headerInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="font-['Kanit'] font-black uppercase leading-none tracking-tight inline-block"
+            initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : (prefersReducedMotion ? { opacity: 1, y: 0 } : {})}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6 }}
+            className="font-['Kanit'] font-black uppercase leading-none tracking-tight inline-block text-[#D4A574]"
             style={{
               fontSize: 'clamp(3rem, 9vw, 7.5rem)',
               background: 'linear-gradient(135deg, #D4A574, #A67C52)',
@@ -68,10 +86,10 @@ export default function ContactSection({ formspreeId }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* LEFT: Orbit Portal */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: prefersReducedMotion ? 1 : 0, x: prefersReducedMotion ? 0 : -20 }}
+            whileInView={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.1 }}
             className="flex justify-center items-center"
           >
             <div className="orbit-container relative w-[360px] h-[360px] max-sm:scale-[0.7] origin-center flex items-center justify-center">
@@ -151,7 +169,7 @@ export default function ContactSection({ formspreeId }) {
                 <span className="text-[#D4A574] text-sm font-['Kanit'] font-bold leading-tight">
                   Talk
                 </span>
-                <span className="text-[rgba(212,165,116,0.4)] text-[8px] uppercase tracking-widest mt-0.5">
+                <span className="text-[rgba(212,165,116,0.65)] text-[10px] uppercase tracking-widest mt-0.5">
                   reach out
                 </span>
               </div>
@@ -160,10 +178,10 @@ export default function ContactSection({ formspreeId }) {
 
           {/* RIGHT: Contact Form Card */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: prefersReducedMotion ? 1 : 0, x: prefersReducedMotion ? 0 : 20 }}
+            whileInView={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.2 }}
           >
             <div className="bg-[rgba(20,18,17,0.55)] backdrop-blur-2xl border border-[rgba(212,165,116,0.08)] rounded-2xl p-8 transition-all duration-300 hover:border-[rgba(212,165,116,0.15)]">
               {/* Top gold accent line */}
@@ -171,7 +189,7 @@ export default function ContactSection({ formspreeId }) {
 
               {/* Form header */}
               <h3 className="text-xl font-['Kanit'] font-bold text-white mb-2">Send a Message</h3>
-              <p id="form-hint" className="text-sm text-[rgba(212,165,116,0.5)] mb-8 font-light">
+              <p id="form-hint" className="text-sm text-[rgba(212,165,116,0.75)] mb-8 font-light">
                 Fill in the details below and I'll get back to you within 24-48 hours.
               </p>
 
@@ -179,7 +197,7 @@ export default function ContactSection({ formspreeId }) {
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 {/* Name field */}
                 <div>
-                  <label htmlFor="contact-name" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
+                  <label htmlFor="contact-name" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.75)] mb-2">
                     Name
                   </label>
                   <input
@@ -190,13 +208,13 @@ export default function ContactSection({ formspreeId }) {
                     autoComplete="name"
                     aria-describedby="form-hint"
                     required
-                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
+                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-white/40 focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
                   />
                 </div>
 
                 {/* Email field */}
                 <div>
-                  <label htmlFor="contact-email" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
+                  <label htmlFor="contact-email" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.75)] mb-2">
                     Email
                   </label>
                   <input
@@ -207,13 +225,13 @@ export default function ContactSection({ formspreeId }) {
                     autoComplete="email"
                     aria-describedby="form-hint"
                     required
-                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
+                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-white/40 focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
                   />
                 </div>
 
                 {/* Message field */}
                 <div>
-                  <label htmlFor="contact-message" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
+                  <label htmlFor="contact-message" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.75)] mb-2">
                     Message
                   </label>
                   <textarea
@@ -224,7 +242,7 @@ export default function ContactSection({ formspreeId }) {
                     autoComplete="off"
                     aria-describedby="form-hint"
                     required
-                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-white/40 focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all resize-none"
                   />
                 </div>
 
@@ -246,7 +264,7 @@ export default function ContactSection({ formspreeId }) {
                 </div>
               )}
               {state.errors && (
-                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400" role="status" aria-live="polite">
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400" role="alert">
                   {Array.isArray(state.errors)
                     ? state.errors.map((err, i) => <p key={i}>{err?.message || 'An error occurred'}</p>)
                     : <p>Failed to send. Please try again or email me directly.</p>}
@@ -260,6 +278,13 @@ export default function ContactSection({ formspreeId }) {
                 >
                   Retry or email bvmanoj61@gmail.com
                 </button>
+              )}
+
+              {/* Offline detection */}
+              {!isOnline && (
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-yellow-500/10 border border-yellow-500/20 text-yellow-400" role="status">
+                  You appear to be offline. Your message will be sent when the connection is restored.
+                </div>
               )}
             </div>
           </motion.div>

@@ -124,6 +124,11 @@ export default function PamWidget({ tourTrigger }) {
     setCurrentTrackIndex(0)
     setCurrentTime(0)
     setShowOverride(false)
+    // Focus the panel after render
+    setTimeout(() => {
+      const panel = document.querySelector('[data-pam-panel]')
+      if (panel) panel.focus()
+    }, 50)
   }, [])
 
   const closePam = useCallback(() => {
@@ -230,9 +235,19 @@ export default function PamWidget({ tourTrigger }) {
     return () => window.removeEventListener('scroll', checkManualScroll)
   }, [pamState, prefersReducedMotion])
 
+  // Close panel on Escape key
+  useEffect(() => {
+    if (pamState === 'idle') return
+    const handler = (e) => {
+      if (e.key === 'Escape') closePam()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [pamState, closePam])
+
   return (
     <>
-      <audio ref={audioRef} preload="metadata" />
+      <audio ref={audioRef} preload="metadata" aria-label="Portfolio tour narration" />
       <AnimatePresence mode="wait">
         {pamState === 'idle' ? (
           <motion.button
@@ -249,6 +264,8 @@ export default function PamWidget({ tourTrigger }) {
         ) : (
           <motion.div
             key="pam-panel"
+            data-pam-panel
+            tabIndex={-1}
             initial={{ scale: 0.85, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.85, opacity: 0, y: 20 }}
@@ -260,11 +277,11 @@ export default function PamWidget({ tourTrigger }) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Volume2 size={14} className="text-purple-400" />
-                    <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
+                    <span className="text-xs uppercase tracking-[0.25em] text-white/70">
                       Tour Complete
                     </span>
                   </div>
-                  <button type="button" onClick={closePam} className="text-white/30 hover:text-white transition-colors">
+                  <button type="button" onClick={closePam} aria-label="Close tour" className="w-11 h-11 flex items-center justify-center text-white/30 hover:text-white transition-colors">
                     <X size={14} />
                   </button>
                 </div>
@@ -274,7 +291,7 @@ export default function PamWidget({ tourTrigger }) {
                 <button
                   type="button"
                   onClick={closePam}
-                  className="w-full rounded-full border border-white/20 py-2.5 text-[10px] font-medium uppercase tracking-[0.25em] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                  className="w-full rounded-full border border-white/20 py-2.5 text-xs font-medium uppercase tracking-[0.25em] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   Close
                 </button>
@@ -284,11 +301,11 @@ export default function PamWidget({ tourTrigger }) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Volume2 size={14} className="text-purple-400" />
-                    <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
+                    <span className="text-xs uppercase tracking-[0.25em] text-white/70">
                       {currentTrack?.label} · {currentTrackIndex + 1}/{TRACKS.length}
                     </span>
                   </div>
-                  <button type="button" onClick={closePam} className="text-white/30 hover:text-white transition-colors">
+                  <button type="button" onClick={closePam} aria-label="Close tour" className="w-11 h-11 flex items-center justify-center text-white/30 hover:text-white transition-colors">
                     <X size={14} />
                   </button>
                 </div>
@@ -337,13 +354,13 @@ export default function PamWidget({ tourTrigger }) {
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-4"
                   >
-                    <p className="text-[10px] text-white/40 text-center uppercase tracking-[0.2em] mb-3">
+                    <p className="text-xs text-white/60 text-center uppercase tracking-[0.2em] mb-3">
                       Tour paused — you scrolled away
                     </p>
                     <button
                       type="button"
                       onClick={resumeTour}
-                      className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 py-2.5 text-[10px] font-medium uppercase tracking-[0.25em] text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 py-2.5 text-xs font-medium uppercase tracking-[0.25em] text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Play size={12} fill="white" />
                       Resume Tour

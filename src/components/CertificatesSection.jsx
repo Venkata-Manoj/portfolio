@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
 import { useInfiniteCarousel } from '../hooks/useInfiniteCarousel'
@@ -114,7 +114,8 @@ const CLONE_COUNT = 3
 // Build flat array of clones for infinite scroll (4 full sets)
 const ALL_CERTS = []
 for (let i = 0; i < CLONE_COUNT + 1; i++) {
-  ALL_CERTS.push(...CERTS)
+  const isCloneSet = i < CLONE_COUNT
+  ALL_CERTS.push(...CERTS.map(c => ({ ...c, isClone: isCloneSet })))
 }
 
 /* =====================================================================
@@ -122,6 +123,7 @@ for (let i = 0; i < CLONE_COUNT + 1; i++) {
    ===================================================================== */
 function CertificateCard({ cert, index, isVisible }) {
   const staggerDelay = (index % TOTAL) * 100
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   return (
     <article
@@ -131,6 +133,8 @@ function CertificateCard({ cert, index, isVisible }) {
       aria-roledescription="slide"
       aria-label={`${(index % TOTAL) + 1} of ${TOTAL}: ${cert.title}`}
       style={{ transitionDelay: `${staggerDelay}ms` }}
+      tabIndex={cert.isClone ? -1 : 0}
+      aria-hidden={cert.isClone}
     >
       {/* Top gold streak */}
       <div className="absolute top-0 left-[10%] right-[10%] h-[2px] z-4 pointer-events-none bg-gradient-to-r from-transparent via-[#D4A574] via-[30%] via-[#A67C52] via-[70%] to-transparent" aria-hidden="true" />
@@ -145,6 +149,9 @@ function CertificateCard({ cert, index, isVisible }) {
 
       {/* Image area */}
       <div className="relative w-full h-[240px] bg-black/50 overflow-hidden">
+        {!imgLoaded && (
+          <div className="absolute inset-0 bg-[rgba(237,231,217,0.03)] animate-pulse rounded-lg z-[1]" />
+        )}
         <img
           src={encodeURI(cert.image)}
           srcSet={`
@@ -164,7 +171,11 @@ function CertificateCard({ cert, index, isVisible }) {
             transition:
               'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
-          onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
+          onLoad={() => setImgLoaded(true)}
+          onError={(e) => {
+            setImgLoaded(true)
+            e.currentTarget.style.opacity = '0.15'
+          }}
         />
         <div
           aria-hidden="true"
@@ -195,11 +206,11 @@ function CertificateCard({ cert, index, isVisible }) {
             alignItems: 'center',
             gap: '6px',
             padding: '4px 10px',
-            fontSize: '0.65rem',
+            fontSize: '0.75rem',
             fontWeight: 500,
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
-            color: 'rgba(212,165,116,0.5)',
+            color: 'rgba(212,165,116,0.75)',
             border: '1px solid rgba(212,165,116,0.12)',
             borderRadius: '999px',
             background: 'rgba(212,165,116,0.03)',
@@ -224,9 +235,9 @@ function CertificateCard({ cert, index, isVisible }) {
         </h3>
         <p
           style={{
-            fontSize: '0.85rem',
+            fontSize: '0.75rem',
             fontWeight: 300,
-            color: 'rgba(237,231,217,0.4)',
+            color: 'rgba(237,231,217,0.65)',
           }}
         >
           {cert.date}
@@ -242,11 +253,11 @@ function CertificateCard({ cert, index, isVisible }) {
             alignItems: 'center',
             gap: '6px',
             marginTop: '4px',
-            fontSize: '0.78rem',
+            fontSize: '0.75rem',
             fontWeight: 500,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            color: 'rgba(212,165,116,0.5)',
+            color: 'rgba(212,165,116,0.75)',
           }}
         >
           <span>View Certificate</span>
@@ -281,6 +292,8 @@ export default function CertificatesSection() {
   return (
     <section
       id="certificates"
+      role="region"
+      aria-label="Certificates"
       className="relative w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C] min-h-screen"
     >
       {/* ═══════════════════════════════════════════════════════════════
@@ -330,8 +343,8 @@ export default function CertificatesSection() {
             ═══════════════════════════════════════════════════════════════ */}
         <div ref={headerRef}>
           <p
-            className={`cert-eyebrow text-center text-[0.75rem] font-medium uppercase tracking-[0.3em] mb-1 ${headerInView ? 'in-view' : ''}`}
-            style={{ color: 'rgba(212,165,116,0.50)' }}
+            className={`cert-eyebrow text-center text-xs font-medium uppercase tracking-[0.3em] mb-1 ${headerInView ? 'in-view' : ''}`}
+            style={{ color: 'rgba(212,165,116,0.75)' }}
           >
             Verified Credentials
           </p>
@@ -388,8 +401,8 @@ export default function CertificatesSection() {
             initial={{ opacity: 0, y: 10 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-center text-[0.90rem] font-light tracking-[0.15em] mb-12 max-sm:mb-8"
-            style={{ color: 'rgba(237,231,217,0.40)' }}
+            className="text-center text-sm font-light tracking-[0.15em] mb-12 max-sm:mb-8"
+            style={{ color: 'rgba(237,231,217,0.65)' }}
           >
             Industry-recognized credentials validating expertise
           </motion.p>
@@ -417,6 +430,7 @@ export default function CertificatesSection() {
             dragMomentum={false}
             aria-live="polite"
             aria-atomic="false"
+            aria-orientation="horizontal"
           >
             {ALL_CERTS.map((cert, i) => (
               <CertificateCard
@@ -435,7 +449,7 @@ export default function CertificatesSection() {
         <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
           <button
             type="button"
-            className="cert-nav-btn"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-[#D4A574]/20 bg-[rgba(12,12,12,0.7)] backdrop-blur-sm text-[#D4A574]/70 hover:text-[#D4A574] hover:border-[#D4A574]/40 transition-all duration-300 active:scale-90"
             onClick={goPrev}
             aria-label="Previous certificate"
           >
@@ -446,7 +460,7 @@ export default function CertificatesSection() {
           <button
             type="button"
             onClick={togglePlayPause}
-            className="cert-nav-btn"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-[#D4A574]/20 bg-[rgba(12,12,12,0.7)] backdrop-blur-sm text-[#D4A574]/70 hover:text-[#D4A574] hover:border-[#D4A574]/40 transition-all duration-300 active:scale-90"
             aria-label={isPlaying ? 'Pause auto-scroll' : 'Resume auto-scroll'}
             aria-pressed={!isPlaying}
           >
@@ -472,18 +486,20 @@ export default function CertificatesSection() {
               <button
                 key={i}
                 type="button"
-                className={i === currentIndex ? 'cert-dot is-active' : 'cert-dot'}
+                className="w-11 h-11 flex items-center justify-center"
                 role="tab"
                 aria-label={`Go to certificate ${i + 1}`}
                 aria-selected={i === currentIndex ? 'true' : 'false'}
                 onClick={() => goToIndex(i)}
-              />
+              >
+                <span className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentIndex ? 'bg-[#D4A574] scale-125' : 'bg-white/20 hover:bg-white/40'}`} />
+              </button>
             ))}
           </div>
 
           <button
             type="button"
-            className="cert-nav-btn"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-[#D4A574]/20 bg-[rgba(12,12,12,0.7)] backdrop-blur-sm text-[#D4A574]/70 hover:text-[#D4A574] hover:border-[#D4A574]/40 transition-all duration-300 active:scale-90"
             onClick={goNext}
             aria-label="Next certificate"
           >
@@ -495,8 +511,8 @@ export default function CertificatesSection() {
             HINT TEXT — Drag to scroll · Use arrows to navigate
             ═══════════════════════════════════════════════════════════════ */}
         <p
-          className="cert-hint-pulse text-center text-[0.7rem] sm:text-xs font-light tracking-[0.25em] uppercase mt-6"
-          style={{ color: 'rgba(237,231,217,0.4)' }}
+          className="cert-hint-pulse text-center text-xs font-light tracking-[0.25em] uppercase mt-6"
+          style={{ color: 'rgba(237,231,217,0.65)' }}
         >
           Drag to scroll · Use arrows to navigate
         </p>

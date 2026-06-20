@@ -36,6 +36,7 @@ export default function HeroSection() {
   const [isMuted, setIsMuted] = useState(true)
   const snapFired = useRef(false)
   const prefersReducedMotion = usePrefersReducedMotion()
+  const [videoLoaded, setVideoLoaded] = useState(false)
 
   const { scrollY } = useScroll()
   const opacity = useTransform(scrollY, [0, 300], [1, 0])
@@ -120,7 +121,12 @@ export default function HeroSection() {
   }
 
   return (
-    <div ref={containerRef} id="hero" className="relative -mt-16 h-[calc(100vh+4rem)] w-full overflow-hidden bg-background">
+    <div ref={containerRef} id="hero" role="region" aria-label="Hero" className="relative -mt-16 h-[calc(100vh+4rem)] w-full overflow-hidden bg-background">
+      {/* Loading skeleton while video loads */}
+      {!videoLoaded && (
+        <div className="absolute inset-0 bg-[rgba(20,18,17,0.5)] animate-pulse z-[1]" />
+      )}
+
       {/* Video Background — preload=metadata avoids downloading entire video on page load */}
       <video
         ref={videoRef}
@@ -136,6 +142,8 @@ export default function HeroSection() {
         height="1080"
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover brightness-60"
+        onLoadedData={() => setVideoLoaded(true)}
+        onError={() => setVideoLoaded(true)}
       >
         <source src="/video/intro.mp4" type="video/mp4" />
       </video>
@@ -218,7 +226,7 @@ export default function HeroSection() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 3, duration: 0.5 }}
-          className="absolute top-21 right-3 text-[9px] uppercase tracking-[0.3em] text-[#D4A574]/40 font-light animate-pulse"
+          className="absolute top-21 right-3 text-xs uppercase tracking-[0.3em] text-[#D4A574]/70 font-light animate-pulse"
         >
           Tap for sound
         </motion.p>

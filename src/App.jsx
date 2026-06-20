@@ -19,14 +19,15 @@ const App = () => {
   const handleStartTour = () => setTourTrigger(t => t + 1)
 
   return (
-    <main className="relative w-full" style={{ overflowX: 'clip', background: 'transparent' }}>
+    <main id="main-content" className="relative w-full" style={{ overflowX: 'clip', background: 'transparent' }}>
       {/* Vercel Analytics — only sends data on Vercel deployments */}
       <Analytics />
       {/* Vercel Speed Insights — only sends data on Vercel deployments */}
       <SpeedInsights />
       {/* Skip to content — first focusable element for keyboard users */}
       <a
-        href="#hero"
+        href="#main-content"
+        aria-label="Skip to main content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-6 focus:py-3 focus:bg-[#D4A574] focus:text-[#0C0C0C] focus:font-bold focus:text-sm focus:rounded-full focus:shadow-[0_0_30px_rgba(212,165,116,0.3)] focus:outline-none"
         tabIndex={0}
       >
@@ -40,6 +41,9 @@ const App = () => {
       <CertificatesSection />
       <ContactSection formspreeId={FORMSPREE_FORM_ID} />
       <PamWidget tourTrigger={tourTrigger} />
+      <footer role="contentinfo" className="text-center py-8 px-4 text-xs text-[rgba(237,231,217,0.45)] uppercase tracking-[0.15em] font-light">
+        <p>&copy; {new Date().getFullYear()} Ballani Venkata Manoj. All rights reserved.</p>
+      </footer>
     </main>
   )
 }

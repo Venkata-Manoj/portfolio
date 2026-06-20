@@ -14,6 +14,7 @@ export default function Navbar({ onStartTour }) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
   const [isOpen, setIsOpen] = useState(false)
+  const [logoLoaded, setLogoLoaded] = useState(false)
 
   const handleNavClick = useCallback((e, id) => {
     e.preventDefault()
@@ -81,6 +82,8 @@ export default function Navbar({ onStartTour }) {
   return (
     <header className="sticky top-2 left-0 right-0 z-50 transition-all duration-300">
       <nav
+        role="navigation"
+        aria-label="Main navigation"
         className={`mx-auto max-w-5xl rounded-full flex items-center justify-between border transition-all duration-500 px-4 py-3 ${isScrolled
           ? 'bg-[#0C0C0E]/80 backdrop-blur-xl border-[#D4A574]/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.6),0_0_24px_-8px_rgba(212,165,116,0.06)]'
           : 'bg-transparent border-transparent'
@@ -92,10 +95,15 @@ export default function Navbar({ onStartTour }) {
           onClick={(e) => handleNavClick(e, 'hero')}
           className="flex items-center gap-2.5 group cursor-pointer"
         >
+          {!logoLoaded && (
+            <div className="w-8 h-8 rounded-full bg-[rgba(237,231,217,0.05)] animate-pulse" />
+          )}
           <img
             src="/favicon.png"
             alt="B V Manoj"
-            className="w-8 h-8 rounded-full object-cover shadow-[0_0_14px_rgba(212,165,116,0.25)] transition-transform duration-300 group-hover:scale-105"
+            className={`w-8 h-8 rounded-full object-cover shadow-[0_0_14px_rgba(212,165,116,0.25)] transition-transform duration-300 group-hover:scale-105 ${!logoLoaded ? 'hidden' : ''}`}
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => setLogoLoaded(true)}
           />
           <span className="font-['Kanit'] font-bold tracking-widest text-xs text-[#EDE7D9]/80 group-hover:text-[#EDE7D9] transition-colors duration-300">
             Manoj
@@ -111,9 +119,9 @@ export default function Navbar({ onStartTour }) {
                 key={item.id}
                 href={`#${item.id}`}
                 onClick={(e) => handleNavClick(e, item.id)}
-                className={`relative overflow-hidden px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-widest transition-all duration-300 rounded-full ${isActive
+                className={`relative overflow-hidden px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest transition-all duration-300 rounded-full ${isActive
                   ? 'bg-gradient-to-r from-[#D4A574] to-[#E8C88A] bg-clip-text text-transparent'
-                  : 'text-white/40 hover:text-[#D4A574]/80'
+                  : 'text-white/60 hover:text-[#D4A574]/80'
                   }`}
               >
                 {item.label}
@@ -130,7 +138,7 @@ export default function Navbar({ onStartTour }) {
           <a
             href="/Resume_Manoj.pdf"
             download="Resume_BV_Manoj.pdf"
-            className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4A574]/30 bg-transparent text-[#D4A574] font-semibold text-[9px] uppercase tracking-widest transition-all duration-300 hover:bg-[#D4A574]/10 hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+            className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4A574]/30 bg-transparent text-[#D4A574] font-semibold text-xs uppercase tracking-widest transition-all duration-300 hover:bg-[#D4A574]/10 hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
           >
             <Download size={12} />
             <span>Resume</span>
@@ -139,7 +147,7 @@ export default function Navbar({ onStartTour }) {
           <button
             type="button"
             onClick={onStartTour}
-            className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-[0_4px_16px_-4px_rgba(212,165,116,0.3)] font-semibold text-[9px] uppercase tracking-widest transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(212,165,116,0.45)] hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
+            className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-[0_4px_16px_-4px_rgba(212,165,116,0.3)] font-semibold text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(212,165,116,0.45)] hover:scale-[1.03] active:scale-[0.97] cursor-pointer"
           >
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A574] opacity-75" />
@@ -152,9 +160,10 @@ export default function Navbar({ onStartTour }) {
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="flex md:hidden items-center justify-center w-10 h-10 rounded-full border border-[#D4A574]/20 text-white/50 hover:text-[#D4A574] transition-colors duration-300 hover:bg-[#D4A574]/8"
+            className="flex md:hidden items-center justify-center w-11 h-11 rounded-full border border-[#D4A574]/20 text-white/50 hover:text-[#D4A574] transition-colors duration-300 hover:bg-[#D4A574]/8"
             aria-label="Toggle menu"
             aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             {isOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -163,6 +172,7 @@ export default function Navbar({ onStartTour }) {
 
       {/* Mobile Drawer - Absolute positioned relative to header */}
       <div
+        id="mobile-menu"
         className={`absolute left-4 right-4 top-full z-40 mt-2 rounded-3xl border border-[#D4A574]/10 bg-[#0C0C0E]/95 backdrop-blur-2xl p-6 shadow-2xl shadow-black/90 flex flex-col gap-4 transition-all duration-300 ${isOpen
           ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 -translate-y-4 pointer-events-none'
@@ -176,9 +186,9 @@ export default function Navbar({ onStartTour }) {
                 key={item.id}
                 href={`#${item.id}`}
                 onClick={(e) => handleNavClick(e, item.id)}
-                className={`relative flex items-center px-4 py-4 rounded-xl text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 overflow-hidden ${isActive
+                className={`relative flex items-center px-4 py-4 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all duration-200 overflow-hidden ${isActive
                   ? 'bg-[#D4A574]/8 bg-gradient-to-r from-[#D4A574] to-[#E8C88A] bg-clip-text text-transparent'
-                  : 'text-white/40 hover:text-[#D4A574]/80 hover:bg-[#D4A574]/5 active:text-[#D4A574]'
+                  : 'text-white/60 hover:text-[#D4A574]/80 hover:bg-[#D4A574]/5 active:text-[#D4A574]'
                   }`}
               >
                 {isActive && (
@@ -196,7 +206,7 @@ export default function Navbar({ onStartTour }) {
           href="/Resume_Manoj.pdf"
           download="Resume_BV_Manoj.pdf"
           onClick={() => setIsOpen(false)}
-          className="flex items-center justify-center gap-2 w-full py-4 rounded-xl border border-[#D4A574]/30 bg-transparent text-[#D4A574] text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 hover:bg-[#D4A574]/10 active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 w-full py-4 rounded-xl border border-[#D4A574]/30 bg-transparent text-[#D4A574] text-xs font-semibold uppercase tracking-widest transition-all duration-300 hover:bg-[#D4A574]/10 active:scale-[0.98]"
         >
           <Download size={16} />
           <span>Resume</span>
@@ -208,7 +218,7 @@ export default function Navbar({ onStartTour }) {
             setIsOpen(false)
             onStartTour()
           }}
-          className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-[0_4px_16px_-4px_rgba(212,165,116,0.3)] text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(212,165,116,0.45)] active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-[0_4px_16px_-4px_rgba(212,165,116,0.3)] text-xs font-semibold uppercase tracking-widest transition-all duration-300 hover:shadow-[0_4px_20px_-4px_rgba(212,165,116,0.45)] active:scale-[0.98]"
         >
           <Play size={12} className="fill-white" />
           <span>Start Tour</span>
