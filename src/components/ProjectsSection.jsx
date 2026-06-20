@@ -1,7 +1,8 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Github, ExternalLink, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Github, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 import { useInfiniteCarousel } from '../hooks/useInfiniteCarousel'
 
 /* =====================================================================
@@ -402,7 +403,7 @@ function ProjectCard({ project, index, isMobile }) {
 /* =====================================================================
    GITHUB CARD — Static, no flip
    ===================================================================== */
-function GitHubCard({ project, index, isMobile }) {
+function GitHubCard({ project, index }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.85 }}
@@ -455,35 +456,32 @@ function GitHubCard({ project, index, isMobile }) {
    ===================================================================== */
 export default function ProjectsSection() {
   const isMobile = useIsMobile()
+  const prefersReducedMotion = usePrefersReducedMotion()
   const { trackRef, x, isPlaying, currentIndex, stepWidth, goNext, goPrev, goToIndex, togglePlayPause, setIsHovering } = useInfiniteCarousel({
     total: TOTAL,
     cardWidth: 380,
     gap: 24,
     autoplayMs: 3000,
-    reducedMotion: false,
+    reducedMotion: prefersReducedMotion,
   })
 
-  // Track focused index in a ref to avoid dependency cycles in resize effect
-  const focusedIndexRef = useRef(0)
-  const [focusedIndex, setFocusedIndex] = useState(0)
-
-  useEffect(() => {
-    focusedIndexRef.current = focusedIndex
-  }, [focusedIndex])
-
-  // Update currentIndex from carousel hook
-  useEffect(() => {
-    setFocusedIndex(currentIndex)
-  }, [currentIndex])
-
   // Progress bar percentage
-  const progressPercent = (focusedIndex / (TOTAL - 1)) * 100
+  const progressPercent = (currentIndex / (TOTAL - 1)) * 100
 
-  // Keyboard navigation
+  // Keyboard navigation — scoped to #projects section only
   useEffect(() => {
+    const section = document.getElementById('projects')
     const handler = (e) => {
-      if (e.key === 'ArrowLeft') goPrev()
-      if (e.key === 'ArrowRight') goNext()
+      // Only handle if focus is within the projects section
+      const active = document.activeElement
+      if (!section || !section.contains(active)) return
+      
+      // Skip when focus is in an input/textarea
+      const tag = active?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      
+      if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev() }
+      if (e.key === 'ArrowRight') { e.preventDefault(); goNext() }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -639,7 +637,6 @@ export default function ProjectsSection() {
                   key={`github-${i}`}
                   project={project}
                   index={itemIndex}
-                  isMobile={isMobile}
                 />
               ) : (
                 <ProjectCard
@@ -696,10 +693,10 @@ export default function ProjectsSection() {
               <button
                 key={i}
                 type="button"
-                className={i === focusedIndex ? 'projects-dot is-active' : 'projects-dot'}
+                className={i === currentIndex ? 'projects-dot is-active' : 'projects-dot'}
                 role="tab"
                 aria-label={`Go to project ${i + 1}`}
-                aria-selected={i === focusedIndex ? 'true' : 'false'}
+                aria-selected={i === currentIndex ? 'true' : 'false'}
                 onClick={() => goToIndex(i)}
               />
             ))}

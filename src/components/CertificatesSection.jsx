@@ -1,7 +1,8 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react'
 import { useInfiniteCarousel } from '../hooks/useInfiniteCarousel'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
 /* =====================================================================
    DATA — 13 certificates (gold/bronze palette accents)
@@ -107,9 +108,6 @@ const CERTS = [
    CONSTANTS — auto-play, sizing
    ===================================================================== */
 const AUTOPLAY_INTERVAL_MS = 5000
-const CARD_GAP_PX = 24
-const CARD_DESKTOP_WIDTH_PX = 380
-const CARD_MOBILE_WIDTH_RATIO = 0.85
 const TOTAL = CERTS.length
 const CLONE_COUNT = 3
 
@@ -265,20 +263,16 @@ function CertificateCard({ cert, index, isVisible }) {
    CERTIFICATES SECTION — Horizontal infinite auto-scrolling carousel
    ===================================================================== */
 export default function CertificatesSection() {
+  const prefersReducedMotion = usePrefersReducedMotion()
   const { trackRef, x, isPlaying, currentIndex, oneSetWidth, goNext, goPrev, goToIndex, togglePlayPause, setIsHovering } = useInfiniteCarousel({
     total: TOTAL,
     cardWidth: 380,
     gap: 24,
     autoplayMs: AUTOPLAY_INTERVAL_MS,
-    reducedMotion: false,
+    reducedMotion: prefersReducedMotion,
   })
 
-  // Track focused index from carousel hook
-  const [focusedIndex, setFocusedIndex] = useState(currentIndex)
-
-  useEffect(() => {
-    setFocusedIndex(currentIndex)
-  }, [currentIndex])
+  // Use currentIndex from carousel hook directly
 
   // Header animation state
   const headerRef = useRef(null)
@@ -478,10 +472,10 @@ export default function CertificatesSection() {
               <button
                 key={i}
                 type="button"
-                className={i === focusedIndex ? 'cert-dot is-active' : 'cert-dot'}
+                className={i === currentIndex ? 'cert-dot is-active' : 'cert-dot'}
                 role="tab"
                 aria-label={`Go to certificate ${i + 1}`}
-                aria-selected={i === focusedIndex ? 'true' : 'false'}
+                aria-selected={i === currentIndex ? 'true' : 'false'}
                 onClick={() => goToIndex(i)}
               />
             ))}

@@ -96,6 +96,10 @@ export default function PamWidget({ tourTrigger }) {
   const isSeekingRef = useRef(false)
   const tourTriggerHandledRef = useRef(0)
 
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false
+
   const currentTrack = TRACKS[currentTrackIndex]
 
   const autoScrollToSection = useCallback((sectionId) => {
@@ -212,6 +216,7 @@ export default function PamWidget({ tourTrigger }) {
   }, [tourTrigger, pamState])
 
   useEffect(() => {
+    if (prefersReducedMotion) return
     if (pamState !== 'playing') return
 
     const checkManualScroll = () => {
@@ -223,7 +228,7 @@ export default function PamWidget({ tourTrigger }) {
 
     window.addEventListener('scroll', checkManualScroll, { passive: true })
     return () => window.removeEventListener('scroll', checkManualScroll)
-  }, [pamState])
+  }, [pamState, prefersReducedMotion])
 
   return (
     <>

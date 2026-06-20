@@ -1,9 +1,8 @@
 import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react'
-import { motion, useMotionValue, animate } from 'framer-motion'
+import { useMotionValue, animate } from 'framer-motion'
 
 export function useInfiniteCarousel({ 
   total, 
-  cardWidth, 
   gap = 24, 
   autoplayMs = 5000, 
   reducedMotion = false 
@@ -132,30 +131,6 @@ export function useInfiniteCarousel({
     setIsPlaying((prev) => !prev)
   }, [])
 
-  // Drag handlers
-  const handleDragStart = useCallback(() => {
-    if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
-    setIsPlaying(false)
-  }, [])
-
-  const handleDragEnd = useCallback(() => {
-    if (stepWidthRef.current === 0) return
-    const currentX = x.get()
-    const nearestCardIndex = Math.round(-currentX / stepWidthRef.current)
-    const targetX = -nearestCardIndex * stepWidthRef.current
-
-    animate(x, [currentX, targetX], {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
-      onComplete: () => {
-        const indexInSet = ((nearestCardIndex % total) + total) % total
-        const wrappedIndex = total + indexInSet
-        x.set(-wrappedIndex * stepWidthRef.current)
-        pauseTimerRef.current = setTimeout(() => setIsPlaying(true), autoplayMs)
-      },
-    })
-  }, [stepWidth, x, total, autoplayMs])
 
   const next = useCallback(() => {
     if (stepWidthRef.current === 0) return
@@ -173,7 +148,7 @@ export function useInfiniteCarousel({
         pauseTimerRef.current = setTimeout(() => setIsPlaying(true), autoplayMs)
       },
     })
-  }, [stepWidth, x, autoplayMs])
+  }, [x, autoplayMs])
 
   const prev = useCallback(() => {
     if (stepWidthRef.current === 0) return
@@ -191,7 +166,7 @@ export function useInfiniteCarousel({
         pauseTimerRef.current = setTimeout(() => setIsPlaying(true), autoplayMs)
       },
     })
-  }, [stepWidth, x, autoplayMs])
+  }, [x, autoplayMs])
 
   const scrollToIndex = useCallback(
     (targetIndex) => {
@@ -215,7 +190,7 @@ export function useInfiniteCarousel({
         },
       })
     },
-    [stepWidth, x, currentIndex, total, autoplayMs]
+    [x, currentIndex, total, autoplayMs]
   )
 
   return {

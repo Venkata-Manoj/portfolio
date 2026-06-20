@@ -171,7 +171,7 @@ export default function ContactSection({ formspreeId }) {
 
               {/* Form header */}
               <h3 className="text-xl font-['Kanit'] font-bold text-white mb-2">Send a Message</h3>
-              <p className="text-sm text-[rgba(212,165,116,0.5)] mb-8 font-light">
+              <p id="form-hint" className="text-sm text-[rgba(212,165,116,0.5)] mb-8 font-light">
                 Fill in the details below and I'll get back to you within 24-48 hours.
               </p>
 
@@ -179,13 +179,16 @@ export default function ContactSection({ formspreeId }) {
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 {/* Name field */}
                 <div>
-                  <label className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
+                  <label htmlFor="contact-name" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
                     Name
                   </label>
                   <input
                     type="text"
+                    id="contact-name"
                     name="name"
                     placeholder="Your name"
+                    autoComplete="name"
+                    aria-describedby="form-hint"
                     required
                     className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
                   />
@@ -193,13 +196,16 @@ export default function ContactSection({ formspreeId }) {
 
                 {/* Email field */}
                 <div>
-                  <label className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
+                  <label htmlFor="contact-email" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
                     Email
                   </label>
                   <input
                     type="email"
+                    id="contact-email"
                     name="email"
                     placeholder="your@email.com"
+                    autoComplete="email"
+                    aria-describedby="form-hint"
                     required
                     className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
                   />
@@ -207,13 +213,16 @@ export default function ContactSection({ formspreeId }) {
 
                 {/* Message field */}
                 <div>
-                  <label className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
+                  <label htmlFor="contact-message" className="block uppercase text-xs tracking-widest text-[rgba(212,165,116,0.5)] mb-2">
                     Message
                   </label>
                   <textarea
+                    id="contact-message"
                     name="message"
                     placeholder="Your message..."
                     rows={5}
+                    autoComplete="off"
+                    aria-describedby="form-hint"
                     required
                     className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-[rgba(237,231,217,0.2)] focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all resize-none"
                   />
@@ -232,14 +241,25 @@ export default function ContactSection({ formspreeId }) {
 
               {/* Feedback message (success or error) */}
               {state.succeeded && (
-                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" role="status" aria-live="polite">
                   Thanks! Your message has been sent. I'll respond within 24-48 hours.
                 </div>
               )}
               {state.errors && (
-                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400">
-                  {state.errors.map((err, i) => <p key={i}>{err.message}</p>)}
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400" role="status" aria-live="polite">
+                  {Array.isArray(state.errors)
+                    ? state.errors.map((err, i) => <p key={i}>{err?.message || 'An error occurred'}</p>)
+                    : <p>Failed to send. Please try again or email me directly.</p>}
                 </div>
+              )}
+              {state.errors && (
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="mt-2 w-full py-2 rounded-xl text-xs font-medium text-[rgba(212,165,116,0.7)] border border-[rgba(212,165,116,0.15)] hover:bg-[rgba(212,165,116,0.05)] hover:text-[#D4A574] transition-all"
+                >
+                  Retry or email bvmanoj61@gmail.com
+                </button>
               )}
             </div>
           </motion.div>

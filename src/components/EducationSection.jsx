@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
 const EDUCATION = [
   {
@@ -24,16 +25,16 @@ const EDUCATION = [
   },
 ]
 
-function EducationCard({ item, index }) {
+function EducationCard({ item, index, prefersReducedMotion }) {
   const cardRef = useRef(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
 
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{
+      initial={prefersReducedMotion ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.95 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : (prefersReducedMotion ? { opacity: 1, y: 0, scale: 1 } : {})}
+      transition={prefersReducedMotion ? { duration: 0 } : {
         duration: 0.6,
         delay: index * 0.15,
         ease: [0.22, 1, 0.36, 1],
@@ -105,7 +106,7 @@ function EducationCard({ item, index }) {
 export default function EducationSection() {
   const headerRef = useRef(null)
   const headerInView = useInView(headerRef, { once: true })
-
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   return (
     <section
@@ -217,7 +218,7 @@ export default function EducationSection() {
         {/* Education cards grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {EDUCATION.map((item, index) => (
-            <EducationCard key={item.id} item={item} index={index} />
+            <EducationCard key={item.id} item={item} index={index} prefersReducedMotion={prefersReducedMotion} />
           ))}
         </div>
       </div>

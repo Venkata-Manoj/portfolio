@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { Volume2, VolumeX, ChevronDown } from 'lucide-react'
 
@@ -34,6 +35,7 @@ export default function HeroSection() {
   const containerRef = useRef(null)
   const [isMuted, setIsMuted] = useState(true)
   const snapFired = useRef(false)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const { scrollY } = useScroll()
   const opacity = useTransform(scrollY, [0, 300], [1, 0])
@@ -48,6 +50,7 @@ export default function HeroSection() {
 
   // Auto-mute on scroll away
   useEffect(() => {
+    if (prefersReducedMotion) return
     const handleScroll = () => {
       const hero = containerRef.current
       if (!hero) return
@@ -60,10 +63,12 @@ export default function HeroSection() {
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [prefersReducedMotion])
 
   // First-scroll snap to About
   useEffect(() => {
+    if (prefersReducedMotion) return
+
     const goToAbout = () => {
       if (snapFired.current) return
       snapFired.current = true
@@ -82,6 +87,11 @@ export default function HeroSection() {
     const onKey = (e) => {
       if (snapFired.current) return
       if (window.scrollY > 60) return
+      
+      // Skip if focus is in an interactive element (form fields, buttons, etc.)
+      const tag = e.target.tagName
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(tag) || e.target.isContentEditable) return
+
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
         goToAbout()
@@ -94,7 +104,7 @@ export default function HeroSection() {
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
     }
-  }, [])
+  }, [prefersReducedMotion])
 
   const toggleMute = () => {
     if (videoRef.current) {
