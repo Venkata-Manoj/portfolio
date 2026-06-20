@@ -270,7 +270,7 @@ export default function PamWidget({ tourTrigger }) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.85, opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 right-6 z-50 w-72 sm:w-80 rounded-2xl border border-white/10 bg-[#141418]/95 backdrop-blur-2xl p-5 shadow-2xl"
+            className="fixed bottom-6 right-6 z-50 w-72 sm:w-80 rounded-2xl border border-white/10 bg-[#141418]/95 backdrop-blur-xl p-5 shadow-2xl"
           >
             {pamState === 'complete' ? (
               <>

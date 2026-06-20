@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import AboutSection from './components/AboutSection'
 import EducationSection from './components/EducationSection'
-import CertificatesSection from './components/CertificatesSection'
-import ProjectsSection from './components/ProjectsSection'
-import ContactSection from './components/ContactSection'
-import PamWidget from './components/PamWidget'
+const CertificatesSection = lazy(() => import('./components/CertificatesSection'))
+const ProjectsSection = lazy(() => import('./components/ProjectsSection'))
+const ContactSection = lazy(() => import('./components/ContactSection'))
+const PamWidget = lazy(() => import('./components/PamWidget'))
 import { FORMSPREE_FORM_ID } from './constants'
 
 const App = () => {
@@ -37,10 +37,12 @@ const App = () => {
       <HeroSection />
       <AboutSection />
       <EducationSection />
-      <ProjectsSection />
-      <CertificatesSection />
-      <ContactSection formspreeId={FORMSPREE_FORM_ID} />
-      <PamWidget tourTrigger={tourTrigger} />
+      <Suspense fallback={null}>
+        <ProjectsSection />
+        <CertificatesSection />
+        <ContactSection formspreeId={FORMSPREE_FORM_ID} />
+        <PamWidget tourTrigger={tourTrigger} />
+      </Suspense>
       <footer role="contentinfo" className="text-center py-8 px-4 text-xs text-[rgba(237,231,217,0.45)] uppercase tracking-[0.15em] font-light">
         <p>&copy; {new Date().getFullYear()} Ballani Venkata Manoj. All rights reserved.</p>
       </footer>

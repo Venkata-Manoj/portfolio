@@ -145,6 +145,7 @@ export default function HeroSection() {
         onLoadedData={() => setVideoLoaded(true)}
         onError={() => setVideoLoaded(true)}
       >
+        <source src="/video/intro.webm" type="video/webm" />
         <source src="/video/intro.mp4" type="video/mp4" />
       </video>
 

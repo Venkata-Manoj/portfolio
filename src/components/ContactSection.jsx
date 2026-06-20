@@ -183,7 +183,7 @@ export default function ContactSection({ formspreeId }) {
             viewport={{ once: true }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, delay: 0.2 }}
           >
-            <div className="bg-[rgba(20,18,17,0.55)] backdrop-blur-2xl border border-[rgba(212,165,116,0.08)] rounded-2xl p-8 transition-all duration-300 hover:border-[rgba(212,165,116,0.15)]">
+            <div className="bg-[rgba(20,18,17,0.55)] backdrop-blur-xl border border-[rgba(212,165,116,0.08)] rounded-2xl p-8 transition-all duration-300 hover:border-[rgba(212,165,116,0.15)]">
               {/* Top gold accent line */}
               <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-[#D4A574] to-transparent mb-6 rounded-full" />
 

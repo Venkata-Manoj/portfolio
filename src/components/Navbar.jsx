@@ -85,7 +85,7 @@ export default function Navbar({ onStartTour }) {
         role="navigation"
         aria-label="Main navigation"
         className={`mx-auto max-w-5xl rounded-full flex items-center justify-between border transition-all duration-500 px-4 py-3 ${isScrolled
-          ? 'bg-[#0C0C0E]/80 backdrop-blur-xl border-[#D4A574]/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.6),0_0_24px_-8px_rgba(212,165,116,0.06)]'
+          ? 'bg-[#0C0C0E]/80 backdrop-blur-lg border-[#D4A574]/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.6),0_0_24px_-8px_rgba(212,165,116,0.06)]'
           : 'bg-transparent border-transparent'
           }`}
       >
@@ -101,6 +101,9 @@ export default function Navbar({ onStartTour }) {
           <img
             src="/favicon.png"
             alt="B V Manoj"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             className={`w-8 h-8 rounded-full object-cover shadow-[0_0_14px_rgba(212,165,116,0.25)] transition-transform duration-300 group-hover:scale-105 ${!logoLoaded ? 'hidden' : ''}`}
             onLoad={() => setLogoLoaded(true)}
             onError={() => setLogoLoaded(true)}
@@ -173,7 +176,7 @@ export default function Navbar({ onStartTour }) {
       {/* Mobile Drawer - Absolute positioned relative to header */}
       <div
         id="mobile-menu"
-        className={`absolute left-4 right-4 top-full z-40 mt-2 rounded-3xl border border-[#D4A574]/10 bg-[#0C0C0E]/95 backdrop-blur-2xl p-6 shadow-2xl shadow-black/90 flex flex-col gap-4 transition-all duration-300 ${isOpen
+        className={`absolute left-4 right-4 top-full z-40 mt-2 rounded-3xl border border-[#D4A574]/10 bg-[#0C0C0E]/95 backdrop-blur-xl p-6 shadow-2xl shadow-black/90 flex flex-col gap-4 transition-all duration-300 ${isOpen
           ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 -translate-y-4 pointer-events-none'
           } md:hidden`}

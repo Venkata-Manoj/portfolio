@@ -539,17 +539,17 @@ a:focus:not(:focus-visible) {
 .gradient-title {
   animation: projects-goldTitleSweep 12s ease-in-out infinite;
   filter: drop-shadow(0 0 60px rgba(212, 165, 116, 0.12));
-  will-change: background-position;
+  will-change: opacity, transform;
 }
 
 .title-accent {
   animation: projects-goldAccentShimmer 4s ease-in-out infinite;
-  will-change: background-position;
+  will-change: opacity, transform;
 }
 
 .card-front-number {
   animation: projects-goldNumberShimmer 5s ease-in-out infinite;
-  will-change: background-position;
+  will-change: opacity, transform;
 }
 
 .animate-projects-mouse-wheel {
@@ -1282,13 +1282,13 @@ a:focus:not(:focus-visible) {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: projects-goldTitleSweep 12s ease-in-out infinite;
-  will-change: background-position;
+  will-change: opacity, transform;
 }
 
 /* Gold accent shimmer */
 .gold-accent-shimmer {
   animation: projects-goldAccentShimmer 4s ease-in-out infinite;
-  will-change: background-position;
+  will-change: opacity, transform;
 }
 
 /* Gold number shimmer */
@@ -1299,7 +1299,7 @@ a:focus:not(:focus-visible) {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: projects-goldNumberShimmer 5s ease-in-out infinite;
-  will-change: background-position;
+  will-change: opacity, transform;
 }
 
 /* Shimmer sweep for hover effects */
@@ -1356,11 +1356,11 @@ a:focus:not(:focus-visible) {
 
 /* Optimized blur radii - max 80px for performance */
 .blur-perf {
-  filter: blur(80px);
+  filter: blur(60px);
 }
 
 .blur-perf-lg {
-  filter: blur(60px);
+  filter: blur(50px);
 }
 
 .blur-perf-md {
