@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 
 // Mock IntersectionObserver — used by framer-motion's useInView
-global.IntersectionObserver = class {
+window.IntersectionObserver = class {
   constructor() { this.observe = () => {}; this.unobserve = () => {}; this.disconnect = () => {} }
 }
 

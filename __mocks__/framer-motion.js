@@ -15,7 +15,7 @@ function createMotionComponent(tag) {
   var Component = React.forwardRef(function MotionComponent(props, ref) {
     var rest = {}
     for (var key in props) {
-      if (props.hasOwnProperty(key) && MOTION_PROPS.indexOf(key) === -1) {
+      if (Object.prototype.hasOwnProperty.call(props, key) && MOTION_PROPS.indexOf(key) === -1) {
         rest[key] = props[key]
       }
     }

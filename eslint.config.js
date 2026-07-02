@@ -8,13 +8,14 @@ export default defineConfig([
   globalIgnores(['dist']),
   {
     files: ['**/*.{js,jsx}'],
+    ignores: ['__mocks__/**'],
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      globals: globals.browser,
+      globals: { ...globals.browser, ...globals.vitest },
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },

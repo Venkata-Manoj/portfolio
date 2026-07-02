@@ -1,3 +1,4 @@
+import React from 'react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import App from './App'
@@ -16,7 +17,6 @@ vi.mock('./components/ProjectsSection', () => ({
 }))
 vi.mock('./components/ContactSection', () => ({
   default: function MockContact() {
-    const React = require('react')
     return React.createElement('div', { 'data-testid': 'contact-section' })
   },
 }))
