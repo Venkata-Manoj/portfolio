@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import type { FallbackProps } from 'react-error-boundary'
 import { ErrorBoundary } from 'react-error-boundary'
 import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
@@ -12,13 +13,13 @@ const ContactSection = lazy(() => import('./components/ContactSection'))
 const PamWidget = lazy(() => import('./components/PamWidget'))
 import { FORMSPREE_FORM_ID } from './constants'
 
-function ErrorFallback({ error, resetErrorBoundary }) {
+function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
       <div className="text-3xl mb-4">⚠</div>
       <h3 className="text-lg font-bold text-[#D4A574] mb-2">Section failed to load</h3>
       <p className="text-sm text-[rgba(237,231,217,0.5)] max-w-sm mb-4">
-        {error?.message || 'An unexpected error occurred in this section.'}
+        {(error as Error).message || 'An unexpected error occurred in this section.'}
       </p>
       <button
         onClick={resetErrorBoundary}
@@ -34,7 +35,7 @@ const App = () => {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
-  const [tourTrigger, setTourTrigger] = useState(0)
+  const [tourTrigger, setTourTrigger] = useState<number>(0)
   const handleStartTour = () => setTourTrigger(t => t + 1)
 
   return (
