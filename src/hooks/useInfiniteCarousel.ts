@@ -1,19 +1,41 @@
 import { useRef, useState, useEffect, useCallback, useLayoutEffect } from 'react'
 import { useMotionValue, animate } from 'framer-motion'
+import type { AnimationPlaybackControls, MotionValue } from 'framer-motion'
 
-export function useInfiniteCarousel({ 
-  total, 
-  gap = 24, 
-  autoplayMs = 5000, 
-  reducedMotion = false 
-}) {
-  const trackRef = useRef(null)
+export interface UseInfiniteCarouselOptions {
+  total: number
+  gap?: number
+  autoplayMs?: number
+  reducedMotion?: boolean
+}
+
+export interface UseInfiniteCarouselReturn {
+  trackRef: React.RefObject<HTMLDivElement | null>
+  x: MotionValue<number>
+  isPlaying: boolean
+  currentIndex: number
+  stepWidth: number
+  oneSetWidth: number
+  goNext: () => void
+  goPrev: () => void
+  goToIndex: (i: number) => void
+  togglePlayPause: () => void
+  setIsHovering: (v: boolean) => void
+}
+
+export function useInfiniteCarousel({
+  total,
+  gap = 24,
+  autoplayMs = 5000,
+  reducedMotion = false,
+}: UseInfiniteCarouselOptions): UseInfiniteCarouselReturn {
+  const trackRef = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
-  const autoAnimRef = useRef(null)
-  const startAnimRef = useRef(null)
-  const pauseTimerRef = useRef(null)
-  const isInitialisedRef = useRef(false)
-  const prevIndexRef = useRef(0)
+  const autoAnimRef = useRef<AnimationPlaybackControls | null>(null)
+  const startAnimRef = useRef<(() => void) | null>(null)
+  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isInitialisedRef = useRef<boolean>(false)
+  const prevIndexRef = useRef<number>(0)
 
   const [stepWidth, setStepWidth] = useState(0)
   const [oneSetWidth, setOneSetWidth] = useState(0)
@@ -21,8 +43,8 @@ export function useInfiniteCarousel({
   const [isHovering, setIsHovering] = useState(false)
   const [isPlaying, setIsPlaying] = useState(true)
 
-  const stepWidthRef = useRef(stepWidth)
-  const oneSetWidthRef = useRef(oneSetWidth)
+  const stepWidthRef = useRef<number>(stepWidth)
+  const oneSetWidthRef = useRef<number>(oneSetWidth)
 
   // Update refs when state changes
   useEffect(() => {
@@ -87,7 +109,7 @@ export function useInfiniteCarousel({
   useEffect(() => {
     if (reducedMotion) return
     if (isPlaying && oneSetWidthRef.current > 0) {
-      startAnimRef.current()
+      startAnimRef.current?.()
     } else if (autoAnimRef.current) {
       autoAnimRef.current.stop()
     }
@@ -109,7 +131,7 @@ export function useInfiniteCarousel({
   // Track focused index from x position
   useEffect(() => {
     if (!stepWidthRef.current) return
-    const unsubscribe = x.on('change', (latest) => {
+    const unsubscribe = x.on('change', (latest: number) => {
       const absScroll = Math.abs(latest)
       const cardAtLeft = Math.floor(absScroll / stepWidthRef.current)
       const index = cardAtLeft % total
@@ -123,7 +145,9 @@ export function useInfiniteCarousel({
 
   // Cleanup timers on unmount
   useEffect(() => {
-    return () => clearTimeout(pauseTimerRef.current)
+    return () => {
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current)
+    }
   }, [])
 
   // Navigation helpers
@@ -131,11 +155,10 @@ export function useInfiniteCarousel({
     setIsPlaying((prev) => !prev)
   }, [])
 
-
   const next = useCallback(() => {
     if (stepWidthRef.current === 0) return
     if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
+    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current)
     setIsPlaying(false)
 
     const currentX = x.get()
@@ -143,7 +166,7 @@ export function useInfiniteCarousel({
 
     animate(x, [currentX, targetX], {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
       onComplete: () => {
         pauseTimerRef.current = setTimeout(() => setIsPlaying(true), autoplayMs)
       },
@@ -153,7 +176,7 @@ export function useInfiniteCarousel({
   const prev = useCallback(() => {
     if (stepWidthRef.current === 0) return
     if (autoAnimRef.current) autoAnimRef.current.stop()
-    clearTimeout(pauseTimerRef.current)
+    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current)
     setIsPlaying(false)
 
     const currentX = x.get()
@@ -161,7 +184,7 @@ export function useInfiniteCarousel({
 
     animate(x, [currentX, targetX], {
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
       onComplete: () => {
         pauseTimerRef.current = setTimeout(() => setIsPlaying(true), autoplayMs)
       },
@@ -169,10 +192,10 @@ export function useInfiniteCarousel({
   }, [x, autoplayMs])
 
   const scrollToIndex = useCallback(
-    (targetIndex) => {
+    (targetIndex: number) => {
       if (stepWidthRef.current === 0) return
       if (autoAnimRef.current) autoAnimRef.current.stop()
-      clearTimeout(pauseTimerRef.current)
+      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current)
       setIsPlaying(false)
 
       let delta = targetIndex - currentIndex
@@ -184,7 +207,7 @@ export function useInfiniteCarousel({
 
       animate(x, [currentX, targetX], {
         duration: 0.5 + Math.abs(delta) * 0.1,
-        ease: [0.22, 1, 0.36, 1],
+        ease: [0.22, 1, 0.36, 1] as const,
         onComplete: () => {
           pauseTimerRef.current = setTimeout(() => setIsPlaying(true), autoplayMs)
         },
