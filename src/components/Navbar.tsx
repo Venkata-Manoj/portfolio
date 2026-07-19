@@ -1,7 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Menu, X, Play, Download } from 'lucide-react'
 
-const NAV_ITEMS = [
+interface NavItem {
+  id: string
+  label: string
+}
+
+interface NavbarProps {
+  onStartTour: () => void
+}
+
+const NAV_ITEMS: NavItem[] = [
   { id: 'hero', label: 'Home' },
   { id: 'about', label: 'About' },
   { id: 'education', label: 'Education' },
@@ -10,13 +19,13 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'Contact' },
 ]
 
-export default function Navbar({ onStartTour }) {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState('hero')
-  const [isOpen, setIsOpen] = useState(false)
-  const [logoLoaded, setLogoLoaded] = useState(false)
+export default function Navbar({ onStartTour }: NavbarProps) {
+  const [isScrolled, setIsScrolled] = useState<boolean>(false)
+  const [activeSection, setActiveSection] = useState<string>('hero')
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [logoLoaded, setLogoLoaded] = useState<boolean>(false)
 
-  const handleNavClick = useCallback((e, id) => {
+  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault()
     setIsOpen(false)
     const el = document.getElementById(id)
@@ -36,12 +45,12 @@ export default function Navbar({ onStartTour }) {
   // Active section detection via IntersectionObserver (fallback to scroll)
   useEffect(() => {
     if (typeof IntersectionObserver !== 'undefined') {
-      const observers = []
+      const observers: IntersectionObserver[] = []
       NAV_ITEMS.forEach((item) => {
         const el = document.getElementById(item.id)
         if (!el) return
         const observer = new IntersectionObserver(
-          (entries) => {
+          (entries: IntersectionObserverEntry[]) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
                 setActiveSection(item.id)
@@ -53,7 +62,7 @@ export default function Navbar({ onStartTour }) {
         observer.observe(el)
         observers.push(observer)
       })
-      
+
       // Bottom-of-page fallback
       const handleBottom = () => {
         if (
@@ -64,7 +73,7 @@ export default function Navbar({ onStartTour }) {
         }
       }
       window.addEventListener('scroll', handleBottom, { passive: true })
-      
+
       return () => {
         observers.forEach((o) => o.disconnect())
         window.removeEventListener('scroll', handleBottom)
@@ -73,7 +82,7 @@ export default function Navbar({ onStartTour }) {
       // Fallback: scroll-based detection for older browsers
       const handleScroll = () => {
         const scrollPos = window.scrollY + window.innerHeight * 0.3
-        let current = 'hero'
+        let current: string = 'hero'
         NAV_ITEMS.forEach((item) => {
           const el = document.getElementById(item.id)
           if (el && el.offsetTop <= scrollPos) {

@@ -4,13 +4,17 @@ import { Mail, Linkedin, Github, Send } from 'lucide-react'
 import { useForm } from '@formspree/react'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
-export default function ContactSection({ formspreeId }) {
-  const headerRef = useRef(null)
+interface ContactSectionProps {
+  formspreeId: string
+}
+
+export default function ContactSection({ formspreeId }: ContactSectionProps) {
+  const headerRef = useRef<HTMLDivElement>(null)
   const headerInView = useInView(headerRef, { once: true })
 
   const [state, handleSubmit] = useForm(formspreeId)
   const prefersReducedMotion = usePrefersReducedMotion()
-  const [isOnline, setIsOnline] = useState(
+  const [isOnline, setIsOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
 
@@ -25,12 +29,12 @@ export default function ContactSection({ formspreeId }) {
     }
   }, [])
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    const name = formData.get('name')
-    const email = formData.get('email')
-    const message = formData.get('message')
+    const formData = new FormData(e.currentTarget)
+    const name = String(formData.get('name') ?? '')
+    const email = String(formData.get('email') ?? '')
+    const message = String(formData.get('message') ?? '')
 
     if (!name || !email || !message) {
       return
@@ -263,13 +267,19 @@ export default function ContactSection({ formspreeId }) {
                   Thanks! Your message has been sent. I'll respond within 24-48 hours.
                 </div>
               )}
-              {state.errors && (
-                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400" role="alert">
-                  {Array.isArray(state.errors)
-                    ? state.errors.map((err, i) => <p key={i}>{err?.message || 'An error occurred'}</p>)
-                    : <p>Failed to send. Please try again or email me directly.</p>}
-                </div>
-              )}
+              {(() => {
+                const errors = state.errors as unknown as { message?: string }[] | null
+                if (Array.isArray(errors)) {
+                  return (
+                    <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400" role="alert">
+                      {errors.map((err, i) => (
+                        <p key={i}>{err?.message || 'An error occurred'}</p>
+                      ))}
+                    </div>
+                  )
+                }
+                return null
+              })()}
               {state.errors && (
                 <button
                   type="button"

@@ -2,7 +2,27 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bot, X, Play, Volume2 } from 'lucide-react'
 
-const TRACKS = [
+interface PamWidgetProps {
+  tourTrigger: number
+}
+
+type PamState = 'idle' | 'playing' | 'paused' | 'complete'
+
+interface Subtitle {
+  start: number
+  end: number
+  text: string
+}
+
+interface Track {
+  id: string
+  sectionId: string
+  label: string
+  duration: number
+  subtitles: Subtitle[]
+}
+
+const TRACKS: Track[] = [
   {
     id: 'hero', sectionId: 'hero', label: 'Welcome', duration: 17,
     subtitles: [
@@ -59,13 +79,20 @@ const TRACKS = [
  * It mounts fresh per track (via key={currentTrackIndex} in the parent),
  * so its currentTime starts at 0 without any synchronous setState reset.
  */
-function TrackTimer({ duration, playing, onTimeUpdate, onComplete }) {
+interface TrackTimerProps {
+  duration: number
+  playing: boolean
+  onTimeUpdate: (t: number) => void
+  onComplete?: () => void
+}
+
+function TrackTimer({ duration, playing, onTimeUpdate, onComplete }: TrackTimerProps) {
   useEffect(() => {
     if (!playing || duration <= 0) return undefined
     const start = performance.now()
-    let raf
+    let raf: number
     let lastTenth = 0
-    const tick = (now) => {
+    const tick = (now: number) => {
       const elapsed = (now - start) / 1000
       if (elapsed >= duration) {
         onTimeUpdate(duration)
@@ -80,21 +107,21 @@ function TrackTimer({ duration, playing, onTimeUpdate, onComplete }) {
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
-    return () => raf && cancelAnimationFrame(raf)
+    return () => { if (raf) cancelAnimationFrame(raf) }
   }, [playing, duration, onTimeUpdate, onComplete])
 
   return null
 }
 
-export default function PamWidget({ tourTrigger }) {
-  const [pamState, setPamState] = useState('idle')
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [showOverride, setShowOverride] = useState(false)
-  const lastAutoScrollRef = useRef(0)
-  const audioRef = useRef(null)
-  const isSeekingRef = useRef(false)
-  const tourTriggerHandledRef = useRef(0)
+export default function PamWidget({ tourTrigger }: PamWidgetProps) {
+  const [pamState, setPamState] = useState<PamState>('idle')
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0)
+  const [currentTime, setCurrentTime] = useState<number>(0)
+  const [showOverride, setShowOverride] = useState<boolean>(false)
+  const lastAutoScrollRef = useRef<number>(0)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const isSeekingRef = useRef<boolean>(false)
+  const tourTriggerHandledRef = useRef<number>(0)
 
   const prefersReducedMotion = typeof window !== 'undefined'
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -102,13 +129,13 @@ export default function PamWidget({ tourTrigger }) {
 
   const currentTrack = TRACKS[currentTrackIndex]
 
-  const autoScrollToSection = useCallback((sectionId) => {
+  const autoScrollToSection = useCallback((sectionId: string): void => {
     lastAutoScrollRef.current = Date.now()
     const el = document.getElementById(sectionId)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
-  const handleTrackEnd = useCallback(() => {
+  const handleTrackEnd = useCallback((): void => {
     if (currentTrackIndex < TRACKS.length - 1) {
       const nextIndex = currentTrackIndex + 1
       setCurrentTrackIndex(nextIndex)
@@ -119,7 +146,7 @@ export default function PamWidget({ tourTrigger }) {
     }
   }, [currentTrackIndex, autoScrollToSection])
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback((): void => {
     setPamState('playing')
     setCurrentTrackIndex(0)
     setCurrentTime(0)
@@ -132,30 +159,30 @@ export default function PamWidget({ tourTrigger }) {
     // Focus the panel after render
     setTimeout(() => {
       const panel = document.querySelector('[data-pam-panel]')
-      if (panel) panel.focus()
+      if (panel) (panel as HTMLElement).focus()
     }, 50)
   }, [])
 
-  const closePam = useCallback(() => {
+  const closePam = useCallback((): void => {
     setPamState('idle')
     setCurrentTrackIndex(0)
     setCurrentTime(0)
     setShowOverride(false)
   }, [])
 
-  const resumeTour = () => {
+  const resumeTour = (): void => {
     setShowOverride(false)
     setPamState('playing')
     autoScrollToSection(currentTrack.sectionId)
   }
 
   const activeSubtitle = currentTrack?.subtitles.find(
-    s => currentTime >= s.start && currentTime < s.end
+    (s: Subtitle) => currentTime >= s.start && currentTime < s.end
   )
 
-  const trackProgress = currentTrack
+  const trackProgress: string = currentTrack
     ? ((currentTime / currentTrack.duration) * 100).toFixed(0)
-    : 0
+    : '0'
 
   useEffect(() => {
     if (!audioRef.current) return
@@ -163,31 +190,31 @@ export default function PamWidget({ tourTrigger }) {
     audio.src = `/audio/${currentTrack.id}.mp3`
     audio.currentTime = 0
     audio.preload = 'metadata'
-    
-    const handleCanPlay = () => {
+
+    const handleCanPlay: () => void = () => {
       if (pamState === 'playing') {
         audio.play().catch(() => {})
       }
     }
-    
-    const handleError = () => {
+
+    const handleError: () => void = () => {
       console.error(`Failed to load audio: /audio/${currentTrack.id}.mp3`)
     }
-    
-    const handleEnded = () => {
+
+    const handleEnded: () => void = () => {
       handleTrackEnd()
     }
-    
+
     audio.addEventListener('canplay', handleCanPlay)
     audio.addEventListener('error', handleError)
     audio.addEventListener('ended', handleEnded)
-    
+
     if (pamState === 'playing') {
       audio.play().catch(() => {})
     } else {
       audio.pause()
     }
-    
+
     return () => {
       audio.removeEventListener('canplay', handleCanPlay)
       audio.removeEventListener('error', handleError)
@@ -229,7 +256,7 @@ export default function PamWidget({ tourTrigger }) {
     if (prefersReducedMotion) return
     if (pamState !== 'playing') return
 
-    const checkManualScroll = () => {
+    const checkManualScroll = (): void => {
       if (Date.now() - lastAutoScrollRef.current > 2500) {
         setShowOverride(true)
         setPamState('paused')
@@ -243,7 +270,7 @@ export default function PamWidget({ tourTrigger }) {
   // Close panel on Escape key
   useEffect(() => {
     if (pamState === 'idle') return
-    const handler = (e) => {
+    const handler = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') closePam()
     }
     window.addEventListener('keydown', handler)

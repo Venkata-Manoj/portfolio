@@ -10,7 +10,24 @@ import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
    On Vercel, image src/srcSet routes through /_vercel/image for
    auto-WebP + responsive sizes (see optimizeImage helper below).
    ===================================================================== */
-const CERTS = [
+
+interface Certificate {
+  title: string
+  org: string
+  date: string
+  image: string
+  accent: string
+}
+
+type CertificateItem = Certificate & { isClone: boolean }
+
+interface CertificateCardProps {
+  cert: CertificateItem
+  index: number
+  isVisible: boolean
+}
+
+const CERTS: Certificate[] = [
   {
     title: 'AI Fundamentals',
     org: 'DataCamp',
@@ -112,7 +129,7 @@ const TOTAL = CERTS.length
 const CLONE_COUNT = 3
 
 // Build flat array of clones for infinite scroll (4 full sets)
-const ALL_CERTS = []
+const ALL_CERTS: CertificateItem[] = []
 for (let i = 0; i < CLONE_COUNT + 1; i++) {
   const isCloneSet = i < CLONE_COUNT
   ALL_CERTS.push(...CERTS.map(c => ({ ...c, isClone: isCloneSet })))
@@ -121,7 +138,7 @@ for (let i = 0; i < CLONE_COUNT + 1; i++) {
 /* =====================================================================
    CERTIFICATE CARD
    ===================================================================== */
-function CertificateCard({ cert, index, isVisible }) {
+function CertificateCard({ cert, index, isVisible }: CertificateCardProps) {
   const staggerDelay = (index % TOTAL) * 100
   const [imgLoaded, setImgLoaded] = useState(false)
 
@@ -175,9 +192,9 @@ function CertificateCard({ cert, index, isVisible }) {
               'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
           onLoad={() => setImgLoaded(true)}
-          onError={(e) => {
+          onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
             e.currentTarget.style.display = 'none'
-            e.currentTarget.parentElement.querySelector('.cert-fallback')?.classList.remove('hidden')
+            e.currentTarget.parentElement?.querySelector('.cert-fallback')?.classList.remove('hidden')
           }}
         />
         <div
@@ -280,7 +297,6 @@ export default function CertificatesSection() {
   const prefersReducedMotion = usePrefersReducedMotion()
   const { trackRef, x, isPlaying, currentIndex, oneSetWidth, goNext, goPrev, goToIndex, togglePlayPause, setIsHovering } = useInfiniteCarousel({
     total: TOTAL,
-    cardWidth: 380,
     gap: 24,
     autoplayMs: AUTOPLAY_INTERVAL_MS,
     reducedMotion: prefersReducedMotion,
@@ -289,7 +305,7 @@ export default function CertificatesSection() {
   // Use currentIndex from carousel hook directly
 
   // Header animation state
-  const headerRef = useRef(null)
+  const headerRef = useRef<HTMLDivElement>(null)
   const headerInView = useInView(headerRef, { once: true })
 
   return (

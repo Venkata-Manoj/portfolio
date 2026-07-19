@@ -6,9 +6,48 @@ import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 import { useInfiniteCarousel } from '../hooks/useInfiniteCarousel'
 
 /* =====================================================================
+   TYPES
+   ===================================================================== */
+
+interface Project {
+  number: string
+  emoji: string
+  name: string
+  description: string
+  tech: string[]
+  accent: string
+  accent2: string
+  github: string
+  live: string | null
+}
+
+interface GitHubCardData {
+  number: string
+  emoji: string
+  name: string
+  description: string
+  accent: string
+  accent2: string
+  github: string
+}
+
+type ProjectItem = (Project | GitHubCardData) & { isClone: boolean }
+
+interface ProjectCardProps {
+  project: ProjectItem
+  index: number
+  isMobile: boolean
+}
+
+interface GitHubCardProps {
+  project: ProjectItem
+  index: number
+}
+
+/* =====================================================================
    DATA — 6 projects with gold/bronze palette accent colors
    ===================================================================== */
-const PROJECTS = [
+const PROJECTS: Project[] = [
   {
     number: '01',
     emoji: '🎬',
@@ -67,7 +106,7 @@ const PROJECTS = [
 ]
 
 // Special 6th card — GitHub CTA (no flip)
-const GITHUB_CARD = {
+const GITHUB_CARD: GitHubCardData = {
   number: '06',
   emoji: '📦',
   name: 'Explore More on GitHub',
@@ -77,13 +116,13 @@ const GITHUB_CARD = {
   github: 'https://github.com/Venkata-Manoj',
 }
 
-const ALL_PROJECTS = [...PROJECTS, GITHUB_CARD] // 6 items
+const ALL_PROJECTS: (Project | GitHubCardData)[] = [...PROJECTS, GITHUB_CARD] // 6 items
 const TOTAL = ALL_PROJECTS.length
 const CLONE_COUNT = 3
 
 // Build flat array of clones for infinite scroll:
 // [clone copy 0, clone copy 1, original copy, clone copy 2, clone copy 3]
-const ITEMS = []
+const ITEMS: ProjectItem[] = []
 for (let i = 0; i < CLONE_COUNT + 1; i++) {
   const isCloneSet = i < CLONE_COUNT
   ITEMS.push(...ALL_PROJECTS.map(p => ({ ...p, isClone: isCloneSet })))
@@ -93,12 +132,15 @@ for (let i = 0; i < CLONE_COUNT + 1; i++) {
 /* =====================================================================
    PROJECT CARD — Click-to-flip with shimmer + gold glow
    ===================================================================== */
-function ProjectCard({ project, index, isMobile }) {
+function ProjectCard({ project, index, isMobile }: ProjectCardProps) {
   const [isFlipped, setIsFlipped] = useState(false)
   const flippingRef = useRef(false)
-  const cardRef = useRef(null)
-  const innerRef = useRef(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const innerRef = useRef<HTMLDivElement>(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
+
+  // In practice ProjectCard is only used with Project items, so cast safely
+  const p = project as Project & { isClone: boolean }
 
   // --- Flip handler ---
   const handleFlip = useCallback(
@@ -137,10 +179,10 @@ function ProjectCard({ project, index, isMobile }) {
   )
 
   const handleKeyDown = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent<HTMLButtonElement>) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        handleFlip({ target: {} })
+        handleFlip()
       }
     },
     [handleFlip]
@@ -154,8 +196,8 @@ function ProjectCard({ project, index, isMobile }) {
     ? { opacity: 1, y: 0 }
     : { opacity: 1, scale: 1, y: 0 }
   const transitionConfig = isMobile
-    ? { duration: 0.4, delay: (index % TOTAL) * 0.05, ease: [0.22, 1, 0.36, 1] }
-    : { duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] }
+    ? { duration: 0.4, delay: (index % TOTAL) * 0.05, ease: [0.22, 1, 0.36, 1] as const }
+    : { duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] as const }
 
   return (
     <motion.div
@@ -175,9 +217,9 @@ function ProjectCard({ project, index, isMobile }) {
           className="absolute inset-0 opacity-[0.04]"
           style={{
             background: [
-              `radial-gradient(ellipse 80% 60% at 30% 40%, ${project.accent} 0%, transparent 70%)`,
-              `radial-gradient(ellipse 60% 70% at 70% 60%, ${project.accent2} 0%, transparent 70%)`,
-              `linear-gradient(145deg, ${project.accent}, ${project.accent2})`,
+              `radial-gradient(ellipse 80% 60% at 30% 40%, ${p.accent} 0%, transparent 70%)`,
+              `radial-gradient(ellipse 60% 70% at 70% 60%, ${p.accent2} 0%, transparent 70%)`,
+              `linear-gradient(145deg, ${p.accent}, ${p.accent2})`,
             ].join(', '),
           }}
         />
@@ -203,7 +245,7 @@ function ProjectCard({ project, index, isMobile }) {
             WebkitBackfaceVisibility: 'hidden',
             ...(isMobile ? {
               opacity: isFlipped ? 0 : 1,
-              pointerEvents: isFlipped ? 'none' : 'auto',
+              pointerEvents: isFlipped ? 'none' as const : 'auto' as const,
               transition: 'opacity 0.3s ease, transform 0.3s ease',
               transform: isFlipped ? 'scale(0.95)' : 'scale(1)',
             } : {})
@@ -236,14 +278,14 @@ function ProjectCard({ project, index, isMobile }) {
               className="card-front-number text-[clamp(4rem,8vw,8rem)] font-black leading-none tracking-[-0.03em] opacity-[0.9] mb-[0.4rem]"
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
-                background: `linear-gradient(135deg, ${project.accent}, ${project.accent2}, ${project.accent})`,
+                background: `linear-gradient(135deg, ${p.accent}, ${p.accent2}, ${p.accent})`,
                 backgroundSize: '200% 100%',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              {project.number}
+              {p.number}
             </div>
 
             {/* Emoji in gold-tinted glass circle */}
@@ -255,17 +297,17 @@ function ProjectCard({ project, index, isMobile }) {
                 boxShadow: '0 0 30px -6px rgba(212,165,116,0.12)',
               }}
             >
-              {project.emoji}
+              {p.emoji}
             </div>
 
             {/* Project title */}
             <h2 className="card-front-title text-[clamp(1.4rem,2.8vw,2.6rem)] font-bold leading-[1.1] tracking-[-0.01em] text-white mb-4">
-              {project.name}
+              {p.name}
             </h2>
 
             {/* Front face tags */}
             <div className="card-front-tags flex flex-wrap gap-2 mb-4">
-              {project.tech.map((t) => (
+              {p.tech.map((t: string) => (
                 <span
                   key={t}
                   className="card-front-tag inline-block text-xs font-medium px-[14px] py-[5px] rounded-full border border-[rgba(212,165,116,0.08)] text-[rgba(237,231,217,0.8)] tracking-[0.02em] cursor-default transition-all duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-[rgba(212,165,116,0.12)] hover:border-[rgba(212,165,116,0.30)] hover:text-[#EDE7D9] hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-[0_0_20px_-4px_rgba(212,165,116,0.10)] active:translate-y-0 active:scale-[0.98]"
@@ -320,12 +362,12 @@ function ProjectCard({ project, index, isMobile }) {
                 overflow: 'hidden',
               }}
             >
-              {project.description}
+              {p.description}
             </p>
 
             {/* Tech stack tags */}
             <div className="flex flex-wrap gap-2 mb-6">
-              {project.tech.map((t) => (
+              {p.tech.map((t: string) => (
                 <span
                   key={t}
                   className="tech-tag inline-block px-[12px] py-[4px] rounded-full border border-[rgba(212,165,116,0.12)] bg-[rgba(212,165,116,0.04)] text-[rgba(212,165,116,0.8)] text-xs font-medium transition-all duration-300 hover:border-[rgba(212,165,116,0.25)] hover:text-[#D4A574] hover:scale-105"
@@ -337,7 +379,7 @@ function ProjectCard({ project, index, isMobile }) {
 
             {/* GitHub link */}
             <a
-              href={project.github}
+              href={p.github}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-[0.85rem] font-medium text-[rgba(212,165,116,0.7)] hover:text-[#D4A574] transition-colors duration-300"
@@ -359,7 +401,7 @@ function ProjectCard({ project, index, isMobile }) {
             transform: 'rotateY(180deg)',
             ...(isMobile ? {
               opacity: isFlipped ? 1 : 0,
-              pointerEvents: isFlipped ? 'auto' : 'none',
+              pointerEvents: isFlipped ? 'auto' as const : 'none' as const,
               transition: 'opacity 0.3s ease, transform 0.3s ease',
               transform: isFlipped ? 'scale(1)' : 'scale(0.95)',
             } : {})
@@ -370,27 +412,27 @@ function ProjectCard({ project, index, isMobile }) {
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-6"
               style={{
-                background: `linear-gradient(135deg, ${project.accent}, ${project.accent2})`,
-                boxShadow: `0 0 40px ${project.accent}40`,
+                background: `linear-gradient(135deg, ${p.accent}, ${p.accent2})`,
+                boxShadow: `0 0 40px ${p.accent}40`,
               }}
             >
-              {project.emoji}
+              {p.emoji}
             </div>
             <h3
               className="text-2xl font-bold text-[#EDE7D9] mb-3"
               style={{
-                textShadow: `0 0 20px ${project.accent}40`,
+                textShadow: `0 0 20px ${p.accent}40`,
               }}
             >
-              {project.name}
+              {p.name}
             </h3>
             <p
               className="text-sm font-light text-[rgba(237,231,217,0.75)] mb-6 leading-relaxed"
             >
-              {project.description}
+              {p.description}
             </p>
             <a
-              href={project.github}
+              href={p.github}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] font-semibold rounded-full hover:shadow-[0_0_30px_rgba(212,165,116,0.3)] hover:scale-105 transition-all duration-300"
@@ -408,12 +450,12 @@ function ProjectCard({ project, index, isMobile }) {
 /* =====================================================================
    GITHUB CARD — Static, no flip
    ===================================================================== */
-function GitHubCard({ project, index }) {
+function GitHubCard({ project, index }: GitHubCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.85 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay: (index % TOTAL) * 0.1, ease: [0.22, 1, 0.36, 1] as const }}
       className="card relative shrink-0 snap-center rounded-3xl overflow-hidden group w-[85vw] lg:w-[400px] glass"
       style={{ minHeight: 480 }}
       whileHover={{ y: -6 }}
@@ -466,7 +508,6 @@ export default function ProjectsSection() {
   const prefersReducedMotion = usePrefersReducedMotion()
   const { trackRef, x, isPlaying, currentIndex, stepWidth, goNext, goPrev, goToIndex, togglePlayPause, setIsHovering } = useInfiniteCarousel({
     total: TOTAL,
-    cardWidth: 380,
     gap: 24,
     autoplayMs: 3000,
     reducedMotion: prefersReducedMotion,
@@ -478,21 +519,21 @@ export default function ProjectsSection() {
   // Keyboard navigation — scoped to #projects section only
   useEffect(() => {
     const section = document.getElementById('projects')
-    const handler = (e) => {
+    const handler = (e: KeyboardEvent) => {
       // Only handle if focus is within the projects section
       const active = document.activeElement
       if (!section || !section.contains(active)) return
-      
+
       // Skip when focus is in an input/textarea
-      const tag = active?.tagName
+      const tag = (active as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-      
+
       if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev() }
       if (e.key === 'ArrowRight') { e.preventDefault(); goNext() }
       if (e.key === 'Escape') {
         e.preventDefault()
         // Move focus away from carousel
-        const dots = section?.querySelector('[role="tablist"]')
+        const dots = section?.querySelector('[role="tablist"]') as HTMLElement | null
         if (dots) dots.focus()
       }
     }
@@ -626,9 +667,7 @@ export default function ProjectsSection() {
           onMouseLeave={() => {
             setIsHovering(false)
             // Restore auto-scroll if it was paused by hover
-            if (isPlaying) {
-              // The hook handles this automatically
-            }
+            // The hook handles this automatically
           }}
         >
           <motion.div

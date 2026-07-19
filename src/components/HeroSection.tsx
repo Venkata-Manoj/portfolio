@@ -3,7 +3,13 @@ import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { Volume2, VolumeX, ChevronDown } from 'lucide-react'
 
-const WordReveal = ({ text, className = '', delay = 0 }) => {
+interface WordRevealProps {
+  text: string
+  className?: string
+  delay?: number
+}
+
+function WordReveal({ text, className = '', delay = 0 }: WordRevealProps) {
   const ref = useRef(null)
   const isVisible = useInView(ref, { once: true, amount: 0.1 })
 
@@ -31,10 +37,10 @@ const WordReveal = ({ text, className = '', delay = 0 }) => {
 }
 
 export default function HeroSection() {
-  const videoRef = useRef(null)
-  const containerRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [isMuted, setIsMuted] = useState(true)
-  const snapFired = useRef(false)
+  const snapFired = useRef<boolean>(false)
   const prefersReducedMotion = usePrefersReducedMotion()
   const [videoLoaded, setVideoLoaded] = useState(false)
 
@@ -77,7 +83,7 @@ export default function HeroSection() {
       if (about) about.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
-    const onWheel = (e) => {
+    const onWheel = (e: WheelEvent) => {
       if (snapFired.current) return
       if (e.deltaY <= 0) return
       if (window.scrollY > 60) return
@@ -85,13 +91,14 @@ export default function HeroSection() {
       goToAbout()
     }
 
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (snapFired.current) return
       if (window.scrollY > 60) return
-      
+
       // Skip if focus is in an interactive element (form fields, buttons, etc.)
-      const tag = e.target.tagName
-      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(tag) || e.target.isContentEditable) return
+      const target = e.target as HTMLElement
+      const tag = target.tagName
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(tag) || target.isContentEditable) return
 
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
@@ -136,8 +143,6 @@ export default function HeroSection() {
         playsInline
         preload="metadata"
         poster="/me.jpeg"
-        fetchPriority="high"
-        decoding="async"
         width="1920"
         height="1080"
         aria-hidden="true"

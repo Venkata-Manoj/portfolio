@@ -2,7 +2,23 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
-const EDUCATION = [
+interface EducationItem {
+  id: string
+  title: string
+  institution: string
+  image: string
+  marks: string
+  year: string
+  description: string
+}
+
+interface EducationCardProps {
+  item: EducationItem
+  index: number
+  prefersReducedMotion: boolean
+}
+
+const EDUCATION: EducationItem[] = [
   {
     id: 'btech',
     title: "B.Tech CSE (AI & Data Science)",
@@ -25,8 +41,8 @@ const EDUCATION = [
   },
 ]
 
-function EducationCard({ item, index, prefersReducedMotion }) {
-  const cardRef = useRef(null)
+function EducationCard({ item, index, prefersReducedMotion }: EducationCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
   const inView = useInView(cardRef, { once: true, margin: '-40px' })
 
   return (
