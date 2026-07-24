@@ -37,6 +37,16 @@ const App = () => {
   }, [])
   const [tourTrigger, setTourTrigger] = useState<number>(0)
   const handleStartTour = () => setTourTrigger(t => t + 1)
+  const [showBackToTop, setShowBackToTop] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > window.innerHeight * 0.6)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
     <main id="main-content" className="relative w-full" style={{ overflowX: 'clip', background: 'transparent' }}>
@@ -57,26 +67,66 @@ const App = () => {
       <HeroSection />
       <AboutSection />
       <EducationSection />
-      <Suspense fallback={null}>
+      <Suspense fallback={
+        <div className="min-h-screen w-full bg-[#0C0C0C] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-full border-2 border-[rgba(212,165,116,0.2)] border-t-[#D4A574] animate-spin" />
+            <p className="text-xs text-[rgba(237,231,217,0.35)] uppercase tracking-[0.2em] animate-pulse">Loading...</p>
+          </div>
+        </div>
+      }>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <ProjectsSection />
         </ErrorBoundary>
       </Suspense>
-      <Suspense fallback={null}>
+      <Suspense fallback={
+        <div className="min-h-screen w-full bg-[#0C0C0C] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-full border-2 border-[rgba(212,165,116,0.2)] border-t-[#D4A574] animate-spin" />
+            <p className="text-xs text-[rgba(237,231,217,0.35)] uppercase tracking-[0.2em] animate-pulse">Loading...</p>
+          </div>
+        </div>
+      }>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <CertificatesSection />
         </ErrorBoundary>
       </Suspense>
-      <Suspense fallback={null}>
+      <Suspense fallback={
+        <div className="min-h-screen w-full bg-[#0C0C0C] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-full border-2 border-[rgba(212,165,116,0.2)] border-t-[#D4A574] animate-spin" />
+            <p className="text-xs text-[rgba(237,231,217,0.35)] uppercase tracking-[0.2em] animate-pulse">Loading...</p>
+          </div>
+        </div>
+      }>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <ContactSection formspreeId={FORMSPREE_FORM_ID} />
         </ErrorBoundary>
       </Suspense>
-      <Suspense fallback={null}>
+      <Suspense fallback={
+        <div className="min-h-screen w-full bg-[#0C0C0C] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-full border-2 border-[rgba(212,165,116,0.2)] border-t-[#D4A574] animate-spin" />
+            <p className="text-xs text-[rgba(237,231,217,0.35)] uppercase tracking-[0.2em] animate-pulse">Loading...</p>
+          </div>
+        </div>
+      }>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <PamWidget tourTrigger={tourTrigger} />
         </ErrorBoundary>
       </Suspense>
+      {showBackToTop && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Back to top"
+          className="fixed bottom-6 left-6 z-50 w-11 h-11 rounded-full bg-gradient-to-br from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
+        </button>
+      )}
       <footer role="contentinfo" className="text-center py-8 px-4 text-xs text-[rgba(237,231,217,0.45)] uppercase tracking-[0.15em] font-light">
         <p>&copy; {new Date().getFullYear()} Ballani Venkata Manoj. All rights reserved.</p>
       </footer>

@@ -287,8 +287,8 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={startTour}
-            style={{ animation: 'pam-pulse 2.5s ease-in-out infinite' }}
-            className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+            style={{ animation: 'pam-gold-pulse 2.5s ease-in-out infinite' }}
+            className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform"
           >
             <Bot size={24} />
           </motion.button>
@@ -307,7 +307,7 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Volume2 size={14} className="text-purple-400" />
+                    <Volume2 size={14} className="text-[#D4A574]" />
                     <span className="text-xs uppercase tracking-[0.25em] text-white/70">
                       Tour Complete
                     </span>
@@ -331,7 +331,7 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Volume2 size={14} className="text-purple-400" />
+                    <Volume2 size={14} className="text-[#D4A574]" />
                     <span className="text-xs uppercase tracking-[0.25em] text-white/70">
                       {currentTrack?.label} · {currentTrackIndex + 1}/{TRACKS.length}
                     </span>
@@ -345,7 +345,7 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
                   {[0, 1, 2, 3, 4].map(i => (
                     <div
                       key={i}
-                      className="w-1 rounded-full bg-purple-400/80 origin-bottom"
+                      className="w-1 rounded-full bg-[#D4A574]/80 origin-bottom"
                       style={{
                         height: '16px',
                         animation: pamState === 'playing' ? 'pam-wave 0.7s ease-in-out infinite' : 'none',
@@ -374,7 +374,7 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
 
                 <div className="mt-4 h-1 w-full rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-400 transition-all duration-100"
+                    className="h-full rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] transition-all duration-100"
                     style={{ width: `${trackProgress}%` }}
                   />
                 </div>
@@ -391,7 +391,7 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
                     <button
                       type="button"
                       onClick={resumeTour}
-                      className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 py-2.5 text-xs font-medium uppercase tracking-[0.25em] text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] py-2.5 text-xs font-medium uppercase tracking-[0.25em] text-[#0C0C0C] shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Play size={12} fill="white" />
                       Resume Tour
