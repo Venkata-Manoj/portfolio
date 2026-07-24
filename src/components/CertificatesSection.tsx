@@ -606,7 +606,7 @@ export default function CertificatesSection() {
       id="certificates"
       role="region"
       aria-label="Certificates"
-      className="relative overflow-hidden mx-3 sm:mx-6 md:mx-8 my-6 sm:my-8 rounded-[2rem] border border-[rgba(212,165,116,0.06)] px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C] min-h-screen"
+      className="relative w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C] min-h-screen"
     >
       {/* ═══════════════════════════════════════════════════════════════
           AMBIENT ORBS — 3 layers, gold/bronze drifting
