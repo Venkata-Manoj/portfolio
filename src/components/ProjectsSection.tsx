@@ -301,17 +301,19 @@ export default function ProjectsSection() {
     resetRef.current = () => {
       view.x = 0; view.y = 0; view.scale = 1
       mouse.drag = null; mouse.panning = false; mouse.down = false
+      mouse.x = -9999; mouse.y = -9999   // reset mouse pos to kill hover
+      hoveredRef.current = null           // clear hover state
       seed()
-      if (prefersReducedMotion) draw()
+      draw()                              // always redraw immediately
     }
 
     // Shake: random velocity kick to every node, then redraw a frame.
     shakeRef.current = () => {
       nodes.forEach((nd) => {
-        nd.vx += (Math.random() - 0.5) * 80
-        nd.vy += (Math.random() - 0.5) * 80
+        nd.vx += (Math.random() - 0.5) * 300
+        nd.vy += (Math.random() - 0.5) * 300
       })
-      if (prefersReducedMotion) draw()
+      draw()  // always redraw immediately for instant visual feedback
     }
 
     function toWorld(cx: number, cy: number) {
