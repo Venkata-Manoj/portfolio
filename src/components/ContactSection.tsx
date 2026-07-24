@@ -19,7 +19,7 @@ const [state, handleSubmit] = useForm(formspreeId)
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
   const [emailError, setEmailError] = useState<string | null>(null)
-  const emailValidationTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const emailValidationTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     const goOnline = () => setIsOnline(true)

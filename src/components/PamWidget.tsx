@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bot, X, Play, Volume2 } from 'lucide-react'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
 interface PamWidgetProps {
   tourTrigger: number
@@ -123,9 +124,7 @@ export default function PamWidget({ tourTrigger }: PamWidgetProps) {
   const isSeekingRef = useRef<boolean>(false)
   const tourTriggerHandledRef = useRef<number>(0)
 
-  const prefersReducedMotion = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const currentTrack = TRACKS[currentTrackIndex]
 

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useIsMobile } from '../hooks/useIsMobile'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
+import { hexA } from '../lib/colorUtils'
 
 /* =====================================================================
    TYPES
@@ -17,6 +18,7 @@ interface Project {
   accent2: string
   github: string
   live: string | null
+  cta?: boolean
 }
 
 interface GitHubCardData {
@@ -28,6 +30,8 @@ interface GitHubCardData {
   accent2: string
   github: string
   cta?: boolean
+  tech?: string[]
+  live?: string | null
 }
 
 type NodeData = Project | GitHubCardData
@@ -220,19 +224,11 @@ const ALL_PROJECTS: NodeData[] = [...PROJECTS, GITHUB_CARD] // 14 items
    ===================================================================== */
 function cat(p: NodeData): CatInfo {
   if (p.cta) return { key: 'all', label: 'All repos', col: '#C0B8A8' }
-  const t = (p.tech[0] || '').toLowerCase()
+  const t = (p.tech?.[0] || '').toLowerCase()
   if (t.includes('python')) return { key: 'py', label: 'Python', col: '#D4A574' }
   if (t.includes('typescript') || t.includes('next')) return { key: 'ts', label: 'TypeScript | Next.js', col: '#C4956A' }
   if (t.includes('html')) return { key: 'web', label: 'Web Native', col: '#E8B4A0' }
   return { key: 'misc', label: 'Other', col: '#B8895E' }
-}
-
-function hexA(hex: string, a: number): string {
-  const c = hex.replace('#', '')
-  const r = parseInt(c.substr(0, 2), 16)
-  const g = parseInt(c.substr(2, 2), 16)
-  const b = parseInt(c.substr(4, 2), 16)
-  return `rgba(${r},${g},${b},${a})`
 }
 
 /* =====================================================================
@@ -253,14 +249,16 @@ export default function ProjectsSection() {
   const sizeRef = useRef({ w: 0, h: 0, dpr: 1 })
   const resetRef = useRef<() => void>(() => {})
   const shakeRef = useRef<() => void>(() => {})
+  const sectionRef = useRef<HTMLElement>(null)
+  const isVisibleRef = useRef(true)
 
   const [selected, setSelected] = useState<NodeData | null>(null)
 
   useEffect(() => {
-    const wrap = wrapRef.current
-    const canvas = canvasRef.current
+    const wrap = wrapRef.current!
+    const canvas = canvasRef.current!
     if (!wrap || !canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d')!
     if (!ctx) return // jsdom / no 2d context — skip simulation but keep DOM
 
     const nodes = nodesRef.current
@@ -271,11 +269,11 @@ export default function ProjectsSection() {
 
     function resize() {
       size.dpr = Math.min(window.devicePixelRatio || 1, 2)
-      size.w = wrap.clientWidth
-      size.h = wrap.clientHeight
-      canvas.width = size.w * size.dpr
-      canvas.height = size.h * size.dpr
-      ctx.setTransform(size.dpr, 0, 0, size.dpr, 0, 0)
+      size.w = wrap!.clientWidth
+      size.h = wrap!.clientHeight
+      canvas!.width = size.w * size.dpr
+      canvas!.height = size.h * size.dpr
+      ctx!.setTransform(size.dpr, 0, 0, size.dpr, 0, 0)
     }
 
     function seed() {
@@ -355,17 +353,17 @@ export default function ProjectsSection() {
     }
 
     function draw() {
-      ctx.clearRect(0, 0, size.w, size.h)
-      ctx.save()
-      ctx.translate(view.x, view.y)
-      ctx.scale(view.scale, view.scale)
+      ctx!.clearRect(0, 0, size.w, size.h)
+      ctx!.save()
+      ctx!.translate(view.x, view.y)
+      ctx!.scale(view.scale, view.scale)
 
       edges.forEach(([i, j]) => {
         const a = nodes[i], b = nodes[j]
         const lit = (hoveredRef.current === a || hoveredRef.current === b)
-        ctx.strokeStyle = lit ? hexA('#EDE7D9', 0.28) : hexA('#D4A574', 0.12)
-        ctx.lineWidth = lit ? 1.6 : 1
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke()
+        ctx!.strokeStyle = lit ? hexA('#EDE7D9', 0.28) : hexA('#D4A574', 0.12)
+        ctx!.lineWidth = lit ? 1.6 : 1
+        ctx!.beginPath(); ctx!.moveTo(a.x, a.y); ctx!.lineTo(b.x, b.y); ctx!.stroke()
       })
 
       hoveredRef.current = null
@@ -379,49 +377,51 @@ export default function ProjectsSection() {
         nd.hover += (target - nd.hover) * 0.15
 
         const pr = nd.r * (1 + nd.hover * 0.25 + Math.sin(nd.pulse) * 0.02)
-        const g = ctx.createRadialGradient(nd.x, nd.y, 0, nd.x, nd.y, pr * 2.6)
+        const g = ctx!.createRadialGradient(nd.x, nd.y, 0, nd.x, nd.y, pr * 2.6)
         g.addColorStop(0, hexA(nd.c.col, 0.5 + nd.hover * 0.3))
         g.addColorStop(1, hexA(nd.c.col, 0))
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(nd.x, nd.y, pr * 2.6, 0, Math.PI * 2); ctx.fill()
+        ctx!.fillStyle = g; ctx!.beginPath(); ctx!.arc(nd.x, nd.y, pr * 2.6, 0, Math.PI * 2); ctx!.fill()
 
-        ctx.fillStyle = hexA(nd.c.col, 0.95)
-        ctx.beginPath(); ctx.arc(nd.x, nd.y, pr, 0, Math.PI * 2); ctx.fill()
+        ctx!.fillStyle = hexA(nd.c.col, 0.95)
+        ctx!.beginPath(); ctx!.arc(nd.x, nd.y, pr, 0, Math.PI * 2); ctx!.fill()
 
-        ctx.strokeStyle = hexA('#EDE7D9', 0.2 + nd.hover * 0.5); ctx.lineWidth = 1.4
-        ctx.beginPath(); ctx.arc(nd.x, nd.y, pr + 4, 0, Math.PI * 2); ctx.stroke()
+        ctx!.strokeStyle = hexA('#EDE7D9', 0.2 + nd.hover * 0.5); ctx!.lineWidth = 1.4
+        ctx!.beginPath(); ctx!.arc(nd.x, nd.y, pr + 4, 0, Math.PI * 2); ctx!.stroke()
 
-        ctx.font = (pr * 0.95) + 'px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-        ctx.fillText(nd.p.emoji, nd.x, nd.y + 1)
+        ctx!.font = (pr * 0.95) + 'px system-ui'; ctx!.textAlign = 'center'; ctx!.textBaseline = 'middle'
+        ctx!.fillText(nd.p.emoji, nd.x, nd.y + 1)
 
         if (nd.hover > 0.15 || nd.p.cta) {
-          ctx.font = '600 12px "JetBrains Mono", monospace'
-          ctx.fillStyle = hexA('#EDE7D9', 0.9 * Math.max(nd.hover, nd.p.cta ? 0.5 : 0))
-          ctx.fillText(nd.p.name, nd.x, nd.y + pr + 16)
+          ctx!.font = '600 12px "JetBrains Mono", monospace'
+          ctx!.fillStyle = hexA('#EDE7D9', 0.9 * Math.max(nd.hover, nd.p.cta ? 0.5 : 0))
+          ctx!.fillText(nd.p.name, nd.x, nd.y + pr + 16)
         }
       })
 
-      ctx.restore()
+      ctx!.restore()
     }
 
     function loop() {
-      if (!prefersReducedMotion) {
-        if (mouse.x !== -9999 && !mouse.panning) {
-          const wm = toWorld(mouse.x, mouse.y)
-          nodes.forEach((nd) => {
-            if (nd === mouse.drag) return
-            const dx = nd.x - wm.x, dy = nd.y - wm.y, d = Math.hypot(dx, dy)
-            if (d < 120 && d > 0.1) { const f = (120 - d) / 120 * 0.35; nd.vx += dx / d * f; nd.vy += dy / d * f }
-          })
+      if (isVisibleRef.current) {
+        if (!prefersReducedMotion) {
+          if (mouse.x !== -9999 && !mouse.panning) {
+            const wm = toWorld(mouse.x, mouse.y)
+            nodes.forEach((nd) => {
+              if (nd === mouse.drag) return
+              const dx = nd.x - wm.x, dy = nd.y - wm.y, d = Math.hypot(dx, dy)
+              if (d < 120 && d > 0.1) { const f = (120 - d) / 120 * 0.35; nd.vx += dx / d * f; nd.vy += dy / d * f }
+            })
+          }
+          step()
         }
-        step()
+        draw()
       }
-      draw()
       rafRef.current = requestAnimationFrame(loop)
     }
 
     /* ── interaction ── */
     function localPos(e: PointerEvent | WheelEvent) {
-      const r = wrap.getBoundingClientRect()
+      const r = wrap!.getBoundingClientRect()
       return { cx: e.clientX - r.left, cy: e.clientY - r.top }
     }
     let downPos = { x: 0, y: 0 }, moved = 0
@@ -433,10 +433,10 @@ export default function ProjectsSection() {
       const wm = toWorld(cx, cy)
       let hit: SimNode | null = null, hd = 1e9
       nodes.forEach((nd) => { const d = Math.hypot(nd.x - wm.x, nd.y - wm.y); if (d < nd.r + 8 && d < hd) { hd = d; hit = nd } })
-      if (hit) { mouse.drag = hit; hit.fixed = true }
+      if (hit) { mouse.drag = hit; (hit as SimNode).fixed = true }
       else { mouse.panning = true; mouse.sx = cx - view.x; mouse.sy = cy - view.y }
-      wrap.classList.add('grabbing')
-      wrap.setPointerCapture(e.pointerId)
+      wrap!.classList.add('grabbing')
+      wrap!.setPointerCapture(e.pointerId)
     }
     function onPointerMove(e: PointerEvent) {
       const { cx, cy } = localPos(e)
@@ -448,7 +448,7 @@ export default function ProjectsSection() {
     function endPointer() {
       if (mouse.drag) mouse.drag.fixed = false
       mouse.down = false; mouse.drag = null; mouse.panning = false
-      wrap.classList.remove('grabbing')
+      wrap!.classList.remove('grabbing')
     }
     function onPointerLeave() { if (!mouse.down) { mouse.x = -9999; mouse.y = -9999 } }
     function onWheel(e: WheelEvent) {
@@ -466,16 +466,16 @@ export default function ProjectsSection() {
       const wm = toWorld(mouse.x, mouse.y)
       let best: SimNode | null = null, bd = 1e9
       nodes.forEach((nd) => { const d = Math.hypot(nd.x - wm.x, nd.y - wm.y); if (d < bd) { bd = d; best = nd } })
-      if (best && bd < best.r + 12) setSelected(best.p)
+      if (best && bd < (best as SimNode).r + 12) setSelected((best as SimNode).p)
     }
 
-    wrap.addEventListener('pointerdown', onPointerDown)
-    wrap.addEventListener('pointermove', onPointerMove)
-    wrap.addEventListener('pointerup', endPointer)
-    wrap.addEventListener('pointercancel', endPointer)
-    wrap.addEventListener('pointerleave', onPointerLeave)
-    wrap.addEventListener('wheel', onWheel, { passive: false })
-    wrap.addEventListener('click', onClick)
+    wrap!.addEventListener('pointerdown', onPointerDown)
+    wrap!.addEventListener('pointermove', onPointerMove)
+    wrap!.addEventListener('pointerup', endPointer)
+    wrap!.addEventListener('pointercancel', endPointer)
+    wrap!.addEventListener('pointerleave', onPointerLeave)
+    wrap!.addEventListener('wheel', onWheel, { passive: false })
+    wrap!.addEventListener('click', onClick)
     window.addEventListener('resize', resize)
 
     resize()
@@ -487,17 +487,29 @@ export default function ProjectsSection() {
     }
 
     return () => {
-      wrap.removeEventListener('pointerdown', onPointerDown)
-      wrap.removeEventListener('pointermove', onPointerMove)
-      wrap.removeEventListener('pointerup', endPointer)
-      wrap.removeEventListener('pointercancel', endPointer)
-      wrap.removeEventListener('pointerleave', onPointerLeave)
-      wrap.removeEventListener('wheel', onWheel)
-      wrap.removeEventListener('click', onClick)
+      wrap!.removeEventListener('pointerdown', onPointerDown)
+      wrap!.removeEventListener('pointermove', onPointerMove)
+      wrap!.removeEventListener('pointerup', endPointer)
+      wrap!.removeEventListener('pointercancel', endPointer)
+      wrap!.removeEventListener('pointerleave', onPointerLeave)
+      wrap!.removeEventListener('wheel', onWheel)
+      wrap!.removeEventListener('click', onClick)
       window.removeEventListener('resize', resize)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [prefersReducedMotion])
+
+  // Pause canvas RAF when section scrolls out of view
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting },
+      { threshold: 0 }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   // Close panel on Escape
   useEffect(() => {
@@ -512,6 +524,7 @@ export default function ProjectsSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="projects"
       role="region"
       aria-label="Projects"
@@ -700,7 +713,7 @@ export default function ProjectsSection() {
               <h3 className="font-['Kanit',sans-serif] text-[2.1rem] font-bold mb-[0.9rem]">{selected.name}</h3>
               <p className="text-[rgba(237,231,217,0.7)] font-light leading-[1.7] text-[0.95rem]">{selected.description}</p>
               <div className="flex flex-wrap gap-[6px] my-[1.2rem]">
-                {selected.tech.map((t) => (
+                {selected.tech?.map((t: string) => (
                   <span
                     key={t}
                     className="text-xs px-[12px] py-[5px] rounded-full border border-[rgba(212,165,116,0.18)] text-[rgba(237,231,217,0.8)]"

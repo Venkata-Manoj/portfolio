@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
+import { hexA } from '../lib/colorUtils'
 
 /* =====================================================================
    DATA — 12 certificates (gold/bronze palette accents)
@@ -134,14 +135,6 @@ interface Signal {
   trail: { x: number; y: number }[]
 }
 
-function hexA(hex: string, a: number): string {
-  const c = hex.replace('#', '')
-  const r = parseInt(c.substr(0, 2), 16)
-  const g = parseInt(c.substr(2, 2), 16)
-  const b = parseInt(c.substr(4, 2), 16)
-  return `rgba(${r},${g},${b},${a})`
-}
-
 /* =====================================================================
    CERTIFICATES SECTION — Interactive Synapse Web canvas
    ===================================================================== */
@@ -169,6 +162,8 @@ export default function CertificatesSection() {
   const pulseRef = useRef<() => void>(() => {})
   const resetRef = useRef<() => void>(() => {})
   const drawRef = useRef<() => void>(() => {})
+  const sectionRef = useRef<HTMLElement>(null)
+  const isVisibleRef = useRef(true)
 
   const [selected, setSelected] = useState<Certificate | null>(null)
 
@@ -187,12 +182,13 @@ export default function CertificatesSection() {
     const size = sizeRef.current
 
     function resize() {
+      if (!wrap || !canvas) return
       size.dpr = Math.min(window.devicePixelRatio || 1, 2)
       size.w = wrap.clientWidth
       size.h = wrap.clientHeight
       canvas.width = size.w * size.dpr
       canvas.height = size.h * size.dpr
-      ctx.setTransform(size.dpr, 0, 0, size.dpr, 0, 0)
+      ctx!.setTransform(size.dpr, 0, 0, size.dpr, 0, 0)
       // ponytail: coarse pointer OR narrow viewport → mobile/compact mode
       isCoarseRef.current =
         window.matchMedia('(pointer: coarse)').matches || size.w < 640
@@ -315,7 +311,7 @@ export default function CertificatesSection() {
         if (ctx) draw()
         return
       }
-      neurons.forEach((n, i) => setTimeout(() => fire(i, false), i * 90))
+      neurons.forEach((_n, i) => setTimeout(() => fire(i, false), i * 90))
     }
 
     function isDim(n: Neuron): boolean {
@@ -326,6 +322,7 @@ export default function CertificatesSection() {
     }
 
     function draw() {
+      if (!ctx) return
       ctx.clearRect(0, 0, size.w, size.h)
 
       // hover detection (skip while dragging — drag node stays hovered)
@@ -435,19 +432,21 @@ export default function CertificatesSection() {
     }
 
     function tick() {
-      if (!prefersReducedMotion) relax()
-      neurons.forEach((n) => {
-        n.ph += 0.03
-        n.glow *= 0.94
-        if (n.fire > 0) n.fire *= 0.96
-      })
-      const now = performance.now()
-      if (now - lastHzRef.current > 1000) {
-        hzRef.current = fireCountRef.current
-        fireCountRef.current = 0
-        lastHzRef.current = now
+      if (isVisibleRef.current) {
+        if (!prefersReducedMotion) relax()
+        neurons.forEach((n) => {
+          n.ph += 0.03
+          n.glow *= 0.94
+          if (n.fire > 0) n.fire *= 0.96
+        })
+        const now = performance.now()
+        if (now - lastHzRef.current > 1000) {
+          hzRef.current = fireCountRef.current
+          fireCountRef.current = 0
+          lastHzRef.current = now
+        }
+        draw()
       }
-      draw()
       rafRef.current = requestAnimationFrame(tick)
     }
 
@@ -461,7 +460,7 @@ export default function CertificatesSection() {
 
     /* ── interaction ── */
     function localPos(e: PointerEvent) {
-      const r = wrap.getBoundingClientRect()
+      const r = wrap!.getBoundingClientRect()
       return { x: e.clientX - r.left, y: e.clientY - r.top }
     }
 
@@ -472,16 +471,16 @@ export default function CertificatesSection() {
       let hit: Neuron | null = null
       let hd = 1e9
       const pad = isCoarseRef.current ? 12 : 6
-      neurons.forEach((n) => {
+      for (const n of neurons) {
         const d = Math.hypot(n.x - p.x, n.y - p.y)
         if (d < n.r + pad && d < hd) { hd = d; hit = n }
-      })
+      }
       if (hit) {
         mouse.drag = hit
         hit.vx = 0
         hit.vy = 0
-        wrap.classList.add('dragging')
-        wrap.setPointerCapture(e.pointerId)
+        wrap!.classList.add('dragging')
+        wrap!.setPointerCapture(e.pointerId)
       }
     }
     function onPointerMove(e: PointerEvent) {
@@ -505,7 +504,7 @@ export default function CertificatesSection() {
           setSelected(mouse.drag.c)
         }
         mouse.drag = null
-        wrap.classList.remove('dragging')
+        wrap!.classList.remove('dragging')
       }
     }
     function onPointerLeave() {
@@ -513,7 +512,7 @@ export default function CertificatesSection() {
       mouse.y = -9999
       if (mouse.drag) {
         mouse.drag = null
-        wrap.classList.remove('dragging')
+        wrap!.classList.remove('dragging')
       }
     }
 
@@ -543,6 +542,18 @@ export default function CertificatesSection() {
     }
   }, [prefersReducedMotion])
 
+  // Pause canvas RAF when section scrolls out of view
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting },
+      { threshold: 0 }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
+
   // Close panel on Escape
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -558,6 +569,7 @@ export default function CertificatesSection() {
 
   return (
     <section
+      ref={sectionRef}
       id="certificates"
       role="region"
       aria-label="Certificates"

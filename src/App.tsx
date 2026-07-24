@@ -61,12 +61,18 @@ const App = () => {
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <ProjectsSection />
         </ErrorBoundary>
+      </Suspense>
+      <Suspense fallback={null}>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <CertificatesSection />
         </ErrorBoundary>
+      </Suspense>
+      <Suspense fallback={null}>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <ContactSection formspreeId={FORMSPREE_FORM_ID} />
         </ErrorBoundary>
+      </Suspense>
+      <Suspense fallback={null}>
         <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
           <PamWidget tourTrigger={tourTrigger} />
         </ErrorBoundary>
