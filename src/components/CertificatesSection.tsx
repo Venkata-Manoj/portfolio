@@ -15,6 +15,7 @@ interface Certificate {
   date: string
   image: string
   accent: string
+  badge: { letter: string; color: string }  // programmatic brand badge
 }
 
 const CERTS: Certificate[] = [
@@ -24,6 +25,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/AI_Fundamentals_DC.webp',
     accent: '#D4A574',
+    badge: { letter: '🏕️', color: '#03C04A' },
   },
   {
     title: 'API Fundamentals',
@@ -31,6 +33,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/API_DC.webp',
     accent: '#D4A574',
+    badge: { letter: '🏕️', color: '#03C04A' },
   },
   {
     title: 'AI Engineer — Data Science',
@@ -38,6 +41,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/AiE_DS_DC.webp',
     accent: '#C4956A',
+    badge: { letter: '🏕️', color: '#03C04A' },
   },
   {
     title: 'AI Engineer — Development',
@@ -45,6 +49,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/AiE_dev_DC.webp',
     accent: '#A67C52',
+    badge: { letter: '🏕️', color: '#03C04A' },
   },
   {
     title: 'Python Programming',
@@ -52,6 +57,7 @@ const CERTS: Certificate[] = [
     date: '2025',
     image: '/certificates/B V Manoj - Python.webp',
     accent: '#B8895E',
+    badge: { letter: '🏆', color: '#20BEFF' },
   },
   {
     title: 'Season 13 Cohort',
@@ -59,6 +65,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/B V Manoj_certificate_s13.webp',
     accent: '#C4956A',
+    badge: { letter: '🌐', color: '#4285F4' },
   },
   {
     title: 'Ultimate AI Power Weekend',
@@ -66,6 +73,7 @@ const CERTS: Certificate[] = [
     date: '2025',
     image: '/certificates/Certificate - B V Manoj - The Ultimate AI Power Weekend_pages-to-jpg-0001.webp',
     accent: '#D4A574',
+    badge: { letter: '🚀', color: '#7C3AED' },
   },
   {
     title: 'Embeddings Fundamentals',
@@ -73,6 +81,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/Embeddings_DC.webp',
     accent: '#A67C52',
+    badge: { letter: '🏕️', color: '#03C04A' },
   },
   {
     title: 'Large Language Models',
@@ -80,6 +89,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/LLM_DC.webp',
     accent: '#D4A574',
+    badge: { letter: '🏕️', color: '#03C04A' },
   },
   {
     title: 'AI Certification',
@@ -87,6 +97,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/NIELIT.webp',
     accent: '#C4956A',
+    badge: { letter: '🎓', color: '#1E3A5F' },
   },
   {
     title: 'RAG Bootcamp',
@@ -94,6 +105,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/RAG-BootCamp-KodeKloud.webp',
     accent: '#B8895E',
+    badge: { letter: '☁️', color: '#DC2626' },
   },
   {
     title: 'Jio Course Certificate',
@@ -101,6 +113,7 @@ const CERTS: Certificate[] = [
     date: '2026',
     image: '/certificates/course_certificate_jio.webp',
     accent: '#A67C52',
+    badge: { letter: '📡', color: '#D81B60' },
   },
 ]
 
@@ -407,6 +420,26 @@ export default function CertificatesSection() {
         ctx.beginPath()
         ctx.arc(n.x, n.y, pr, 0, Math.PI * 2)
         ctx.fill()
+        // Brand badge — colored circular badge with emoji inside the neuron
+        const badgeR = pr * 0.5
+        const badgeY = n.y - pr * 0.08  // slightly above center
+        ctx.save()
+        // Badge background circle
+        ctx.beginPath()
+        ctx.arc(n.x, badgeY, badgeR, 0, Math.PI * 2)
+        ctx.fillStyle = hexA(n.c.badge.color, 0.85)
+        ctx.fill()
+        // Badge ring
+        ctx.strokeStyle = hexA('#EDE7D9', 0.3)
+        ctx.lineWidth = 1
+        ctx.stroke()
+        // Emoji letter
+        ctx.font = `${badgeR * 1.1}px system-ui`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = '#ffffff'
+        ctx.fillText(n.c.badge.letter, n.x, badgeY + 1)
+        ctx.restore()
         ctx.strokeStyle = hexA('#EDE7D9', 0.25 + (isH ? 0.5 : 0) + n.glow * 0.4)
         ctx.lineWidth = 1.4
         ctx.beginPath()
@@ -573,7 +606,7 @@ export default function CertificatesSection() {
       id="certificates"
       role="region"
       aria-label="Certificates"
-      className="relative w-full overflow-hidden px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C] min-h-screen"
+      className="relative overflow-hidden mx-3 sm:mx-6 md:mx-8 my-6 sm:my-8 rounded-[2rem] border border-[rgba(212,165,116,0.06)] px-5 sm:px-8 md:px-10 py-24 sm:py-28 md:py-36 bg-[#0C0C0C] min-h-screen"
     >
       {/* ═══════════════════════════════════════════════════════════════
           AMBIENT ORBS — 3 layers, gold/bronze drifting
@@ -776,14 +809,24 @@ export default function CertificatesSection() {
                 e.currentTarget.style.display = 'none'
               }}
             />
-            <div className="font-['JetBrains_Mono',monospace] text-[rgba(212,165,116,0.7)] tracking-[0.1em] text-[0.74rem] mt-[1rem]">
-              {selected.org} · {selected.date}
-            </div>
-            <h3 className="font-['Kanit',sans-serif] text-[1.6rem] font-bold mt-[0.3rem] mb-[0.4rem]">
-              {selected.title}
-            </h3>
-            <div className="text-[rgba(237,231,217,0.7)] font-light text-[0.9rem]">
-              {selected.org}
+            <div className="flex items-center gap-3 mt-[1rem]">
+              <span
+                className="w-[40px] h-[40px] rounded-full flex items-center justify-center text-lg flex-shrink-0"
+                style={{
+                  background: hexA(selected.badge.color, 0.15),
+                  border: `1px solid ${hexA(selected.badge.color, 0.35)}`,
+                }}
+              >
+                {selected.badge.letter}
+              </span>
+              <div>
+                <div className="font-['JetBrains_Mono',monospace] text-[rgba(212,165,116,0.7)] tracking-[0.1em] text-[0.74rem]">
+                  {selected.org} · {selected.date}
+                </div>
+                <h3 className="font-['Kanit',sans-serif] text-[1.6rem] font-bold -mt-[2px]">
+                  {selected.title}
+                </h3>
+              </div>
             </div>
             <a
               href={encodeURI(selected.image)}
