@@ -4,9 +4,15 @@ import { ArrowRight } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
+interface SkillGroup {
+  label: string
+  dotColor: string
+  items: string[]
+}
+
 const ABOUT_TEXT = "I'm an AI & Data Science engineering student at SIMATS Engineering, class of 2028. I build intelligent systems - from RAG pipelines and multi-LLM agent workflows to full-stack applications deployed at scale. Every project starts with the same philosophy: production-grade quality from day one."
 
-const SKILL_GROUPS = [
+const SKILL_GROUPS: SkillGroup[] = [
   {
     label: 'Languages',
     dotColor: '#D4A574',
@@ -34,7 +40,7 @@ const SKILL_GROUPS = [
   // }
 ]
 
-function SkillPill({ children }) {
+function SkillPill({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex px-3.5 py-1.5 rounded-full border border-[rgba(237,231,217,0.05)] bg-[rgba(255,255,255,0.015)] text-xs text-[rgba(237,231,217,0.75)] font-light cursor-default transition-all duration-300 hover:border-[rgba(212,165,116,0.25)] hover:text-[#EDE7D9] hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_4px_16px_rgba(212,165,116,0.08)] active:translate-y-0 active:scale-[0.98] relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-[linear-gradient(135deg,rgba(212,165,116,0.08),transparent)] before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100">
       {children}
@@ -51,14 +57,14 @@ export default function AboutSection() {
   const skillsInView = useInView(skillsRef, { once: true, margin: '-40px' })
   const isMobile = useIsMobile()
   const prefersReducedMotion = usePrefersReducedMotion()
-  const [avatarLoaded, setAvatarLoaded] = useState(false)
+  const [avatarLoaded, setAvatarLoaded] = useState<boolean>(false)
 
   // Simplified animation variants for mobile
   const fadeInUp = prefersReducedMotion
     ? { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0 } }
     : isMobile
-      ? { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }
-      : { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
+      ? { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } }
+      : { initial: { opacity: 0, y: 30 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } }
 
   return (
     <section
@@ -80,14 +86,15 @@ export default function AboutSection() {
         {/* === Heading === */}
         <div ref={headingRef} className="text-center mb-16 sm:mb-20 group/heading">
           <motion.p
-            {...fadeInUp}
+            initial={fadeInUp.initial}
             animate={headingInView ? fadeInUp.animate : fadeInUp.initial}
+            transition={fadeInUp.transition}
             className="text-xs uppercase tracking-[0.3em] text-[rgba(237,231,217,0.5)] font-normal mb-3"
           >
             Discover my story
           </motion.p>
           <motion.h2
-            {...fadeInUp}
+            initial={fadeInUp.initial}
             animate={headingInView ? fadeInUp.animate : fadeInUp.initial}
             transition={{ duration: isMobile ? 0.5 : 0.7, delay: 0.2 }}
             className="font-['Kanit'] font-black uppercase leading-none tracking-tighter text-[#EDE7D9] transition-transform duration-500 group-hover/heading:scale-[1.01]"
@@ -187,7 +194,7 @@ export default function AboutSection() {
             <div className="flex flex-wrap gap-4">
               <a
                 href="#contact"
-                onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }) }}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }) }}
                 className="group/cta inline-flex items-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] text-xs font-bold uppercase tracking-[0.1em] no-underline transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105 hover:-translate-y-0.5 hover:shadow-[0_8px_40px_rgba(212,165,116,0.3),0_0_60px_rgba(212,165,116,0.1)] active:scale-[0.98] active:translate-y-0 relative overflow-hidden"
               >
                 <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.15),transparent)] opacity-0 transition-opacity duration-400 group-hover/cta:opacity-100" />
@@ -196,7 +203,7 @@ export default function AboutSection() {
               </a>
               <a
                 href="#projects"
-                onClick={(e) => { e.preventDefault(); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }) }}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => { e.preventDefault(); document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' }) }}
                 className="group/cta2 relative inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full border border-[rgba(237,231,217,0.12)] text-[rgba(237,231,217,0.8)] text-xs font-medium uppercase tracking-[0.08em] no-underline transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-[rgba(212,165,116,0.3)] hover:text-[#EDE7D9] hover:-translate-y-0.5 overflow-hidden"
               >
                 <span className="absolute inset-[-1px] rounded-full opacity-0 transition-opacity duration-400 group-hover/cta2:opacity-100"

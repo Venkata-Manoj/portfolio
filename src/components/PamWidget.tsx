@@ -1,8 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bot, X, Play, Volume2 } from 'lucide-react'
+import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
-const TRACKS = [
+interface PamWidgetProps {
+  tourTrigger: number
+}
+
+type PamState = 'idle' | 'playing' | 'paused' | 'complete'
+
+interface Subtitle {
+  start: number
+  end: number
+  text: string
+}
+
+interface Track {
+  id: string
+  sectionId: string
+  label: string
+  duration: number
+  subtitles: Subtitle[]
+}
+
+const TRACKS: Track[] = [
   {
     id: 'hero', sectionId: 'hero', label: 'Welcome', duration: 17,
     subtitles: [
@@ -59,13 +80,20 @@ const TRACKS = [
  * It mounts fresh per track (via key={currentTrackIndex} in the parent),
  * so its currentTime starts at 0 without any synchronous setState reset.
  */
-function TrackTimer({ duration, playing, onTimeUpdate, onComplete }) {
+interface TrackTimerProps {
+  duration: number
+  playing: boolean
+  onTimeUpdate: (t: number) => void
+  onComplete?: () => void
+}
+
+function TrackTimer({ duration, playing, onTimeUpdate, onComplete }: TrackTimerProps) {
   useEffect(() => {
     if (!playing || duration <= 0) return undefined
     const start = performance.now()
-    let raf
+    let raf: number
     let lastTenth = 0
-    const tick = (now) => {
+    const tick = (now: number) => {
       const elapsed = (now - start) / 1000
       if (elapsed >= duration) {
         onTimeUpdate(duration)
@@ -80,35 +108,33 @@ function TrackTimer({ duration, playing, onTimeUpdate, onComplete }) {
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
-    return () => raf && cancelAnimationFrame(raf)
+    return () => { if (raf) cancelAnimationFrame(raf) }
   }, [playing, duration, onTimeUpdate, onComplete])
 
   return null
 }
 
-export default function PamWidget({ tourTrigger }) {
-  const [pamState, setPamState] = useState('idle')
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [showOverride, setShowOverride] = useState(false)
-  const lastAutoScrollRef = useRef(0)
-  const audioRef = useRef(null)
-  const isSeekingRef = useRef(false)
-  const tourTriggerHandledRef = useRef(0)
+export default function PamWidget({ tourTrigger }: PamWidgetProps) {
+  const [pamState, setPamState] = useState<PamState>('idle')
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0)
+  const [currentTime, setCurrentTime] = useState<number>(0)
+  const [showOverride, setShowOverride] = useState<boolean>(false)
+  const lastAutoScrollRef = useRef<number>(0)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const isSeekingRef = useRef<boolean>(false)
+  const tourTriggerHandledRef = useRef<number>(0)
 
-  const prefersReducedMotion = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const currentTrack = TRACKS[currentTrackIndex]
 
-  const autoScrollToSection = useCallback((sectionId) => {
+  const autoScrollToSection = useCallback((sectionId: string): void => {
     lastAutoScrollRef.current = Date.now()
     const el = document.getElementById(sectionId)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [])
 
-  const handleTrackEnd = useCallback(() => {
+  const handleTrackEnd = useCallback((): void => {
     if (currentTrackIndex < TRACKS.length - 1) {
       const nextIndex = currentTrackIndex + 1
       setCurrentTrackIndex(nextIndex)
@@ -119,7 +145,7 @@ export default function PamWidget({ tourTrigger }) {
     }
   }, [currentTrackIndex, autoScrollToSection])
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback((): void => {
     setPamState('playing')
     setCurrentTrackIndex(0)
     setCurrentTime(0)
@@ -132,30 +158,30 @@ export default function PamWidget({ tourTrigger }) {
     // Focus the panel after render
     setTimeout(() => {
       const panel = document.querySelector('[data-pam-panel]')
-      if (panel) panel.focus()
+      if (panel) (panel as HTMLElement).focus()
     }, 50)
   }, [])
 
-  const closePam = useCallback(() => {
+  const closePam = useCallback((): void => {
     setPamState('idle')
     setCurrentTrackIndex(0)
     setCurrentTime(0)
     setShowOverride(false)
   }, [])
 
-  const resumeTour = () => {
+  const resumeTour = (): void => {
     setShowOverride(false)
     setPamState('playing')
     autoScrollToSection(currentTrack.sectionId)
   }
 
   const activeSubtitle = currentTrack?.subtitles.find(
-    s => currentTime >= s.start && currentTime < s.end
+    (s: Subtitle) => currentTime >= s.start && currentTime < s.end
   )
 
-  const trackProgress = currentTrack
+  const trackProgress: string = currentTrack
     ? ((currentTime / currentTrack.duration) * 100).toFixed(0)
-    : 0
+    : '0'
 
   useEffect(() => {
     if (!audioRef.current) return
@@ -163,31 +189,31 @@ export default function PamWidget({ tourTrigger }) {
     audio.src = `/audio/${currentTrack.id}.mp3`
     audio.currentTime = 0
     audio.preload = 'metadata'
-    
-    const handleCanPlay = () => {
+
+    const handleCanPlay: () => void = () => {
       if (pamState === 'playing') {
         audio.play().catch(() => {})
       }
     }
-    
-    const handleError = () => {
+
+    const handleError: () => void = () => {
       console.error(`Failed to load audio: /audio/${currentTrack.id}.mp3`)
     }
-    
-    const handleEnded = () => {
+
+    const handleEnded: () => void = () => {
       handleTrackEnd()
     }
-    
+
     audio.addEventListener('canplay', handleCanPlay)
     audio.addEventListener('error', handleError)
     audio.addEventListener('ended', handleEnded)
-    
+
     if (pamState === 'playing') {
       audio.play().catch(() => {})
     } else {
       audio.pause()
     }
-    
+
     return () => {
       audio.removeEventListener('canplay', handleCanPlay)
       audio.removeEventListener('error', handleError)
@@ -229,7 +255,7 @@ export default function PamWidget({ tourTrigger }) {
     if (prefersReducedMotion) return
     if (pamState !== 'playing') return
 
-    const checkManualScroll = () => {
+    const checkManualScroll = (): void => {
       if (Date.now() - lastAutoScrollRef.current > 2500) {
         setShowOverride(true)
         setPamState('paused')
@@ -243,7 +269,7 @@ export default function PamWidget({ tourTrigger }) {
   // Close panel on Escape key
   useEffect(() => {
     if (pamState === 'idle') return
-    const handler = (e) => {
+    const handler = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') closePam()
     }
     window.addEventListener('keydown', handler)
@@ -261,8 +287,8 @@ export default function PamWidget({ tourTrigger }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={startTour}
-            style={{ animation: 'pam-pulse 2.5s ease-in-out infinite' }}
-            className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+            style={{ animation: 'pam-gold-pulse 2.5s ease-in-out infinite' }}
+            className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#D4A574] to-[#A67C52] text-[#0C0C0C] shadow-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform"
           >
             <Bot size={24} />
           </motion.button>
@@ -281,7 +307,7 @@ export default function PamWidget({ tourTrigger }) {
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Volume2 size={14} className="text-purple-400" />
+                    <Volume2 size={14} className="text-[#D4A574]" />
                     <span className="text-xs uppercase tracking-[0.25em] text-white/70">
                       Tour Complete
                     </span>
@@ -305,7 +331,7 @@ export default function PamWidget({ tourTrigger }) {
               <>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <Volume2 size={14} className="text-purple-400" />
+                    <Volume2 size={14} className="text-[#D4A574]" />
                     <span className="text-xs uppercase tracking-[0.25em] text-white/70">
                       {currentTrack?.label} · {currentTrackIndex + 1}/{TRACKS.length}
                     </span>
@@ -319,7 +345,7 @@ export default function PamWidget({ tourTrigger }) {
                   {[0, 1, 2, 3, 4].map(i => (
                     <div
                       key={i}
-                      className="w-1 rounded-full bg-purple-400/80 origin-bottom"
+                      className="w-1 rounded-full bg-[#D4A574]/80 origin-bottom"
                       style={{
                         height: '16px',
                         animation: pamState === 'playing' ? 'pam-wave 0.7s ease-in-out infinite' : 'none',
@@ -348,7 +374,7 @@ export default function PamWidget({ tourTrigger }) {
 
                 <div className="mt-4 h-1 w-full rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-400 transition-all duration-100"
+                    className="h-full rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] transition-all duration-100"
                     style={{ width: `${trackProgress}%` }}
                   />
                 </div>
@@ -365,7 +391,7 @@ export default function PamWidget({ tourTrigger }) {
                     <button
                       type="button"
                       onClick={resumeTour}
-                      className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-500 py-2.5 text-xs font-medium uppercase tracking-[0.25em] text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-to-r from-[#D4A574] to-[#A67C52] py-2.5 text-xs font-medium uppercase tracking-[0.25em] text-[#0C0C0C] shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                       <Play size={12} fill="white" />
                       Resume Tour

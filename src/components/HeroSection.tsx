@@ -3,7 +3,13 @@ import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { Volume2, VolumeX, ChevronDown } from 'lucide-react'
 
-const WordReveal = ({ text, className = '', delay = 0 }) => {
+interface WordRevealProps {
+  text: string
+  className?: string
+  delay?: number
+}
+
+function WordReveal({ text, className = '', delay = 0 }: WordRevealProps) {
   const ref = useRef(null)
   const isVisible = useInView(ref, { once: true, amount: 0.1 })
 
@@ -31,10 +37,10 @@ const WordReveal = ({ text, className = '', delay = 0 }) => {
 }
 
 export default function HeroSection() {
-  const videoRef = useRef(null)
-  const containerRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [isMuted, setIsMuted] = useState(true)
-  const snapFired = useRef(false)
+  const snapFired = useRef<boolean>(false)
   const prefersReducedMotion = usePrefersReducedMotion()
   const [videoLoaded, setVideoLoaded] = useState(false)
 
@@ -77,7 +83,7 @@ export default function HeroSection() {
       if (about) about.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
-    const onWheel = (e) => {
+    const onWheel = (e: WheelEvent) => {
       if (snapFired.current) return
       if (e.deltaY <= 0) return
       if (window.scrollY > 60) return
@@ -85,13 +91,14 @@ export default function HeroSection() {
       goToAbout()
     }
 
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (snapFired.current) return
       if (window.scrollY > 60) return
-      
+
       // Skip if focus is in an interactive element (form fields, buttons, etc.)
-      const tag = e.target.tagName
-      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(tag) || e.target.isContentEditable) return
+      const target = e.target as HTMLElement
+      const tag = target.tagName
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(tag) || target.isContentEditable) return
 
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
@@ -136,8 +143,6 @@ export default function HeroSection() {
         playsInline
         preload="metadata"
         poster="/me.jpeg"
-        fetchPriority="high"
-        decoding="async"
         width="1920"
         height="1080"
         aria-hidden="true"
@@ -209,7 +214,7 @@ export default function HeroSection() {
           >
             <a
               href="mailto:bvmanoj61@gmail.com"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-white font-semibold rounded-full text-sm hover:shadow-[0_0_40px_rgba(212,165,116,0.25)] hover:scale-105 active:scale-[0.97] transition-all duration-300 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D4A574] to-[#A67C52] text-[#0C0C0C] font-semibold rounded-full text-sm hover:shadow-[0_0_40px_rgba(212,165,116,0.25)] hover:scale-105 active:scale-[0.97] transition-all duration-300 cursor-pointer"
             >
               Get in touch
               <span className="text-base">→</span>
@@ -243,16 +248,21 @@ export default function HeroSection() {
       )}
 
       {/* Scroll cue */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 3 }}
-        onClick={scrollToAbout}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 p-3 text-[#EDE7D9]/60 hover:text-[#D4A574] transition-all duration-300 animate-bounce cursor-pointer active:scale-90"
-        aria-label="Scroll to about section"
-      >
-        <ChevronDown className="w-8 h-8" />
-      </motion.button>
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-0">
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 3 }}
+          onClick={scrollToAbout}
+          className="p-3 text-[#EDE7D9]/60 hover:text-[#D4A574] transition-all duration-300 animate-bounce cursor-pointer active:scale-90"
+          aria-label="Scroll to about section"
+        >
+          <ChevronDown className="w-8 h-8" />
+        </motion.button>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-[rgba(237,231,217,0.35)] font-light -mt-1">
+          Scroll
+        </span>
+      </div>
     </div>
   )
 }

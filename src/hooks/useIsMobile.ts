@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
  * Returns true when viewport width is < 768px (mobile breakpoint).
  * Uses the same breakpoint as existing carousel components.
  */
-export function useIsMobile(breakpoint = 768) {
+export function useIsMobile(breakpoint: number = 768): boolean {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {

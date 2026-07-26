@@ -1,18 +1,25 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Mail, Linkedin, Github, Send } from 'lucide-react'
+import { Mail, Linkedin, Github, Send, CheckCircle } from 'lucide-react'
 import { useForm } from '@formspree/react'
+
 import usePrefersReducedMotion from '../hooks/usePrefersReducedMotion'
 
-export default function ContactSection({ formspreeId }) {
-  const headerRef = useRef(null)
+interface ContactSectionProps {
+  formspreeId: string
+}
+
+export default function ContactSection({ formspreeId }: ContactSectionProps) {
+  const headerRef = useRef<HTMLDivElement>(null)
   const headerInView = useInView(headerRef, { once: true })
 
-  const [state, handleSubmit] = useForm(formspreeId)
+const [state, handleSubmit] = useForm(formspreeId)
   const prefersReducedMotion = usePrefersReducedMotion()
-  const [isOnline, setIsOnline] = useState(
+  const [isOnline, setIsOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const emailValidationTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
     const goOnline = () => setIsOnline(true)
@@ -25,20 +32,45 @@ export default function ContactSection({ formspreeId }) {
     }
   }, [])
 
-  const handleFormSubmit = (e) => {
+  const validateEmail = useCallback((email: string): string | null => {
+    if (!email) return 'Email is required'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please enter a valid email address'
+    return null
+  }, [])
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (emailValidationTimeout.current) clearTimeout(emailValidationTimeout.current)
+    emailValidationTimeout.current = setTimeout(() => {
+      const error = validateEmail(value)
+      setEmailError(error)
+    }, 300)
+  }
+
+  const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (emailValidationTimeout.current) clearTimeout(emailValidationTimeout.current)
+    const error = validateEmail(e.target.value)
+    setEmailError(error)
+  }
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.target)
-    const name = formData.get('name')
-    const email = formData.get('email')
-    const message = formData.get('message')
+    const formData = new FormData(e.currentTarget)
+    const name = String(formData.get('name') ?? '')
+    const email = String(formData.get('email') ?? '')
+    const message = String(formData.get('message') ?? '')
 
     if (!name || !email || !message) {
       return
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const emailErr = validateEmail(email)
+    if (emailErr) {
+      setEmailError(emailErr)
       return
     }
+    setEmailError(null)
     handleSubmit(formData)
+    e.currentTarget.reset()
   }
 
   return (
@@ -225,8 +257,13 @@ export default function ContactSection({ formspreeId }) {
                     autoComplete="email"
                     aria-describedby="form-hint"
                     required
-                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(212,165,116,0.1)] rounded-xl text-white placeholder:text-white/40 focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all"
+                    onChange={handleEmailChange}
+                    onBlur={handleEmailBlur}
+                    className={`w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border ${emailError ? 'border-red-500/40' : 'border-[rgba(212,165,116,0.1)]'} rounded-xl text-white placeholder:text-white/40 focus:border-[#D4A574] focus:ring-2 focus:ring-[rgba(212,165,116,0.25)] focus:bg-[rgba(255,255,255,0.05)] outline-none transition-all`}
                   />
+                  {emailError && (
+                    <p className="mt-1 text-xs text-red-400" role="alert">{emailError}</p>
+                  )}
                 </div>
 
                 {/* Message field */}
@@ -259,15 +296,33 @@ export default function ContactSection({ formspreeId }) {
 
               {/* Feedback message (success or error) */}
               {state.succeeded && (
-                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" role="status" aria-live="polite">
-                  Thanks! Your message has been sent. I'll respond within 24-48 hours.
+                <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-start gap-3" role="status" aria-live="polite">
+                  <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium">Message sent successfully!</p>
+                    <p className="text-xs opacity-80 mt-0.5">
+                      Your message was received via Formspree and will appear in my inbox at <span className="font-mono">bvmanoj61@gmail.com</span>. I'll respond within 24–48 hours.
+                    </p>
+                  </div>
                 </div>
               )}
               {state.errors && (
                 <div className="mt-4 px-4 py-3 rounded-xl text-sm bg-red-500/10 border border-red-500/20 text-red-400" role="alert">
-                  {Array.isArray(state.errors)
-                    ? state.errors.map((err, i) => <p key={i}>{err?.message || 'An error occurred'}</p>)
-                    : <p>Failed to send. Please try again or email me directly.</p>}
+                  {state.errors.kind === 'error' && (
+                    <>
+                      {state.errors.getFormErrors().map((err, i) => (
+                        <p key={`form-${i}`}>{err.message || 'An error occurred'}</p>
+                      ))}
+                      {state.errors.getAllFieldErrors().map(([field, fieldErrors]) => (
+                        <div key={`field-${field as string}`} className="mt-2">
+                          <p className="font-medium text-red-300">Error in field "{field as string}":</p>
+                          {fieldErrors.map((err, i) => (
+                            <p key={`field-${field}-${i}`} className="ml-4">- {err.message || 'An error occurred'}</p>
+                          ))}
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
               {state.errors && (
